@@ -1,4 +1,4 @@
-# Understanding the Differences Between Liferay IDE and Liferay Developer Studio
+# Understanding the Differences Between Liferay IDE and Liferay Developer Studio [](id=understanding-the-differences-between-liferay-ide-and-liferay-developer-stu)
 
 If you're interested in Liferay development, the first step is choosing the
 development environment that offers the necessary tools for a productive
@@ -10,7 +10,7 @@ In this tutorial, you'll explore what both development environments have to
 offer, and be able to make a choice between which environment you should use to
 meet your Liferay development goals. 
 
-## Comparing IDE and Developer Studio
+## Comparing IDE and Developer Studio [](id=comparing-ide-and-developer-studio)
 
 Liferay IDE is a set of Eclipse plugins that support Liferay development. It is
 shipped as one single Eclipse feature (a set of plugins) that can be installed
@@ -47,7 +47,7 @@ they must have a properly licensed EE server also configured in Studio.
 
 Next, you'll learn about the specific plugins only offered for Developer Studio.
 
-## Learning About Developer Studio's Additional Plugins
+## Learning About Developer Studio's Additional Plugins [](id=learning-about-developer-studios-additional-plugins)
 
 In the previous section, you learned that Developer Studio is simply a superset
 of Liferay IDE, containing additional plugins that support EE developers. What
@@ -63,7 +63,7 @@ are the additional plugins? A comprehensive list is given below:
 Excellent! You now have a better understanding of the differences between
 Liferay IDE and Developer Studio! 
 
-## Related Topics
+## Related Topics [](id=related-topics)
 
 [Developing Applications with Liferay IDE](/develop/learning-paths/-/knowledge_base/6-2/developing-apps-with-liferay-ide)
 
