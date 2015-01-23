@@ -1,4 +1,4 @@
-## Liferay IDE vs Liferay Developer Studio ##
+# Understanding the Differences Between Liferay IDE and Liferay Developer Studio
 
 ### Basics ###
 
@@ -31,5 +31,3 @@ as one single Eclipse feature (a set of plugins) that can be installed in any ex
 - In Developer Studio there is a new type of Liferay Tomcat server that is available for developers, and that is the Liferay Tomcat Server EE, which is just an upgraded version of the CE server that is to be used specifically for EE edition of Liferay. 
 - If you just have Liferay IDE, you can use the Liferay Server CE version to develop against Liferay Portal EE, but you may miss EE specific features in the future. 
 - For Liferay Developer Studio users, they may use CE version of Liferay, if they also have a properly license EE server also configured in Studio.
-
-
