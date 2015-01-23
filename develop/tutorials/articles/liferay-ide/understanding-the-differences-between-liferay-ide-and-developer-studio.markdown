@@ -62,3 +62,11 @@ are the additional plugins? A comprehensive list is given below:
 
 Excellent! You now have a better understanding of the differences between
 Liferay IDE and Developer Studio! 
+
+## Related Topics
+
+[Developing Applications with Liferay IDE](/develop/learning-paths/-/knowledge_base/6-2/developing-apps-with-liferay-ide)
+
+[Developing Applications with Liferay Developer Studio](/develop/learning-paths/-/knowledge_base/6-2/developing-applications-with-liferay-developer-stu)
+
+[Creating Projects Using the New Project Wizard](/develop/tutorials/-/knowledge_base/6-2/creating-projects-using-the-new-project-wizard)
