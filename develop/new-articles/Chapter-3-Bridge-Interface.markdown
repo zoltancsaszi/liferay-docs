@@ -171,47 +171,97 @@ on a per portlet basis.
 
 The bridge is destroyed by calling its destroy method:
 
-public void destroy();
+    public void destroy();
 
-When a portlet no longer needs the bridge's services, the portlet releases the bridge by calling the destroy() method. Typically this is done in the portlet's own destroy() method.  Once destroy() has been called, no further requests can be processed through this bridge until a subsequent init() has occurred[3.13].
+When a portlet no longer needs the bridge's services, the portlet releases the
+bridge by calling the `destroy()` method. Typically this is done in the
+portlet's own `destroy()` method. Once `destroy()` has been called, no further
+requests can be processed through this bridge until a subsequent `init()` has
+occurred<sup>[[3.13](TCK-Tests.html#3.13)]</sup>.
 
-This call performs no action if the bridge is in an uninitialized state[3.14].
-3.4 Request Processing
-The bridge is used to execute Faces requests on behalf of the portlet by calling its doFacesRequest method:
+This call performs no action if the bridge is in an uninitialized
+state<sup>[[3.14](TCK-Tests.html#3.14)]</sup>.
 
-public void doFacesRequest(
-   javax.portlet.ActionRequest request,
-   javax.portlet.ActionResponse response)
-      throws BridgeUnititializedException, BridgeDefaultViewNotSpecifiedException,
-             BridgeException, NullPointerException;
+## 3.4 Request Processing
 
+The bridge is used to execute Faces requests on behalf of the portlet by calling
+its `doFacesRequest` method:
 
-public void doFacesRequest(
-   javax.portlet.RenderRequest request,
-   javax.portlet.RenderResponse response);
-      throws BridgeUnititializedException, BridgeDefaultViewNotSpecifiedException,
-             BridgeException, NullPointerException;
+    public void doFacesRequest(
+        javax.portlet.ActionRequest request,
+        javax.portlet.ActionResponse response)
+            throws BridgeUnititializedException, BridgeDefaultViewNotSpecifiedException,
+                BridgeException, NullPointerException;
 
+    public void doFacesRequest(
+        javax.portlet.RenderRequest request,
+        javax.portlet.RenderResponse response);
+            throws BridgeUnititializedException, BridgeDefaultViewNotSpecifiedException,
+                BridgeException, NullPointerException;
 
-public void doFacesRequest(ResourceRequest request, ResourceResponse response)
-       throws BridgeUninitializedException,
-              BridgeException;
+    public void doFacesRequest(ResourceRequest request, ResourceResponse response)
+            throws BridgeUninitializedException,
+                BridgeException;
 
+    public void doFacesRequest(EventRequest request, EventResponse response)
+            throws BridgeUninitializedException,
+                BridgeException;
 
-public void doFacesRequest(EventRequest request, EventResponse response)
-       throws BridgeUninitializedException,
-              BridgeException;
+Portlets call the appropriate form of this method for each of the request phases
+in the portlet lifecycle. In Portlet 2.0 the lifecycle can be more complicated
+than in Portlet 1.0. I.e. a typical Java Portlet Specification 1.0 (JSR 168)
+portlet lifecycle invokes the portlet `processAction()` and `render()` methods
+which results in two calls to the bridge's `doFacesRequest()`. The first
+processes the action request by passing the corresponding `ActionRequest` and
+`ActionResponse` objects and the second the render request by passing the
+corresponding `RenderRequest` and `RenderResponse` objects. Likewise, when a
+Java Portlet Specification 1.0 (JSR 168) portlet lifecycle only invokes
+`render()` such as on the initial request or as a result of `renderURL`
+invocation, `doFacesRequest()` is only executed once passing the corresponding
+`RenderRequest` and `RenderResponse` objects.
 
-Portlets call the appropriate form of this method for each of the request phases in the portlet lifecycle. In Portlet 2.0 the lifecycle can be more complicated than in Portlet 1.0.  I.e. a typical Java Portlet Specification 1.0 (JSR 168) portlet lifecycle invokes the portlet processAction() and render() methods which results in two calls to the bridge's doFacesRequest().  The first processes the action request by passing the corresponding ActionRequest and ActionResponse objects and the second the render request by passing the corresponding RenderRequest and RenderResponse objects.  Likewise, when a  Java Portlet Specification 1.0 (JSR 168) portlet lifecycle only invokes render() such as on the initial request or as a result of renderURL invocation, doFacesRequest() is only executed once passing the corresponding RenderRequest and RenderResponse objects.
+Though this lifecycle remains for Portlet 2.0, additional phases can
+occur/replace the Portlet 1.0 phases. Portlet events are communications sent to
+a portlet by the consuming application to convey pertinent information when
+interactions occur outside of this portlet. i.e. if a portlet action is the
+lifecycle phase executed when a user directly interacts with the portlet, a
+portlet event is the lifecycle phase when an interaction outside of this portlet
+causes the consumer to need to inform this portlet of the change. Because the
+portlet model calls for all events (stemming from a client interaction) to be
+completed before rendering occurs and event processing can trigger new events to
+be raised, a portlet can either receive the event as a side effect of it having
+raised an event during its own action processing or in the more common form of
+the action being directed elsewhere.
 
-Though this lifecycle remains for Portlet 2.0, additional phases can occur/replace the Portlet 1.0 phases.  Portlet events are communications sent to a portlet by the consuming application to convey pertinent information when interactions occur outside of this portlet.  i.e. if a portlet action is the lifecycle phase executed when a user directly interacts with the portlet, a portlet event is the lifecycle phase when an interaction outside of this portlet causes the consumer to need to inform this portlet of the change.  Because the portlet model calls for all events (stemming from a client interaction) to be completed before rendering occurs and event processing can trigger new events to be raised, a portlet can either receive the event as a side effect of it having raised an event during its own action processing or in the more common form of the action being directed elsewhere.
+The other new request lifecycle phase in Portlet 2.0 is the resource serving
+phase. Whereas in Portlet 1.0 resources couldn't be directly served by the
+portlet but rather had to be referenced via direct http references, Portlet 2.0
+allows a portlet to directly return dependent resources. One common use case for
+this new lifecycle is to implement "rich client" behaviors using technologies
+such as `AJAX`. In this use case the resource is a portion of the portlet's page
+markup which the client requests and inserts directly. Whether this or the more
+convention use case of acquiring a dependent resource such as a javascript file
+or image, the resource phase can be thought of as an additional step that is
+part of but after a render phase.
 
-The other new request lifecycle phase in Portlet 2.0 is the resource serving phase.  Whereas in Portlet 1.0 resources couldn't be directly served by the portlet but rather had to be referenced via direct http references, Portlet 2.0 allows a portlet to directly return dependent resources.  One common use case for this new lifecycle is to implement "rich client" behaviors using technologies such as AJAX.  In this use case the resource is a portion of the portlet's page markup which the client requests and inserts directly.   Whether this or the more convention use case of acquiring a dependent resource such as a javascript file or image, the resource phase can be thought of as an additional step that is part of but after a render phase.  
+Each of the `doFacesRequest` lifecycle phase methods takes a portlet request and
+response object. In addition to the incoming information in the portlet request,
+the portlet provides additional bridge request context by setting attributes in
+the request using `PortletRequest.setAttribute()`. To direct the bridge to
+execute a specific Faces target the portlet can set either of the following
+before calling `doFacesRequest`:
 
-Each of the doFacesRequest lifecycle phase methods takes a portlet request and response object.  In addition to the incoming information in the portlet request, the portlet provides additional bridge request context by setting attributes in the request using PortletRequest.setAttribute().  To direct the bridge to execute a specific Faces target the portlet can set either of the following before calling doFacesRequest:
+`javax.portlet.faces.viewId`: The value of this attribute identifies the Faces
+`viewId` the bridge must use for this request (e.g. `/myFacesPage.jsp`). This is
+expected to be a valid Faces viewId though it may optionally contain a query
+string<sup>[[3.15](TCK-Tests.html#3.15)]</sup>.
 
-javax.portlet.faces.viewId: The value of this attribute identifies the Faces viewId the bridge must use for this request (e.g. /myFacesPage.jsp).  This is expected to be a valid Faces viewId though it may optionally contain a query string[3.15].
+`javax.portlet.faces.viewPath`: The value of this attribute contains the the
+Faces `viewId` the bridge must use for this request in `ContextPath` relative
+path form (e.g. `/faces/myFacesPage.jsp`). This value may optionally contain a
+query string<sup>[[3.16](TCK-Tests.html#3.16)]</sup>.
 
-javax.portlet.faces.viewPath: The value of this attribute contains the the Faces viewId the bridge must use for this request in ContextPath relative path form (e.g. /faces/myFacesPage.jsp).  This value may optionally contain a query string[3.16].
-
-The BridgeUninitializedException is thrown if this method is called while the bridge is in an uninitialized state[3.17].  The NullPointerException is thrown if either the passed request or response objects are null[3.18]. 
+The `BridgeUninitializedException` is thrown if this method is called while the
+bridge is in an uninitialized state<sup>[[3.17](TCK-Tests.html#3.17)]</sup>. The
+`NullPointerException` is thrown if either the passed request or response
+objects are null<sup>[[3.18](TCK-Tests.html#3.18)]</sup>. 

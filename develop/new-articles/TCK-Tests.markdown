@@ -188,23 +188,58 @@ for existence of the request parameter that would indicate its use.
 
 ## Chapter 4 Tests
 
-[4.1]  In addition the GenericFacesPortlet reads the following portlet initialization parameters and either sets the appropriate context attributes.
-Test:  In the JSF Test read the portlet context init params that correspond to the one the GFP should be setting for each of these and make sure they have the same value as the ones in portlet.xml
+[<a name="4.1"></a>4.1] In addition the `GenericFacesPortlet` reads the
+following portlet initialization parameters and either sets the appropriate
+context attributes.
 
-[4.2]  The GenericFacesPortlet overrides the init() method and does the following:
-Test:  Subclass GFP and override init, call super(), override each of the methods its supposed to call -- verify they were called, verify appropriate context params set.
+Test: In the JSF Test read the portlet context init params that correspond to
+the one the GFP should be setting for each of these and make sure they have the
+same value as the ones in portlet.xml
 
-[4.3] When not overridden by a subclass, the GenericFacesPortlet processes the request by first determining if the target of the request is a Faces or a nonFaces view.  A nonFaces view target is recognized if the request contains the parameter _jsfBridgeNonFacesView.  The value of this parameter is the ContextPath relative path to the nonFaces target.  To handle this request the GenericFacesPortlet sets the response contentType, if not already set, using the preferred contentType expressed by the portlet container. It then uses a portlet RequestDispatcher to dispatch(include) the nonFaces target
-Test: Subclass GFP and overide render (to set the testname).  Run test as a multirequest test.  On action set the navigation (face-config.xml) to a viewId that is a nonFaces view (has the appropriate QS parameter.
+[<a name="4.2"></a>4.2] The `GenericFacesPortlet` overrides the `init()` method
+and does the following:
 
-[4.4] If either the _jsfBridgeViewId parameter exists or both parameters exist and the _jsfBridgeViewId parameter value is non null, the GenericFacesPortlet must set the value of the request attribute javax.portlet.faces.viewId to the value of the _jsfBridgeViewId parameter.
-Test:  Set the navigation rule to navigate to a response page but have in its query string both of the above (also pointing to the success page).  Verify in the test that the attribute is set.
+Test: Subclass GFP and override init, call super(), override each of the methods
+its supposed to call -- verify they were called, verify appropriate context
+params set.
 
-[4.5] If only the _jsfBridgeViewPath parameter exists and contains a non null value,  the GenericFacesPortlet must set the value of the request attribute javax.portlet.faces.viewPath to the value of the _jsfBridgeViewPath parameter.
-Test:  Set the navigation rule to navigate to a response page but have in its query string only the viewPath (also pointing to the success page).  Verify in the test that the attribute is set.
+[<a name="4.3"></a>4.3] When not overridden by a subclass, the
+`GenericFacesPortlet` processes the request by first determining if the target of
+the request is a Faces or a nonFaces view. A nonFaces view target is recognized
+if the request contains the parameter `_jsfBridgeNonFacesView`. The value of this
+parameter is the `ContextPath` relative path to the nonFaces target. To handle
+this request the `GenericFacesPortlet` sets the response contentType, if not
+already set, using the preferred contentType expressed by the portlet container.
+It then uses a portlet `RequestDispatcher` to dispatch(include) the nonFaces
+target
 
-[4.6] Otherwise the bridge is called without either of these attributes being set.
-Test:  Set the navigation rule to navigate to a response page.  Verify in the test that the attributes aren't set.
+Test: Subclass GFP and overide render (to set the testname). Run test as a
+multirequest test. On action set the navigation (face-config.xml) to a viewId
+that is a nonFaces view (has the appropriate QS parameter.
+
+[<a name="4.4"></a>4.4] If either the `_jsfBridgeViewId` parameter exists or
+both parameters exist and the `_jsfBridgeViewId` parameter value is non null,
+the `GenericFacesPortlet` must set the value of the request attribute
+`javax.portlet.faces.viewId` to the value of the `_jsfBridgeViewId parameter`.
+
+Test: Set the navigation rule to navigate to a response page but have in its
+query string both of the above (also pointing to the success page). Verify in
+the test that the attribute is set.
+
+[<a name="4.5"></a>4.5] If only the `_jsfBridgeViewPath` parameter exists and
+contains a non null value, the `GenericFacesPortlet` must set the value of the
+request attribute `javax.portlet.faces.viewPath` to the value of the
+`_jsfBridgeViewPath` parameter.
+
+Test: Set the navigation rule to navigate to a response page but have in its
+query string only the viewPath (also pointing to the success page). Verify in
+the test that the attribute is set.
+
+[<a name="4.6"></a>4.6] Otherwise the bridge is called without either of these
+attributes being set.
+
+Test: Set the navigation rule to navigate to a response page. Verify in the test
+that the attributes aren't set.
 
 [4.7] The bridge calls this method during init().  getBridgeClassName returns the name of the class the GenericFacesPortlet uses to instantiate the bridge.  The default (GenericFacesPortlet) implementation returns the value of the javax.portlet.faces.BridgeClassName PortletContext initialization parameter, if it exists.  If it doesn't exist, it calls getResourceAsStream() using the current thread's context class loader passing the resource path "META-INF/services/javax.portlet.faces.Bridge".  It returns the first line of this stream excluding leading and trailing white space. If it can not resolve a class name, it throws a PortletException
 Test:  override getBridgeClassName, have this method implement behavior as specified -- test that result is same as what super() returned.
