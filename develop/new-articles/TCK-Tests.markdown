@@ -204,14 +204,14 @@ its supposed to call -- verify they were called, verify appropriate context
 params set.
 
 [<a name="4.3"></a>4.3] When not overridden by a subclass, the
-`GenericFacesPortlet` processes the request by first determining if the target of
-the request is a Faces or a nonFaces view. A nonFaces view target is recognized
-if the request contains the parameter `_jsfBridgeNonFacesView`. The value of this
-parameter is the `ContextPath` relative path to the nonFaces target. To handle
-this request the `GenericFacesPortlet` sets the response contentType, if not
-already set, using the preferred contentType expressed by the portlet container.
-It then uses a portlet `RequestDispatcher` to dispatch(include) the nonFaces
-target
+`GenericFacesPortlet` processes the request by first determining if the target
+of the request is a Faces or a nonFaces view. A nonFaces view target is
+recognized if the request contains the parameter `_jsfBridgeNonFacesView`. The
+value of this parameter is the `ContextPath` relative path to the nonFaces
+target. To handle this request the `GenericFacesPortlet` sets the response
+contentType, if not already set, using the preferred contentType expressed by
+the portlet container. It then uses a portlet `RequestDispatcher` to
+dispatch(include) the nonFaces target.
 
 Test: Subclass GFP and overide render (to set the testname). Run test as a
 multirequest test. On action set the navigation (face-config.xml) to a viewId
@@ -241,95 +241,203 @@ attributes being set.
 Test: Set the navigation rule to navigate to a response page. Verify in the test
 that the attributes aren't set.
 
-[4.7] The bridge calls this method during init().  getBridgeClassName returns the name of the class the GenericFacesPortlet uses to instantiate the bridge.  The default (GenericFacesPortlet) implementation returns the value of the javax.portlet.faces.BridgeClassName PortletContext initialization parameter, if it exists.  If it doesn't exist, it calls getResourceAsStream() using the current thread's context class loader passing the resource path "META-INF/services/javax.portlet.faces.Bridge".  It returns the first line of this stream excluding leading and trailing white space. If it can not resolve a class name, it throws a PortletException
-Test:  override getBridgeClassName, have this method implement behavior as specified -- test that result is same as what super() returned.
+[<a name="4.7"></a>4.7] The bridge calls this method during `init()`.
+`getBridgeClassName` returns the name of the class the `GenericFacesPortlet`
+uses to instantiate the bridge. The default (`GenericFacesPortlet`)
+implementation returns the value of the `javax.portlet.faces.BridgeClassName`
+`PortletContext` initialization parameter, if it exists. If it doesn't exist, it
+calls `getResourceAsStream()` using the current thread's context class loader
+passing the resource path "`META-INF/services/javax.portlet.faces.Bridge`". It
+returns the first line of this stream excluding leading and trailing white
+space. If it can not resolve a class name, it throws a `PortletException`.
 
-[4.8] The default (GenericFacesPortlet) implementation of getDefaultViewIdMap() reads each portlet initialization parameter prefixed named javax.portlet.faces.defaultViewId.[mode] where mode is the String form of a supported PortletMode. For each entry it adds a Map entry with mode as the key value and the initialization parameter value as the map value
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+Test: override getBridgeClassName, have this method implement behavior as
+specified -- test that result is same as what super() returned.
 
-[4.9] The default (GenericFacesPortlet) implementation for getExcludedRequestAttributes() returns a List constructed by parsing the comma delimited String value from the corresponding portlet initialization parameter, javax.portlet.faces.excludedRequestAttributes.
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+[<a name="4.8"></a>4.8] The default (`GenericFacesPortlet`) implementation of
+`getDefaultViewIdMap()` reads each portlet initialization parameter prefixed
+named `javax.portlet.faces.defaultViewId.[mode]` where *mode* is the `String`
+form of a supported `PortletMode`. For each entry it adds a Map entry with mode
+as the key value and the initialization parameter value as the map value.
 
-[4.10] If this initialization parameter isn't present null is returned which causes the GenericFacesPortlet to not set the corresponding PortletContext attribute.
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned. -- in this case don't configure in portlet.xml so verify null.
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
 
-[4.11] The default (GenericFacesPortlet) implementation returns the boolean value corresponding to the String value represented in the portlet initialization parameter, javax.portlet.faces.preserveActionParams.
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+[<a name="4.9"></a>4.9] The default (`GenericFacesPortlet`) implementation for
+`getExcludedRequestAttributes()` returns a `List` constructed by parsing the
+comma delimited `String` value from the corresponding portlet initialization
+parameter, `javax.portlet.faces.excludedRequestAttributes`.
 
-[4.12] If this initialization parameter doesn't exist, false is returned.
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
 
-[4.13] It returns the portlet container's indication of the preferred content type for this response.
-Test:  override method, have this method get preeferred content type -- test that result is same as what super() returned.
+[<a name="4.10"></a>4.10] If this initialization parameter isn't present `null`
+is returned which causes the `GenericFacesPortlet` to not set the corresponding
+`PortletContext` attribute.
 
-[4.14] It returns null.
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned. -- in this case don't configure in
+portlet.xml so verify null.
+
+[<a name="4.11"></a>4.11] The default (`GenericFacesPortlet`) implementation
+returns the `boolean` value corresponding to the `String` value represented in
+the portlet initialization parameter,
+`javax.portlet.faces.preserveActionParams`.
+
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
+
+[<a name="4.12"></a>4.12] If this initialization parameter doesn't exist,
+`false` is returned.
+
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
+
+[<a name="4.13"></a>4.13] It returns the portlet container's indication of the
+preferred content type for this response.
+
+Test: override method, have this method get preeferred content type -- test that
+result is same as what super() returned.
+
+[<a name="4.14"></a>4.14] It returns `null`.
+
 Test:  override method -- test thatt super() returns null..
 
-[4.15] read the portlet initialization parameter javax.portlet.faces.bridgeEventHandler and return an instance of the class that corresponds to its value.
+[<a name="4.15"></a>4.15] read the portlet initialization parameter
+`javax.portlet.faces.bridgeEventHandler` and return an instance of the class
+that corresponds to its value.
+
 Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
 
-[4.16] If this initialization parameter doesn't exist, null is returned.
+[<a name="4.16"></a>4.16] If this initialization parameter doesn't exist, `null`
+is returned.
+
 Test:  override method,  test that result is from super() is null.
 
-[4.17] read the portlet initialization parameter javax.portlet.faces.bridgePublicRenderParameterHandler and return an instance of the class that corresponds to its value
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+[<a name="4.17"></a>4.17] read the portlet initialization parameter
+`javax.portlet.faces.bridgePublicRenderParameterHandler` and return an instance
+of the class that corresponds to its value.
 
-[4.18] If this initialization parameter doesn't exist, null is returned.
-Test:  override method,  test that result is from super() is null.
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
 
-[4.19] If it exists the value is interpreted as a boolean valued String (i.e. "true" is true while all other values are false).
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+[<a name="4.18"></a>4.18] If this initialization parameter doesn't exist, `null`
+is returned.
 
-[4.20] If this initialization parameter doesn't exist, true is returned.
-Test:  override method,  test that result is from super() is true
+Test:  override method,  test that result is from super() is `null`.
 
-[4.21] To support this the GenericFacesPortlet, via this method, returns a properly initialized and active bridge which a subclass can use to call one of the doFacesRequest() methods.
-Test:  override method, have this method get value as specified -- then call doFacesRequest() and see that all works right..
+[<a name="4.19"></a>4.19] If it exists the value is interpreted as a `boolean`
+valued `String` (i.e. "true" is `true` while all other values are `false`).
 
-[4.22] return the value of the portlet initialization parameter javax.portlet.faces.defaultRenderKitId.
-Test:  override method, have this method get values as specified -- test that result is same as what super() returned.
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
 
-[4.23] If this initialization parameter doesn't exist, null is returned.
-Test:  override method,  test that result is from super() is null.
+[<a name="4.20"></a>4.20] If this initialization parameter doesn't exist, `true`
+is returned.
+
+Test:  override method,  test that result is from super() is `true`
+
+[<a name="4.21"></a>4.21] To support this the `GenericFacesPortlet`, via this
+method, returns a properly initialized and active bridge which a subclass can
+use to call one of the `doFacesRequest()` methods.
+
+Test: override method, have this method get value as specified -- then call
+doFacesRequest() and see that all works right.
+
+[<a name="4.22"></a>4.22] return the value of the portlet initialization
+parameter `javax.portlet.faces.defaultRenderKitId`.
+
+Test: override method, have this method get values as specified -- test that
+result is same as what super() returned.
+
+[<a name="4.23"></a>4.23] If this initialization parameter doesn't exist, `null`
+is returned.
+
+Test:  override method,  test that result is from super() is `null`.
 
 ## Chapter 5 Tests
 
-[5.1] This additional associated data includes (state stored in bridge request scope):
-Test:  During action handling -- create all attributes/messages listed (including the excluded one's).  On render verify what should be there is there and what shouldn't isn't.  Test needs to render same view as runs in the action.
+[<a name="5.1"></a>5.1] This additional associated data includes (state stored
+in bridge request scope):
 
-[5.2]  For each portlet action ignore any references to an existing request scope. I.e. portlet action requests always define the start of a new scope so never restore a preexisting one.
-Test:  During an action -- add a request attribute, in a second action test and see that its not there.
+Test: During action handling -- create all attributes/messages listed (including
+the excluded one's). On render verify what should be there is there and what
+shouldn't isn't. Test needs to render same view as runs in the action.
 
-[5.3] Upon completion of each portlet action preserve the state described above in a newly created bridge request scope if the action doesn't terminate because of a redirect.
-Test:  During an action -- add a request attribute, have the action's navigation rule indicate <redirect>, verify that during the render the attribute isn't there.
+[<a name="5.2"></a>5.2] For each portlet action ignore any references to an
+existing request scope. I.e. portlet action requests always define the start of
+a new scope so never restore a preexisting one.
 
-[5.4] ... the navigational target of the action doesn't specify a portlet mode that differs from the current request.
-Test:  During an action -- add a request attribute, have the action's navigation encode a mode change, verify that during the render the atribute isn't there.
+Test: During an action -- add a request attribute, in a second action test and
+see that its not there.
 
-[5.5] For each render request, the bridge identifies the corresponding bridge request scope that pertains to this request and if one exists it passes the state in this scope to the current (container) request scope.
-Test:  Covered by test 5.1.
+[<a name="5.3"></a>5.3] Upon completion of each portlet action preserve the
+state described above in a newly created bridge request scope if the action
+doesn't terminate because of a redirect.
 
-[5.6] For any action parameters that have been preserved, the parameter is restored if and only if there isn't an existing parameter of the same name in the incoming request.
-Test:  set preserveActionParams.  Cause an action (with parameters), verify in render the parameters are there.
+Test: During an action -- add a request attribute, have the action's navigation
+rule indicate <redirect>, verify that during the render the attribute isn't
+there.
 
-[5.7] This corresponds to ensuring that ViewHandler.createView() is used to establish the viewroot vs. ViewHandler.restoreView()
-Test:  Action followed by render, followed by render (redisplay but with a new Mode) -- verify that out test ViewHandler's createView is called not its restoreView.
+[<a name="5.4"></a>5.4] ... the navigational target of the action doesn't
+specify a portlet mode that differs from the current request.
 
-[5.8] Under normal conditions, a bridge request scope must be maintained at least until the next action request (a subsequent bridge request scope is established)
-Test:  Covered by 5.1
+Test: During an action -- add a request attribute, have the action's navigation
+encode a mode change, verify that during the render the atribute isn't there.
 
-[5.9] The bridge must not assume that all render requests following the establishment of a request scope (and prior to a subsequent action) are executed in the same bridge request scope.
-Test:  Same type of test as 5.7 except add an attribute in the action and verify its not there in the redisplay.
+[<a name="5.5"></a>5.5] For each render request, the bridge identifies the
+corresponding bridge request scope that pertains to this request and if one
+exists it passes the state in this scope to the current (container) request
+scope. 
 
-[5.10a-e] exclude attributes based on:
+Test: Covered by test [5.1](TCK-Tests.html#5.1).
 
-    an annotated bean
-    whose attribute name is listed as an excluded attribute using the <bridge:excluded-attributes> ... in faces-config.xml
-    whose attribute name is in the immediate namespace listed as a wildcarded excluded attribute using the <bridge:excluded-attributes> ... in faces-config.xml
-    whose attribute name appears in the List object of excluded attributes in the portlet context  attribute javax.portlet.faces.[portlet name].excludedRequestAttributes
-    whose attribute name appears in the immediate namespace listed as a wildcarded excluded attribute in the List object of excluded attributes in the portlet context  attribute javax.portlet.faces.[portlet name].excludedRequestAttributes
+[<a name="5.6"></a>5.6] For any action parameters that have been preserved, the
+parameter is restored if and only if there isn't an existing parameter of the
+same name in the incoming request.
 
-Test:  In action add request M request attributes -- some to test each of the 4 conditions above -- others to test the inverse -- that other attributes are retained.
+Test: set preserveActionParams. Cause an action (with parameters), verify in
+render the parameters are there.
+
+[<a name="5.7"></a>5.7] This corresponds to ensuring that
+`ViewHandler.createView()` is used to establish the viewroot vs.
+`ViewHandler.restoreView()`.
+
+Test: Action followed by render, followed by render (redisplay but with a new
+Mode) -- verify that out test ViewHandler's createView is called not its
+restoreView.
+
+[<a name="5.8"></a>5.8] Under normal conditions, a bridge request scope must be maintained at
+least until the next action request (a subsequent bridge request scope is
+established) 
+
+Test: Covered by [5.1](TCK-Tests.html#5.1)
+
+[<a name="5.9"></a>5.9] The bridge must not assume that all render requests
+following the establishment of a request scope (and prior to a subsequent
+action) are executed in the same bridge request scope.
+
+Test: Same type of test as 5.7 except add an attribute in the action and verify
+its not there in the redisplay.
+
+[<a name="5.10a-e"></a>5.10a-e] exclude attributes based on:
+
+- an annotated bean
+- whose attribute name is listed as an excluded attribute using the
+`<bridge:excluded-attributes>` ... in faces-config.xml
+- whose attribute name is in the immediate namespace listed as a wildcarded
+excluded attribute using the `<bridge:excluded-attributes>` ... in
+faces-config.xml
+- whose attribute name appears in the `List` object of excluded attributes in the
+portlet context attribute `javax.portlet.faces.[portlet
+name].excludedRequestAttributes`
+- whose attribute name appears in the immediate namespace listed as a wildcarded
+excluded attribute in the `List` object of excluded attributes in the portlet
+context attribute `javax.portlet.faces.[portlet name].excludedRequestAttributes`
+
+Test: In action add request M request attributes -- some to test each of the 4
+conditions above -- others to test the inverse -- that other attributes are
+retained.
 
 [5.11]  The JSF 1.2 specification, section 6.1.5 requires that the various FacesContext methods that get Messages return those Messages in insertion order. The bridge must preserve this requirement while managing such Messages within the bridge request scope.
 Test: Covered by #5.1 -- the message portion of the test adds 2 messages to the UIView root and verifies they come back in the same order.

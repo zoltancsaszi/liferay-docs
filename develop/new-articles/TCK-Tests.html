@@ -1,5 +1,272 @@
 <h1>Summary of TCK Tests related to Specification Assertions</h1>
-<hr/><p>[<a name="NT"></a>NT] Not Testable</p><p>Unable to define a TCK test to verify the assertion in a manner that is implementation independent. I.e. the test won&rsquo;t work in every portlet container/app server environment. Note, in some circumstances the test is provided so it can be used to verify behavior/compliance in environments that do provide the necessary support.</p><a id="chapter-3-tests"></a><h2>Chapter 3 Tests</h2><p>[<a name="3.1"></a>3.1] For this specification, the returned name must be &ldquo;Portlet 1.0 Bridge for JavaServer Faces 1.2&rdquo;</p><p>Test: Write a portlet that gets Bridge API class and calls Class.getPackage to get the Specification Title and Version to compare with above statement.</p><p>[<a name="3.2"></a>3.2] The value <code>ALWAYS_DELEGATE</code> indicates the bridge should not render the view itself but rather always delegate the rendering.</p><p>Test: Run app with this config setting. Test by writing a ApplicationFactory to insert our own Application Impl that overrides setViewhandler which creates/installs the test ViewHandler before all others (on first call). In this text ViewHandlers render &ndash; check to see what the renderpolicy is and set an appropriate msg indicator on the request (attribute)</p><p>[<a name="3.3"></a>3.3] The value <code>NEVER_DELEGATE</code> indicates the bridge should always render the view itself and never delegate.</p><p>Test: Run app with this config setting. Test by writing a ApplicationFactory to insert our own Application Impl that overrides setViewhandler which creates/installs the test ViewHandler before all others (on first call). In this text ViewHandlers render &ndash; check to see what the renderpolicy is and set an appropriate msg indicator on the request (attribute)</p><p>[<a name="3.4"></a>3.4] <code>DEFAULT</code> indicates &hellip;. the bridge to first delegate the render and if and only if an Exception is thrown then render the view based on its own logic</p><p>Test: Run app with this config setting. Test by writing a ApplicationFactory to insert our own Application Impl that overrides setViewhandler which creates/installs the test ViewHandler before all others (on first call). In this text ViewHandlers render &ndash; check to see what the renderpolicy is and set an appropriate msg indicator on the request (attribute)</p><p>[<a name="3.5"></a>3.5] If the configuration parameter is not present or has an invalid value the bridge renders using default behavior. I.e. as if <code>DEFAULT</code> is set</p><p>Test: Run app with this config setting. Test by writing a ApplicationFactory to insert our own Application Impl that overrides setViewhandler which creates/installs the test ViewHandler before all others (on first call). In this text ViewHandlers render &ndash; check to see what the renderpolicy is and set an appropriate msg indicator on the request (attribute)</p><p>[<a name="3.6"></a>3.6] <code>LIFECYCLE_ID</code> is a <code>String</code> valued configuration parameter that describes the <code>ID</code> of the <code>Lifecycle</code> the bridge uses when executing Faces requests.</p><p>Test: Supply test FacesContextFactory. Create a new Lifecycle impl and register with its own ID. aka via faces-config.xml. Set init-param in web.xml to use. Verify in FacesContextFactory we are using this new Lifecycle &ndash; test by getting the Lifecycle by ID and verifying that its the same instance as the one passed in.</p><p>[<a name="3.7"></a>3.7] If not set the bridge uses the ID for the default lifecycle (<code>LifecycleFactory.DEFAULT_LIFECYCLE</code>).</p><p>Test: Supply test FacesContextFactory. Don&rsquo;t configure any specific Lifecycle to be used. Verify in FacesContxtFactory that we are using the default one.</p><p>[<a name="3.8"></a>3.8] <code>excludedRequestAttributes</code> is an attribute whose value is a <code>List</code> of <code>String</code> objects each of which either defines a specific attribute name the bridge is to exclude from its managed request scope or defines a set of attributes the bridge is to exclude from its managed request scope.</p><p>Test: covered by 6.1.3.1: requestMapRequestScopeTest &ndash; which tests that exclusion works.</p><p>[<a name="3.9"></a>3.9] Such wildcard usage indicates the bridge is to exclude all those attributes within the namespace identified by removing the &ldquo;*&rdquo;</p><p>Test: covered by 6.1.3.1: requestMapRequestScopeTest &ndash; which tests that exclusion works.</p><p>[<a name="3.10"></a>3.10] <code>preserveActionParams</code> is a <code>Boolean</code> valued attribute that when <code>TRUE</code> indicates the bridge must maintain the action&rsquo;s request parameters for the duration of the bridge request scope.</p><p>Test: covered by 6.1.3.1: getRequestParameterPreserveParamsTest, getRequestParameterNamesPreserveParamsTest, getRequestParameterValuesMapPreserveParamsTest.</p><p>[<a name="3.11"></a>3.11] The exception to this is the <code>ResponseStateManager.VIEW_STATE_PARAM</code> parameter which is always maintained in the bridge request scope regardless of this setting. (I.e. always preserve the VIEW_STATE_PARAM regardless of preserveActionParams setting).</p><p>Test: covered by 6.1.3.1:getRequestParameterMapCoreTest, getRequestParameterNamesCoreTest, getRequestParameterValuesMapCoreTest.</p><p>[<a name="3.12"></a>3.12] <code>defaultViewIdMap</code> is a <code>Map&lt;String, String&gt;</code> valued attribute containing one entry per supported <code>PortletMode</code>. The <code>Map</code> key is the <code>String</code> name of the <code>PortletMode</code>. The Map value is the default Faces <code>viewId</code> for the mode.</p><p>Test: basically covered by any test. However add a test that supports a non-View mode (Edit) with a different viewId mapping. Then write a portlet that has an initial (non-JSF) render that adds a render link back to the portlet putting it in Edit mode. Verify our view is invoked.</p><p>[<a name="3.13"></a>3.13] Once destroy() has been called, no further requests can be processed through this bridge until a subsequent init() has occurred.</p><p>Test: subclass GFP, overriding the render behavior &ndash; get the Bridge from GFP and then in a render call, init Bridge, destroy it, then call doFacesRequest(render) verify it fails as expected (i.e. throws UninitializedException). Do same but in processAction (i.e. destroy, followed by a doFacesRender), processEvent, and serveResource.</p><p>[<a name="3.14"></a>3.14] This call (destroy()) performs no action if the bridge is in an uninitialized state.</p><p>Test: Using test from <a href="TCK-Tests.html#3.13">3.13</a> have it call destroy() a second time and verify that no exceptions are thrown.</p><p>[<a name="3.15"></a>3.15] <code>javax.portlet.faces.viewId</code>: The value of this attribute identifies the Faces <code>viewId</code> the bridge must use for this request (e.g. <code>/myFacesPage.jsp</code>). This is expected to be a valid Faces viewId though it may optionally contain a query string</p><p>Test: Write a portlet that has a default viewId of X.jsp but in its render sets the above attribute to y.jsp. Verify that y.jsp is activated. I.e. the X.jsp reports an error for the test while Y.jsp reports success.</p><p>[<a name="3.16"></a>3.16] <code>javax.portlet.faces.viewPath</code>: The value of this attribute contains the the Faces <code>viewId</code> the bridge must use for this request in <code>ContextPath</code> relative path form (e.g. <code>/faces/myFacesPage.jsp</code>). This value may optionally contain a query string.</p><p>Test: Same test as 3.15 but set a path relative viewId.</p><p>[<a name="3.17"></a>3.17] The <code>BridgeUninitializedException</code> is thrown if this method (doFacesRequest) is called while the bridge is in an uninitialized state</p><p>Test: covered by 3.13.</p><p>[<a name="3.18"></a>3.18] The <code>NullPointerException</code> is thrown (from doFacesRequest()) if either the passed request or response objects are <code>null</code>.</p><p>Test: call both action and render forms of doFacesRequest passing null. (Get bridge from GFP to do this).</p><p>[<a name="3.19"></a>3.19] The <code>NullPointerException</code> is thrown (from doFacesRequest()) if either the passed request or response objects are <code>null</code>.</p><p>Test: call both action and render forms of doFacesRequest passing null. (Get bridge from GFP to do this).</p><p>[<a name="3.20"></a>3.20] <code>bridgeEventHandler</code> is a (instanceof) <code>BridgeEventHandler</code> valued attribute identifying the instance that is called to handle portlet events received by the bridge</p><p>Test: Covered by #5.56 &ndash; Provide an eventHandler, trigger an event (in the test&rsquo;s action handler), have the eventHandler set a request attribute indicating its been called, have the test render check this bit.</p><p>[<a name="3.21"></a>3.21] <code>bridgePublicRenderParameterHandler</code> is a (instanceof) <code>BridgePublicRenderParameterHandler</code> valued attribute identifying the instance that is called to postprocess incoming public render parameter changes after the bridge has pushed these values into the mapped managed beans. This handler gives the portlet an opportunity to recompute and get into a new consistent state after such changes</p><p>Test: Covered by #5.71 &ndash; Provide an PRPHandler, trigger a PRP change during an action (test&rsquo;s handler), have the PRPhandler set a request attribute indicating its been called, have the test render check this bit.</p><p>[<a name="3.22"></a>3.22] &hellip; the renderkit id the bridge should encode as a request parameter in each request to ensure that Faces will use this Id when resolving the renderkit used by this portlet</p><p>Test: set the attribute (via configuration). In the test (render) have it test for existence of the request parameter that would indicate its use.</p><a id="chapter-4-tests"></a><h2>Chapter 4 Tests</h2><p>[4.1] In addition the GenericFacesPortlet reads the following portlet initialization parameters and either sets the appropriate context attributes. Test: In the JSF Test read the portlet context init params that correspond to the one the GFP should be setting for each of these and make sure they have the same value as the ones in portlet.xml</p><p>[4.2] The GenericFacesPortlet overrides the init() method and does the following: Test: Subclass GFP and override init, call super(), override each of the methods its supposed to call &ndash; verify they were called, verify appropriate context params set.</p><p>[4.3] When not overridden by a subclass, the GenericFacesPortlet processes the request by first determining if the target of the request is a Faces or a nonFaces view. A nonFaces view target is recognized if the request contains the parameter _jsfBridgeNonFacesView. The value of this parameter is the ContextPath relative path to the nonFaces target. To handle this request the GenericFacesPortlet sets the response contentType, if not already set, using the preferred contentType expressed by the portlet container. It then uses a portlet RequestDispatcher to dispatch(include) the nonFaces target Test: Subclass GFP and overide render (to set the testname). Run test as a multirequest test. On action set the navigation (face-config.xml) to a viewId that is a nonFaces view (has the appropriate QS parameter.</p><p>[4.4] If either the _jsfBridgeViewId parameter exists or both parameters exist and the _jsfBridgeViewId parameter value is non null, the GenericFacesPortlet must set the value of the request attribute javax.portlet.faces.viewId to the value of the _jsfBridgeViewId parameter. Test: Set the navigation rule to navigate to a response page but have in its query string both of the above (also pointing to the success page). Verify in the test that the attribute is set.</p><p>[4.5] If only the _jsfBridgeViewPath parameter exists and contains a non null value, the GenericFacesPortlet must set the value of the request attribute javax.portlet.faces.viewPath to the value of the _jsfBridgeViewPath parameter. Test: Set the navigation rule to navigate to a response page but have in its query string only the viewPath (also pointing to the success page). Verify in the test that the attribute is set.</p><p>[4.6] Otherwise the bridge is called without either of these attributes being set. Test: Set the navigation rule to navigate to a response page. Verify in the test that the attributes aren&rsquo;t set.</p><p>[4.7] The bridge calls this method during init(). getBridgeClassName returns the name of the class the GenericFacesPortlet uses to instantiate the bridge. The default (GenericFacesPortlet) implementation returns the value of the javax.portlet.faces.BridgeClassName PortletContext initialization parameter, if it exists. If it doesn&rsquo;t exist, it calls getResourceAsStream() using the current thread&rsquo;s context class loader passing the resource path &ldquo;META-INF/services/javax.portlet.faces.Bridge&rdquo;. It returns the first line of this stream excluding leading and trailing white space. If it can not resolve a class name, it throws a PortletException Test: override getBridgeClassName, have this method implement behavior as specified &ndash; test that result is same as what super() returned.</p><p>[4.8] The default (GenericFacesPortlet) implementation of getDefaultViewIdMap() reads each portlet initialization parameter prefixed named javax.portlet.faces.defaultViewId.[mode] where mode is the String form of a supported PortletMode. For each entry it adds a Map entry with mode as the key value and the initialization parameter value as the map value Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.9] The default (GenericFacesPortlet) implementation for getExcludedRequestAttributes() returns a List constructed by parsing the comma delimited String value from the corresponding portlet initialization parameter, javax.portlet.faces.excludedRequestAttributes. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.10] If this initialization parameter isn&rsquo;t present null is returned which causes the GenericFacesPortlet to not set the corresponding PortletContext attribute. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned. &ndash; in this case don&rsquo;t configure in portlet.xml so verify null.</p><p>[4.11] The default (GenericFacesPortlet) implementation returns the boolean value corresponding to the String value represented in the portlet initialization parameter, javax.portlet.faces.preserveActionParams. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.12] If this initialization parameter doesn&rsquo;t exist, false is returned. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.13] It returns the portlet container&rsquo;s indication of the preferred content type for this response. Test: override method, have this method get preeferred content type &ndash; test that result is same as what super() returned.</p><p>[4.14] It returns null. Test: override method &ndash; test thatt super() returns null..</p><p>[4.15] read the portlet initialization parameter javax.portlet.faces.bridgeEventHandler and return an instance of the class that corresponds to its value. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.16] If this initialization parameter doesn&rsquo;t exist, null is returned. Test: override method, test that result is from super() is null.</p><p>[4.17] read the portlet initialization parameter javax.portlet.faces.bridgePublicRenderParameterHandler and return an instance of the class that corresponds to its value Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.18] If this initialization parameter doesn&rsquo;t exist, null is returned. Test: override method, test that result is from super() is null.</p><p>[4.19] If it exists the value is interpreted as a boolean valued String (i.e. &ldquo;true&rdquo; is true while all other values are false). Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.20] If this initialization parameter doesn&rsquo;t exist, true is returned. Test: override method, test that result is from super() is true</p><p>[4.21] To support this the GenericFacesPortlet, via this method, returns a properly initialized and active bridge which a subclass can use to call one of the doFacesRequest() methods. Test: override method, have this method get value as specified &ndash; then call doFacesRequest() and see that all works right..</p><p>[4.22] return the value of the portlet initialization parameter javax.portlet.faces.defaultRenderKitId. Test: override method, have this method get values as specified &ndash; test that result is same as what super() returned.</p><p>[4.23] If this initialization parameter doesn&rsquo;t exist, null is returned. Test: override method, test that result is from super() is null.</p><a id="chapter-5-tests"></a><h2>Chapter 5 Tests</h2><p>[5.1] This additional associated data includes (state stored in bridge request scope): Test: During action handling &ndash; create all attributes/messages listed (including the excluded one&rsquo;s). On render verify what should be there is there and what shouldn&rsquo;t isn&rsquo;t. Test needs to render same view as runs in the action.</p><p>[5.2] For each portlet action ignore any references to an existing request scope. I.e. portlet action requests always define the start of a new scope so never restore a preexisting one. Test: During an action &ndash; add a request attribute, in a second action test and see that its not there.</p><p>[5.3] Upon completion of each portlet action preserve the state described above in a newly created bridge request scope if the action doesn&rsquo;t terminate because of a redirect. Test: During an action &ndash; add a request attribute, have the action&rsquo;s navigation rule indicate <redirect>, verify that during the render the attribute isn&rsquo;t there.</p><p>[5.4] &hellip; the navigational target of the action doesn&rsquo;t specify a portlet mode that differs from the current request. Test: During an action &ndash; add a request attribute, have the action&rsquo;s navigation encode a mode change, verify that during the render the atribute isn&rsquo;t there.</p><p>[5.5] For each render request, the bridge identifies the corresponding bridge request scope that pertains to this request and if one exists it passes the state in this scope to the current (container) request scope. Test: Covered by test 5.1.</p><p>[5.6] For any action parameters that have been preserved, the parameter is restored if and only if there isn&rsquo;t an existing parameter of the same name in the incoming request. Test: set preserveActionParams. Cause an action (with parameters), verify in render the parameters are there.</p><p>[5.7] This corresponds to ensuring that ViewHandler.createView() is used to establish the viewroot vs. ViewHandler.restoreView() Test: Action followed by render, followed by render (redisplay but with a new Mode) &ndash; verify that out test ViewHandler&rsquo;s createView is called not its restoreView.</p><p>[5.8] Under normal conditions, a bridge request scope must be maintained at least until the next action request (a subsequent bridge request scope is established) Test: Covered by 5.1</p><p>[5.9] The bridge must not assume that all render requests following the establishment of a request scope (and prior to a subsequent action) are executed in the same bridge request scope. Test: Same type of test as 5.7 except add an attribute in the action and verify its not there in the redisplay.</p><p>[5.10a-e] exclude attributes based on:</p>
+<hr/><p>[<a name="NT"></a>NT] Not Testable</p><p>Unable to define a TCK test to
+verify the assertion in a manner that is implementation independent. I.e. the
+test won&rsquo;t work in every portlet container/app server environment. Note,
+in some circumstances the test is provided so it can be used to verify
+behavior/compliance in environments that do provide the necessary support.</p><a
+id="chapter-3-tests"></a><h2>Chapter 3 Tests</h2><p>[<a name="3.1"></a>3.1] For
+this specification, the returned name must be &ldquo;Portlet 1.0 Bridge for
+JavaServer Faces 1.2&rdquo;</p><p>Test: Write a portlet that gets Bridge API
+class and calls Class.getPackage to get the Specification Title and Version to
+compare with above statement.</p><p>[<a name="3.2"></a>3.2] The value
+<code>ALWAYS_DELEGATE</code> indicates the bridge should not render the view
+itself but rather always delegate the rendering.</p><p>Test: Run app with this
+config setting. Test by writing a ApplicationFactory to insert our own
+Application Impl that overrides setViewhandler which creates/installs the test
+ViewHandler before all others (on first call). In this text ViewHandlers render
+&ndash; check to see what the renderpolicy is and set an appropriate msg
+indicator on the request (attribute)</p><p>[<a name="3.3"></a>3.3] The value
+<code>NEVER_DELEGATE</code> indicates the bridge should always render the view
+itself and never delegate.</p><p>Test: Run app with this config setting. Test by
+writing a ApplicationFactory to insert our own Application Impl that overrides
+setViewhandler which creates/installs the test ViewHandler before all others (on
+first call). In this text ViewHandlers render &ndash; check to see what the
+renderpolicy is and set an appropriate msg indicator on the request
+(attribute)</p><p>[<a name="3.4"></a>3.4] <code>DEFAULT</code> indicates
+&hellip;. the bridge to first delegate the render and if and only if an
+Exception is thrown then render the view based on its own logic</p><p>Test: Run
+app with this config setting. Test by writing a ApplicationFactory to insert our
+own Application Impl that overrides setViewhandler which creates/installs the
+test ViewHandler before all others (on first call). In this text ViewHandlers
+render &ndash; check to see what the renderpolicy is and set an appropriate msg
+indicator on the request (attribute)</p><p>[<a name="3.5"></a>3.5] If the
+configuration parameter is not present or has an invalid value the bridge
+renders using default behavior. I.e. as if <code>DEFAULT</code> is
+set</p><p>Test: Run app with this config setting. Test by writing a
+ApplicationFactory to insert our own Application Impl that overrides
+setViewhandler which creates/installs the test ViewHandler before all others (on
+first call). In this text ViewHandlers render &ndash; check to see what the
+renderpolicy is and set an appropriate msg indicator on the request
+(attribute)</p><p>[<a name="3.6"></a>3.6] <code>LIFECYCLE_ID</code> is a
+<code>String</code> valued configuration parameter that describes the
+<code>ID</code> of the <code>Lifecycle</code> the bridge uses when executing
+Faces requests.</p><p>Test: Supply test FacesContextFactory. Create a new
+Lifecycle impl and register with its own ID. aka via faces-config.xml. Set
+init-param in web.xml to use. Verify in FacesContextFactory we are using this
+new Lifecycle &ndash; test by getting the Lifecycle by ID and verifying that its
+the same instance as the one passed in.</p><p>[<a name="3.7"></a>3.7] If not set
+the bridge uses the ID for the default lifecycle
+(<code>LifecycleFactory.DEFAULT_LIFECYCLE</code>).</p><p>Test: Supply test
+FacesContextFactory. Don&rsquo;t configure any specific Lifecycle to be used.
+Verify in FacesContxtFactory that we are using the default one.</p><p>[<a
+name="3.8"></a>3.8] <code>excludedRequestAttributes</code> is an attribute whose
+value is a <code>List</code> of <code>String</code> objects each of which either
+defines a specific attribute name the bridge is to exclude from its managed
+request scope or defines a set of attributes the bridge is to exclude from its
+managed request scope.</p><p>Test: covered by 6.1.3.1:
+requestMapRequestScopeTest &ndash; which tests that exclusion works.</p><p>[<a
+name="3.9"></a>3.9] Such wildcard usage indicates the bridge is to exclude all
+those attributes within the namespace identified by removing the
+&ldquo;*&rdquo;</p><p>Test: covered by 6.1.3.1: requestMapRequestScopeTest
+&ndash; which tests that exclusion works.</p><p>[<a name="3.10"></a>3.10]
+<code>preserveActionParams</code> is a <code>Boolean</code> valued attribute
+that when <code>TRUE</code> indicates the bridge must maintain the
+action&rsquo;s request parameters for the duration of the bridge request
+scope.</p><p>Test: covered by 6.1.3.1: getRequestParameterPreserveParamsTest,
+getRequestParameterNamesPreserveParamsTest,
+getRequestParameterValuesMapPreserveParamsTest.</p><p>[<a name="3.11"></a>3.11]
+The exception to this is the <code>ResponseStateManager.VIEW_STATE_PARAM</code>
+parameter which is always maintained in the bridge request scope regardless of
+this setting. (I.e. always preserve the VIEW_STATE_PARAM regardless of
+preserveActionParams setting).</p><p>Test: covered by
+6.1.3.1:getRequestParameterMapCoreTest, getRequestParameterNamesCoreTest,
+getRequestParameterValuesMapCoreTest.</p><p>[<a name="3.12"></a>3.12]
+<code>defaultViewIdMap</code> is a <code>Map&lt;String, String&gt;</code> valued
+attribute containing one entry per supported <code>PortletMode</code>. The
+<code>Map</code> key is the <code>String</code> name of the
+<code>PortletMode</code>. The Map value is the default Faces <code>viewId</code>
+for the mode.</p><p>Test: basically covered by any test. However add a test that
+supports a non-View mode (Edit) with a different viewId mapping. Then write a
+portlet that has an initial (non-JSF) render that adds a render link back to the
+portlet putting it in Edit mode. Verify our view is invoked.</p><p>[<a
+name="3.13"></a>3.13] Once destroy() has been called, no further requests can be
+processed through this bridge until a subsequent init() has
+occurred.</p><p>Test: subclass GFP, overriding the render behavior &ndash; get
+the Bridge from GFP and then in a render call, init Bridge, destroy it, then
+call doFacesRequest(render) verify it fails as expected (i.e. throws
+UninitializedException). Do same but in processAction (i.e. destroy, followed by
+a doFacesRender), processEvent, and serveResource.</p><p>[<a
+name="3.14"></a>3.14] This call (destroy()) performs no action if the bridge is
+in an uninitialized state.</p><p>Test: Using test from <a
+href="TCK-Tests.html#3.13">3.13</a> have it call destroy() a second time and
+verify that no exceptions are thrown.</p><p>[<a name="3.15"></a>3.15]
+<code>javax.portlet.faces.viewId</code>: The value of this attribute identifies
+the Faces <code>viewId</code> the bridge must use for this request (e.g.
+<code>/myFacesPage.jsp</code>). This is expected to be a valid Faces viewId
+though it may optionally contain a query string</p><p>Test: Write a portlet that
+has a default viewId of X.jsp but in its render sets the above attribute to
+y.jsp. Verify that y.jsp is activated. I.e. the X.jsp reports an error for the
+test while Y.jsp reports success.</p><p>[<a name="3.16"></a>3.16]
+<code>javax.portlet.faces.viewPath</code>: The value of this attribute contains
+the the Faces <code>viewId</code> the bridge must use for this request in
+<code>ContextPath</code> relative path form (e.g.
+<code>/faces/myFacesPage.jsp</code>). This value may optionally contain a query
+string.</p><p>Test: Same test as 3.15 but set a path relative viewId.</p><p>[<a
+name="3.17"></a>3.17] The <code>BridgeUninitializedException</code> is thrown if
+this method (doFacesRequest) is called while the bridge is in an uninitialized
+state</p><p>Test: covered by 3.13.</p><p>[<a name="3.18"></a>3.18] The
+<code>NullPointerException</code> is thrown (from doFacesRequest()) if either
+the passed request or response objects are <code>null</code>.</p><p>Test: call
+both action and render forms of doFacesRequest passing null. (Get bridge from
+GFP to do this).</p><p>[<a name="3.19"></a>3.19] The
+<code>NullPointerException</code> is thrown (from doFacesRequest()) if either
+the passed request or response objects are <code>null</code>.</p><p>Test: call
+both action and render forms of doFacesRequest passing null. (Get bridge from
+GFP to do this).</p><p>[<a name="3.20"></a>3.20] <code>bridgeEventHandler</code>
+is a (instanceof) <code>BridgeEventHandler</code> valued attribute identifying
+the instance that is called to handle portlet events received by the
+bridge</p><p>Test: Covered by #5.56 &ndash; Provide an eventHandler, trigger an
+event (in the test&rsquo;s action handler), have the eventHandler set a request
+attribute indicating its been called, have the test render check this
+bit.</p><p>[<a name="3.21"></a>3.21]
+<code>bridgePublicRenderParameterHandler</code> is a (instanceof)
+<code>BridgePublicRenderParameterHandler</code> valued attribute identifying the
+instance that is called to postprocess incoming public render parameter changes
+after the bridge has pushed these values into the mapped managed beans. This
+handler gives the portlet an opportunity to recompute and get into a new
+consistent state after such changes</p><p>Test: Covered by #5.71 &ndash; Provide
+an PRPHandler, trigger a PRP change during an action (test&rsquo;s handler),
+have the PRPhandler set a request attribute indicating its been called, have the
+test render check this bit.</p><p>[<a name="3.22"></a>3.22] &hellip; the
+renderkit id the bridge should encode as a request parameter in each request to
+ensure that Faces will use this Id when resolving the renderkit used by this
+portlet</p><p>Test: set the attribute (via configuration). In the test (render)
+have it test for existence of the request parameter that would indicate its
+use.</p><a id="chapter-4-tests"></a><h2>Chapter 4 Tests</h2><p>[4.1] In addition
+the GenericFacesPortlet reads the following portlet initialization parameters
+and either sets the appropriate context attributes. Test: In the JSF Test read
+the portlet context init params that correspond to the one the GFP should be
+setting for each of these and make sure they have the same value as the ones in
+portlet.xml</p><p>[4.2] The GenericFacesPortlet overrides the init() method and
+does the following: Test: Subclass GFP and override init, call super(), override
+each of the methods its supposed to call &ndash; verify they were called, verify
+appropriate context params set.</p><p>[4.3] When not overridden by a subclass,
+the GenericFacesPortlet processes the request by first determining if the target
+of the request is a Faces or a nonFaces view. A nonFaces view target is
+recognized if the request contains the parameter _jsfBridgeNonFacesView. The
+value of this parameter is the ContextPath relative path to the nonFaces target.
+To handle this request the GenericFacesPortlet sets the response contentType, if
+not already set, using the preferred contentType expressed by the portlet
+container. It then uses a portlet RequestDispatcher to dispatch(include) the
+nonFaces target Test: Subclass GFP and overide render (to set the testname). Run
+test as a multirequest test. On action set the navigation (face-config.xml) to a
+viewId that is a nonFaces view (has the appropriate QS parameter.</p><p>[4.4] If
+either the _jsfBridgeViewId parameter exists or both parameters exist and the
+_jsfBridgeViewId parameter value is non null, the GenericFacesPortlet must set
+the value of the request attribute javax.portlet.faces.viewId to the value of
+the _jsfBridgeViewId parameter. Test: Set the navigation rule to navigate to a
+response page but have in its query string both of the above (also pointing to
+the success page). Verify in the test that the attribute is set.</p><p>[4.5] If
+only the _jsfBridgeViewPath parameter exists and contains a non null value, the
+GenericFacesPortlet must set the value of the request attribute
+javax.portlet.faces.viewPath to the value of the _jsfBridgeViewPath parameter.
+Test: Set the navigation rule to navigate to a response page but have in its
+query string only the viewPath (also pointing to the success page). Verify in
+the test that the attribute is set.</p><p>[4.6] Otherwise the bridge is called
+without either of these attributes being set. Test: Set the navigation rule to
+navigate to a response page. Verify in the test that the attributes aren&rsquo;t
+set.</p><p>[4.7] The bridge calls this method during init(). getBridgeClassName
+returns the name of the class the GenericFacesPortlet uses to instantiate the
+bridge. The default (GenericFacesPortlet) implementation returns the value of
+the javax.portlet.faces.BridgeClassName PortletContext initialization parameter,
+if it exists. If it doesn&rsquo;t exist, it calls getResourceAsStream() using
+the current thread&rsquo;s context class loader passing the resource path
+&ldquo;META-INF/services/javax.portlet.faces.Bridge&rdquo;. It returns the first
+line of this stream excluding leading and trailing white space. If it can not
+resolve a class name, it throws a PortletException Test: override
+getBridgeClassName, have this method implement behavior as specified &ndash;
+test that result is same as what super() returned.</p><p>[4.8] The default
+(GenericFacesPortlet) implementation of getDefaultViewIdMap() reads each portlet
+initialization parameter prefixed named javax.portlet.faces.defaultViewId.[mode]
+where mode is the String form of a supported PortletMode. For each entry it adds
+a Map entry with mode as the key value and the initialization parameter value as
+the map value Test: override method, have this method get values as specified
+&ndash; test that result is same as what super() returned.</p><p>[4.9] The
+default (GenericFacesPortlet) implementation for getExcludedRequestAttributes()
+returns a List constructed by parsing the comma delimited String value from the
+corresponding portlet initialization parameter,
+javax.portlet.faces.excludedRequestAttributes. Test: override method, have this
+method get values as specified &ndash; test that result is same as what super()
+returned.</p><p>[4.10] If this initialization parameter isn&rsquo;t present null
+is returned which causes the GenericFacesPortlet to not set the corresponding
+PortletContext attribute. Test: override method, have this method get values as
+specified &ndash; test that result is same as what super() returned. &ndash; in
+this case don&rsquo;t configure in portlet.xml so verify null.</p><p>[4.11] The
+default (GenericFacesPortlet) implementation returns the boolean value
+corresponding to the String value represented in the portlet initialization
+parameter, javax.portlet.faces.preserveActionParams. Test: override method, have
+this method get values as specified &ndash; test that result is same as what
+super() returned.</p><p>[4.12] If this initialization parameter doesn&rsquo;t
+exist, false is returned. Test: override method, have this method get values as
+specified &ndash; test that result is same as what super()
+returned.</p><p>[4.13] It returns the portlet container&rsquo;s indication of
+the preferred content type for this response. Test: override method, have this
+method get preeferred content type &ndash; test that result is same as what
+super() returned.</p><p>[4.14] It returns null. Test: override method &ndash;
+test thatt super() returns null..</p><p>[4.15] read the portlet initialization
+parameter javax.portlet.faces.bridgeEventHandler and return an instance of the
+class that corresponds to its value. Test: override method, have this method get
+values as specified &ndash; test that result is same as what super()
+returned.</p><p>[4.16] If this initialization parameter doesn&rsquo;t exist,
+null is returned. Test: override method, test that result is from super() is
+null.</p><p>[4.17] read the portlet initialization parameter
+javax.portlet.faces.bridgePublicRenderParameterHandler and return an instance of
+the class that corresponds to its value Test: override method, have this method
+get values as specified &ndash; test that result is same as what super()
+returned.</p><p>[4.18] If this initialization parameter doesn&rsquo;t exist,
+null is returned. Test: override method, test that result is from super() is
+null.</p><p>[4.19] If it exists the value is interpreted as a boolean valued
+String (i.e. &ldquo;true&rdquo; is true while all other values are false). Test:
+override method, have this method get values as specified &ndash; test that
+result is same as what super() returned.</p><p>[4.20] If this initialization
+parameter doesn&rsquo;t exist, true is returned. Test: override method, test
+that result is from super() is true</p><p>[4.21] To support this the
+GenericFacesPortlet, via this method, returns a properly initialized and active
+bridge which a subclass can use to call one of the doFacesRequest() methods.
+Test: override method, have this method get value as specified &ndash; then call
+doFacesRequest() and see that all works right..</p><p>[4.22] return the value of
+the portlet initialization parameter javax.portlet.faces.defaultRenderKitId.
+Test: override method, have this method get values as specified &ndash; test
+that result is same as what super() returned.</p><p>[4.23] If this
+initialization parameter doesn&rsquo;t exist, null is returned. Test: override
+method, test that result is from super() is null.</p><a
+id="chapter-5-tests"></a><h2>Chapter 5 Tests</h2><p>[5.1] This additional
+associated data includes (state stored in bridge request scope): Test: During
+action handling &ndash; create all attributes/messages listed (including the
+excluded one&rsquo;s). On render verify what should be there is there and what
+shouldn&rsquo;t isn&rsquo;t. Test needs to render same view as runs in the
+action.</p><p>[5.2] For each portlet action ignore any references to an existing
+request scope. I.e. portlet action requests always define the start of a new
+scope so never restore a preexisting one. Test: During an action &ndash; add a
+request attribute, in a second action test and see that its not
+there.</p><p>[5.3] Upon completion of each portlet action preserve the state
+described above in a newly created bridge request scope if the action
+doesn&rsquo;t terminate because of a redirect. Test: During an action &ndash;
+add a request attribute, have the action&rsquo;s navigation rule indicate
+<redirect>, verify that during the render the attribute isn&rsquo;t
+there.</p><p>[5.4] &hellip; the navigational target of the action doesn&rsquo;t
+specify a portlet mode that differs from the current request. Test: During an
+action &ndash; add a request attribute, have the action&rsquo;s navigation
+encode a mode change, verify that during the render the atribute isn&rsquo;t
+there.</p><p>[5.5] For each render request, the bridge identifies the
+corresponding bridge request scope that pertains to this request and if one
+exists it passes the state in this scope to the current (container) request
+scope. Test: Covered by test 5.1.</p><p>[5.6] For any action parameters that
+have been preserved, the parameter is restored if and only if there isn&rsquo;t
+an existing parameter of the same name in the incoming request. Test: set
+preserveActionParams. Cause an action (with parameters), verify in render the
+parameters are there.</p><p>[5.7] This corresponds to ensuring that
+ViewHandler.createView() is used to establish the viewroot vs.
+ViewHandler.restoreView() Test: Action followed by render, followed by render
+(redisplay but with a new Mode) &ndash; verify that out test ViewHandler&rsquo;s
+createView is called not its restoreView.</p><p>[5.8] Under normal conditions, a
+bridge request scope must be maintained at least until the next action request
+(a subsequent bridge request scope is established) Test: Covered by
+5.1</p><p>[5.9] The bridge must not assume that all render requests following
+the establishment of a request scope (and prior to a subsequent action) are
+executed in the same bridge request scope. Test: Same type of test as 5.7 except
+add an attribute in the action and verify its not there in the
+redisplay.</p><p>[5.10a-e] exclude attributes based on:</p>
 <pre><code>an annotated bean
 whose attribute name is listed as an excluded attribute using the &lt;bridge:excluded-attributes&gt; ... in faces-config.xml
 whose attribute name is in the immediate namespace listed as a wildcarded excluded attribute using the &lt;bridge:excluded-attributes&gt; ... in faces-config.xml
