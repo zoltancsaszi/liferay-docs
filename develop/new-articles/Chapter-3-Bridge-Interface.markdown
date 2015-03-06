@@ -2,7 +2,7 @@
 
 * * *
 
-#Bridge Interface
+# Bridge Interface
 
 The `Bridge` interface is the main abstraction of the Portlet Bridge API. It
 defines the activation and invocation APIs whereby a portlet delegates
@@ -21,7 +21,7 @@ after its current use has been destroyed.
 - that once destroyed, a bridge must not be reused to process a portlet Faces
 request until it has been initialized again.
 
-## 3.1 Discovering and Instantiating the Bridge
+## <a name="3.1"></a>3.1 Discovering and Instantiating the Bridge
 
 The bridge is a pluggable component. The specific bridge implementation used by
 a portlet in a given deployment is controlled by the portlet. `Bridge`
@@ -46,7 +46,7 @@ this specification that this bridge implements. The version number contains 2
 places separated by a "." (e.g. 1.0). The first number signifies the major
 version, the second number signifies the minor (maintenance) version.
 
-## 3.2 Initializing the Bridge
+## <a name="3.2"></a>3.2 Initializing the Bridge
 
 A bridge is initialized by calling its init method:
 
@@ -79,7 +79,7 @@ the bridge should not render the view itself but rather always delegate the
 rendering<sup>[[3.2](TCK-Tests.html#3.2)]</sup>. The value `NEVER_DELEGATE` indicates the bridge should always
 render the view itself and never delegate<sup>[[3.3](TCK-Tests.html#3.3)]</sup>.
 The value `DEFAULT` indicates the bridge should follow the requirements as
-specified [6.2](Chapter-6-Bridge-Requirements-for-Managing-Faces.html#PLT_6.2)
+specified [6.2](Chapter-6-Bridge-Requirements-for-Managing-Faces.html#6.2)
 concerning implementing `renderView()`. This section directs the bridge to first
 delegate the render and if and only if an `Exception` is thrown then render the
 view based on its own logic<sup>[[3.4](TCK-Tests.html#3.4)]</sup>. If the
@@ -123,7 +123,7 @@ removing the "\*"<sup>[[3.9](TCK-Tests.html#3.9)]</sup>.
 
 `preserveActionParams` is a `Boolean` valued attribute that when `TRUE` indicates
 the bridge must maintain the action's request parameters for the duration of the
-bridge request scope<sup>[[3.10](TCK-Tests.html#3.10)]</sup> [5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#PLT_5.1.2). When this attribute isn't present or is
+bridge request scope<sup>[[3.10](TCK-Tests.html#3.10)]</sup> [5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2). When this attribute isn't present or is
 `FALSE` the action's request parameters are only maintained for the duration of
 the portlet request scope. The exception to this is the
 `ResponseStateManager.VIEW_STATE_PARAM` parameter which is always maintained in
@@ -167,7 +167,7 @@ name]* where *portlet name* is the name of the portlet returned from a
 attribute. Using *portlet name* ensures the bridge can locate the correct value
 on a per portlet basis.
 
-## 3.3 Destroying the Bridge
+## <a name="3.3"></a>3.3 Destroying the Bridge
 
 The bridge is destroyed by calling its destroy method:
 
@@ -182,7 +182,7 @@ occurred<sup>[[3.13](TCK-Tests.html#3.13)]</sup>.
 This call performs no action if the bridge is in an uninitialized
 state<sup>[[3.14](TCK-Tests.html#3.14)]</sup>.
 
-## 3.4 Request Processing
+## <a name="3.4"></a>3.4 Request Processing
 
 The bridge is used to execute Faces requests on behalf of the portlet by calling
 its `doFacesRequest` method:
