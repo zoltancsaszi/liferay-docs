@@ -4,72 +4,278 @@
 
 # Bridge Request Lifecycle Requirements
 
-When an incoming portlet request is recognized as one that should be processed by Faces, the portlet executes it by calling the bridge's doFacesRequest method.  When executing the request, the bridge is responsible for setting up the appropriate Faces environment, executing the appropriate portions of the Faces lifecycle, and managing the resulting view and managed bean state in a manner that is consistent with the Faces specification. The bridge's implementation provides this behavior without impacting Faces ability to (simultaneously) process requests coming in via the servlet container and by coexisting with any of the many Faces extensions that might also be configured in this application. 
-5.1 Request Lifecycle
-Bridge request processing maps between the portlet and Faces models within a well defined Faces execution flow.  This entails managing differences between lifecyle processing.
-5.1.1 Bridge Request Lifecycle
-Faces has a single request lifecycle primarily split between action (data processing) and rendering.  The action portion of the lifecycle is broken into four distinct (sub) phases that move the submitted data from the request into the data models and performs the intended action (based on this new state).  The render portion of the lifecycle is a single (sub) phase in which the view markup is generated based on the application's recomputed state.  The initial (sub) phase of the lifecyle is an initialization phase that restores the target view based on incoming request data.  
+When an incoming portlet request is recognized as one that should be processed
+by Faces, the portlet executes it by calling the bridge's `doFacesRequest`
+method. When executing the request, the bridge is responsible for setting up the
+appropriate Faces environment, executing the appropriate portions of the Faces
+lifecycle, and managing the resulting view and managed bean state in a manner
+that is consistent with the Faces specification. The bridge's implementation
+provides this behavior without impacting Faces ability to (simultaneously)
+process requests coming in via the servlet container and by coexisting with any
+of the many Faces extensions that might also be configured in this application.
 
-Figure 2 depicts the non-portlet Faces lifecycle where both the action is processed and the view is rendered within a single client request.
+## <a name="5.1"></a>5.1 Request Lifecycle
 
-Faces Lifecycle Diagram
+Bridge request processing maps between the portlet and Faces models within a
+well defined Faces execution flow. This entails managing differences between
+lifecyle processing.
 
-Like the portlet 1.0 model, the portlet 2.0 model has a multi-request lifecycle primarily split between action (data processing) and rendering. The main difference is that the portlet 2.0 model provides a richer set of operations.  In portlet 1.0 data processing was limited to those instigated by the client.  Such actions were expressed in requests handled by the portlet's processAction method.  Likewise rendering occurred in a single request handled by the portlet's render method.   Within a given lifecycle, such renders might be repeated as the consumer (portal) reacquires the current markup.  This usually occurs as a result of processing external to this portlet causing the consuming application to regenerate the markup for the entire page.
+### <a name="5.1.1"></a>5.1.1 Bridge Request Lifecycle
 
-In portlet 2.0, data processing has been expanded to include events sent by the consumer application (usually as a result of another portlet raising an event).  These are processed in the portlet's processEvent method. Now a lifecycle can begin either with a processAction or a processEvent. And because events can be chained within a single lifecycle, a processEvent can be followed by zero or more processEvents prior to moving into the render portion of the lifecycle.  Likewise the portlet 2.0 rendering model is enriched by including support for portlet's rendering resources.  The rendering portion of a lifecycle always begins with a call to the portlet's render method.  This can be followed by zero or more resource requests.  And like portlet 1.0, because rendering is supposed to be idempotent, this portion of the lifecycle may repeat over and over until a new action or event causes the start of the next lifecycle.  Figure 3 depicts the difference between the portlet 1.0 and 2.0 models:
+Faces has a single request lifecycle primarily split between action (data
+processing) and rendering. The action portion of the lifecycle is broken into
+four distinct (sub) phases that move the submitted data from the request into
+the data models and performs the intended action (based on this new state). The
+render portion of the lifecycle is a single (sub) phase in which the view markup
+is generated based on the application's recomputed state. The initial (sub)
+phase of the lifecyle is an initialization phase that restores the target view
+based on incoming request data.
 
-Portlet 1.0 vs. Portlet 2.0 lifecycle comparison 
+Figure 2 depicts the non-portlet Faces lifecycle where both the action is
+processed and the view is rendered within a single client request.
 
-The key difference between the Faces model and the portlet model is that Faces typically executes completely within a single request while portlets execute each phase of its lifecycle in distinct requests.  Faces relies on this single request execution using request scoped managed state created during the action phase to render from.  This doesn't work in the portlet environment as the phases are run in distinct requests and hence request scoped state is not carried across.  A key function of the bridge is managing this Faces request scoped state across the varying portlet requests that constitute a lifecyle.
+![Faces Lifecyle Diagram](FacesLifecycleDiagram.jpg)
 
-Figure 3 depicts the Faces lifecycle as executed in a portlet environment for a portlet that just responds to action and render requests.  In response to a portlet action request, the Faces action lifecycle is executed but the resulting view is not rendered.  Rather the bridge encodes in the action response the information it needs to subsequently render the view when called by the portlet to render.  Following an action, one or more portlet render requests may be executed.  Each of these render requests, if running in the same action scope, renders the same response. The bridge manages the necessary Faces state to ensure this behavior.
+Like the portlet 1.0 model, the portlet 2.0 model has a multi-request lifecycle
+primarily split between action (data processing) and rendering. The main
+difference is that the portlet 2.0 model provides a richer set of operations. In
+portlet 1.0 data processing was limited to those instigated by the client. Such
+actions were expressed in requests handled by the portlet's `processAction`
+method. Likewise rendering occurred in a single request handled by the portlet's
+`render` method. Within a given lifecycle, such renders might be repeated as the
+consumer (portal) reacquires the current markup. This usually occurs as a result
+of processing external to this portlet causing the consuming application to
+regenerate the markup for the entire page.
 
-Faces Action Lifecycle in Bridge
-Faces Render Lifecycle in Bridge
+In portlet 2.0, data processing has been expanded to include events sent by the
+consumer application (usually as a result of another portlet raising an event).
+These are processed in the portlet's `processEvent` method. Now a lifecycle can
+begin either with a `processAction` or a `processEvent`. And because events can be
+chained within a single lifecycle, a `processEvent` can be followed by zero or
+more `processEvents` prior to moving into the render portion of the lifecycle.
+Likewise the portlet 2.0 rendering model is enriched by including support for
+portlet's rendering resources. The rendering portion of a lifecycle always
+begins with a call to the portlet's `render` method. This can be followed by zero
+or more resource requests. And like portlet 1.0, because rendering is supposed
+to be idempotent, this portion of the lifecycle may repeat over and over until a
+new action or event causes the start of the next lifecycle. Figure 3 depicts the
+difference between the portlet 1.0 and 2.0 models:
 
-Like render, event processing runs using the bridge managed request scope.  When an event is received, the scope in which it is related is restored.  If no scope exists a new one is created.  The Faces "action" lifecycle  is run to restore the view but since a portlet event doesn't include POSTBACK data the other phases are skipped.  The event is processed by a portlet provided event handler whose result (can) contain a Faces navigation.  If returned, the navigation is processed and encoded.  The current request state is preserved within the (existing) scope in case it has been modified and the event response returned.  For situations when an event signals an application transition where it becomes necessary to clear all or some of the existing scope, the portlet must to this manually by removing the appropriate request scope attributes within its event handler.  The details on managing this execution are described below in section [5.2.5].
+![Portlet Lifecycle Comparison](Portlet1and2LifecycleComparison.jpg)
 
-Resource requests are an additional phase in the overall portlet render lifecyle.  Following a render, one or more resource requests are made to either acquire dependent resources to complete the rendition or update parts of the existing rendition.  As such, resource requests run within the same restored bridge managed request scope as its render request.   What is unique to resources, however, is they can be a POSTBACK.  I.e. they can be a Faces view (form) submit requesting a partial update and rendition and hence require the full Faces action lifecycle to be run.  So like the event processing described above, resource request handling also has to deal with saving changes to the restored scope so that subsequent render requests will have complete and updated state.  The details on managing this are describe below in section [5.2.7].   
-5.1.2 Managing Lifecycle State
-To support Faces, the bridge is responsible for encoding portlet (action) responses in a manner that allows it (and Faces) to reestablish the request environment that existed at the end of the corresponding action phase during subsequent render requests that are identified as pertaining to that action (or event).  The term used to describe the scope of this managed data is the bridge request scope.  The bridge request scope manages two types of Faces data: the Faces view state and the additional Faces request scope data Faces relies on when executing both the action and the render in a single request.  Though the Faces view state management is commonly delegated to the normal Faces StateManager process, the bridge is responsible for ensuring that such state is not restored if it can't restore the associated data.   This additional associated data is called scoped data and  includes[5.1]:
+The key difference between the Faces model and the portlet model is that Faces
+typically executes completely within a single request while portlets execute
+each phase of its lifecycle in distinct requests. Faces relies on this single
+request execution using request scoped managed state created during the action
+phase to render from. This doesn't work in the portlet environment as the phases
+are run in distinct requests and hence request scoped state is not carried
+across. A key function of the bridge is managing this Faces request scoped state
+across the varying portlet requests that constitute a lifecyle.
 
-    All the FacesMessage(s) for each component in the view containing such messages.
-    The Faces request scope attributes returned by calling ExternalContext.getRequestMap() except for:
-        those that existed before the bridge acquired the FacesContext for this request
-        those explicitly excluded by mechanisms described in [5.1.2.1]
-        those whose value is an instanceof javax.portlet.PortletConfig, javax.portlet.PortletContext, javax.portlet.PortletRequest, javax.portlet.PortletResponse, javax.portlet.PortletSession, javax.portlet.PortletPreferences, javax.portlet.PortalContext, javax.faces.context.FacesContext, javax.faces.context.ExternalContext, javax.servlet.ServletConfig, javax.servlet.ServletContext, javax.servlet.ServletRequest, javax.servlet.ServletResponse, or javax.servlet.HttpSession.
-        those whose attribute name contains an identifier in either the "javax.portlet", "javax.portlet.faces", "javax.faces",  "javax.servlet", or "javax.servlet.include" namespaces.
-        those added by the bridge implementation and are not needed in subsequent requests.
-    The request parameter whose name is identified by ResponseStateManger.VIEW_STATE_PARAM (if it exists).
-    All (additional) request parameters, if the javax.portlet.faces.[portlet name].PRESERVE_ACTION_PARAMS PortletContext attribute exists and has a value of TRUE.
+Figure 3 depicts the Faces lifecycle as executed in a portlet environment for a
+portlet that just responds to action and render requests. In response to a
+portlet action request, the Faces action lifecycle is executed but the resulting
+view is not rendered. Rather the bridge encodes in the action response the
+information it needs to subsequently render the view when called by the portlet
+to render. Following an action, one or more portlet render requests may be
+executed. Each of these render requests, if running in the same action scope,
+renders the same response. The bridge manages the necessary Faces state to
+ensure this behavior.
 
-Specifically, the bridge must implement a notion of a bridge request scope that supplies the expected Faces semantics.  This is done as follows:
+![Faces Action Lifecycle in Bridge](FacesActionLifecycleInBridge.jpg)
+![Faces Render Lifecycle in Bridge](FacesRenderLifecycleInBridge.jpg)
 
-    For each portlet action ignore any references to an existing request scope. I.e. portlet action requests always define the start of a new scope so never restore a preexisting one[5.2].  Note:  if the bridge uses such a scope itself to preserve internal information about the Faces view, such information may be extracted and used as needed to satisfy the request.  For example, if the bridge manages the view's view state, it would acquire this information so that it may be used to fully restore the view during the action processing.
-    Upon completion of each portlet action preserve the scoped data (described above) in a newly created bridge request scope if the action doesn't terminate because of a redirect[5.3] or the navigational target of the action doesn't specify a portlet mode that differs from the current request[5.4]. Such state may either be managed directly in a scoped data structure or indirectly by ensuring its use only occurs if the scope still exists. In addition the bridge must encode sufficient information in the action response that allows it to reestablish the data in this scope in subsequent in-scope requests.
-    For each portlet event, if a bridge request scope exists, restore its state to the current (container) request scope[5.48], otherwise create a new scope.
-    Upon completion of each portlet event preserve the scoped data (described above) into the preexisting scope if it exists or otherwise a newly created bridge request scope unless the event processing issued a redirect[5.49] or the navigational target of the event specifies a portlet mode that differs from the current request[5.50]. Such state may either be managed directly in a scoped data structure or indirectly by ensuring its use only occurs if the scope still exists. In addition the bridge must encode sufficient information in the action response that allows it to reestablish the data in this scope in subsequent in-scope requests. 
-    For each render request, if a bridge request scope exists, restore its state to the current (container) request scope.[5.5]. For any action parameters that have been preserved, the parameter is restored if and only if there isn't an existing parameter of the same name in the incoming request[5.6].
-    Upon completion of each portlet render, do not preserve any changes in the request scope back into the bridge request scope except those related to internal bridge operations (e.g. VIEW_STATE_PARAM management).  In the portlet (and Faces) model, render is supposed to be idempotent.
-    For each resource request,  if a bridge request scope exists, do not restore the scope into the current request rather maintain a reference to the scope so new request scoped attributes can be merged back into the bridge request scope after the lifecycle has run.[5.51]. For any action parameters that have been preserved, the parameters are cleared (preserving action parameters should not be used in conjunction with processing Faces requests via portlet resource requests).
-    Upon completion of each resource request, preserve the scoped data (described above) into the preexisting scope if it exists or otherwise a newly created bridge request scope[5.52]. Such state may either be managed directly in a scoped data structure or indirectly by ensuring its use only occurs if the scope still exists. In addition the bridge must encode sufficient information in the action response that allows it to reestablish the data in this scope in subsequent in-scope requests.
+Like render, event processing runs using the bridge managed request scope. When
+an event is received, the scope in which it is related is restored. If no scope
+exists a new one is created. The Faces "action" lifecycle is run to restore the
+view but since a portlet event doesn't include POSTBACK data the other phases
+are skipped. The event is processed by a portlet provided event handler whose
+result (can) contain a Faces navigation. If returned, the navigation is
+processed and encoded. The current request state is preserved within the
+(existing) scope in case it has been modified and the event response returned.
+For situations when an event signals an application transition where it becomes
+necessary to clear all or some of the existing scope, the portlet must to this
+manually by removing the appropriate request scope attributes within its event
+handler. The details on managing this execution are described below in section
+[5.2.5](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.5).
+
+Resource requests are an additional phase in the overall portlet render
+lifecyle. Following a render, one or more resource requests are made to either
+acquire dependent resources to complete the rendition or update parts of the
+existing rendition. As such, resource requests run within the same restored
+bridge managed request scope as its render request. What is unique to resources,
+however, is they can be a POSTBACK. I.e. they can be a Faces view (form) submit
+requesting a partial update and rendition and hence require the full Faces
+action lifecycle to be run. So like the event processing described above,
+resource request handling also has to deal with saving changes to the restored
+scope so that subsequent render requests will have complete and updated state.
+The details on managing this are describe below in section
+[5.2.7](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.7).
+
+### <a name="5.1.2"></a>5.1.2 Managing Lifecycle State
+
+To support Faces, the bridge is responsible for encoding portlet (action)
+responses in a manner that allows it (and Faces) to reestablish the request
+environment that existed at the end of the corresponding action phase during
+subsequent render requests that are identified as pertaining to that action (or
+event). The term used to describe the scope of this managed data is the bridge
+request scope. The bridge request scope manages two types of Faces data: the
+Faces view state and the additional Faces request scope data Faces relies on
+when executing both the action and the render in a single request. Though the
+Faces view state management is commonly delegated to the normal Faces
+`StateManager` process, the bridge is responsible for ensuring that such state
+is not restored if it can't restore the associated data. This additional
+associated data is called *scoped data* and
+includes<sup>[[5.1](TCK-Tests.html#5.1)]</sup>:
+
+- All the `FacesMessage`(s) for each component in the view containing such
+messages.
+- The Faces request scope attributes returned by calling
+`ExternalContext.getRequestMap()` except for:
+
+    - those that existed before the bridge acquired the `FacesContext` for this
+    request
+    - those explicitly excluded by mechanisms described in
+    [5.1.2.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2.1)
+    - those whose value is an instanceof `javax.portlet.PortletConfig`,
+    `javax.portlet.PortletContext`, `javax.portlet.PortletRequest`,
+    `javax.portlet.PortletResponse`, `javax.portlet.PortletSession`,
+    `javax.portlet.PortletPreferences`, `javax.portlet.PortalContext`,
+    `javax.faces.context.FacesContext`, `javax.faces.context.ExternalContext`,
+    `javax.servlet.ServletConfig`, `javax.servlet.ServletContext`,
+    `javax.servlet.ServletRequest`, `javax.servlet.ServletResponse`, or
+    `javax.servlet.HttpSession`.
+    - those whose attribute name contains an identifier in either the
+    "`javax.portlet`", "`javax.portlet.faces`", "`javax.faces`",
+    "`javax.servlet`", or "`javax.servlet.include`" namespaces.
+    - those added by the bridge implementation and are not needed in subsequent
+    requests.
+- The request parameter whose name is identified by
+`ResponseStateManger.VIEW_STATE_PARAM` (if it exists).
+- All (additional) request parameters, if the `javax.portlet.faces.[portlet
+name].PRESERVE_ACTION_PARAMS` `PortletContext` attribute exists and has a value
+of `TRUE`.
+
+Specifically, the bridge must implement a notion of a bridge request scope that
+supplies the expected Faces semantics. This is done as follows:
+
+- For each portlet action ignore any references to an existing request scope.
+I.e. portlet action requests always define the start of a new scope so never
+restore a preexisting one<sup>[[5.2](TCK-Tests.html#5.2)]</sup>. Note: if the
+bridge uses such a scope itself to preserve internal information about the Faces
+view, such information may be extracted and used as needed to satisfy the
+request. For example, if the bridge manages the view's view state, it would
+acquire this information so that it may be used to fully restore the view during
+the action processing.
+- Upon completion of each portlet action preserve the *scoped data* (described
+above) in a newly created bridge request scope if the action doesn't terminate
+because of a redirect<sup>[[5.3](TCK-Tests.html#5.3)]</sup> or the navigational
+target of the action doesn't specify a portlet mode that differs from the
+current request<sup>[[5.4](TCK-Tests.html#5.4)]</sup>. Such state may either be
+managed directly in a scoped data structure or indirectly by ensuring its use
+only occurs if the scope still exists. In addition the bridge must encode
+sufficient information in the action response that allows it to reestablish the
+data in this scope in subsequent in-scope requests.
+- For each portlet event, if a bridge request scope exists, restore its state to
+the current (container) request scope<sup>[[5.48](TCK-Tests.html#5.48)]</sup>,
+otherwise create a new scope.
+- Upon completion of each portlet event preserve the *scoped data* (described
+above) into the preexisting scope if it exists or otherwise a newly created
+bridge request scope unless the event processing issued a
+redirect<sup>[[5.49](TCK-Tests.html#5.49)]</sup> or the navigational target of
+the event specifies a portlet mode that differs from the current
+request<sup>[[5.50(TCK-Tests.html#5.50)]</sup>. Such state may either be managed
+directly in a scoped data structure or indirectly by ensuring its use only
+occurs if the scope still exists. In addition the bridge must encode sufficient
+information in the action response that allows it to reestablish the data in
+this scope in subsequent in-scope requests.
+- For each render request, if a bridge request scope exists, restore its state
+to the current (container) request scope<sup>[[5.5](TCK-Tests.html#5.5)]</sup>.
+For any action parameters that have been preserved, the parameter is restored if
+and only if there isn't an existing parameter of the same name in the incoming
+request<sup>[[5.6](TCK-Tests.html#5.6)]</sup>.
+- Upon completion of each portlet render, do not preserve any changes in the
+request scope back into the bridge request scope except those related to
+internal bridge operations (e.g. `VIEW_STATE_PARAM` management). In the portlet
+(and Faces) model, render is supposed to be idempotent.
+- For each resource request, if a bridge request scope exists, do not restore
+the scope into the current request rather maintain a reference to the scope so
+new request scoped attributes can be merged back into the bridge request scope
+after the lifecycle has run<sup>[[5.51](TCK-Tests.html#5.51)]</sup>. For any
+action parameters that have been preserved, the parameters are cleared
+(preserving action parameters should not be used in conjunction with processing
+Faces requests via portlet resource requests).
+- Upon completion of each resource request, preserve the *scoped data*
+(described above) into the preexisting scope if it exists or otherwise a newly
+created bridge request scope<sup>[[5.52](TCK-Tests.html#5.52)]</sup>. Such state
+may either be managed directly in a scoped data structure or indirectly by
+ensuring its use only occurs if the scope still exists. In addition the bridge
+must encode sufficient information in the action response that allows it to
+reestablish the data in this scope in subsequent in-scope requests.
 
 Notes:
 
-    Under normal conditions, a bridge request scope must be maintained at least until the next action or event request (a subsequent bridge request scope is established)[5.8]. The exception is when the bridge manages this scope in its server and choses to reclaim this state due to lack of use. 
-    The bridge must not assume that all requests following the establishment of a request scope (and prior to a subsequent action) are executed in the same bridge request scope[5.9].  There are a variety of reasons that subsequent render requests might reference differing request scopes including a mode change, processing a bookmark(ed page) and consumer history management.  Hence the bridge must manage this scope in a manner that ensures that each request is encoded with sufficient information as to allow it to decode the specific scope targeted by the request.
-    If a corresponding bridge request scope can't be located or restored then the bridge must ensure that none of the state described above is restored.  In particular, when relying on Faces to manage the view state, the bridge must ensure that the view isn't restored from this state in the event the corresponding bridge request scope has been lost (doesn't exist).  This corresponds to ensuring that ViewHandler.createView() is used to establish the viewroot vs. ViewHandler.restoreView().  This behavior should occur automatically as a by-product of not being able to restore the request scope.  The default Faces implementation relies on the value of the ResponseStateManager.VIEW_STATE_PARAM request parameter and ResponseStateManager.isPostback() to determine whether a targeted view has corresponding state to be restored.  ResponseStateManager.isPostback() also depends on the ResponseStateManager.VIEW_STATE_PARAM request parameter.  As the bridge manages the ResponseStateManager.VIEW_STATE_PARAM request parameter in its request scope, not restoring it should ensure the view is recreated. 
+- Under normal conditions, a bridge request scope must be maintained at least
+until the next action or event request (a subsequent bridge request scope is
+established)<sup>[[5.8](TCK-Tests.html#5.8)]</sup>. The exception is when the
+bridge manages this scope in its server and choses to reclaim this state due to
+lack of use.
+- The bridge must not assume that all requests following the establishment of a
+request scope (and prior to a subsequent action) are executed in the same bridge
+request scope<sup>[[5.9](TCK-Tests.html#5.9)]</sup>. There are a variety of
+reasons that subsequent render requests might reference differing request scopes
+including a mode change, processing a bookmark(ed page) and consumer history
+management. Hence the bridge must manage this scope in a manner that ensures
+that each request is encoded with sufficient information as to allow it to
+decode the specific scope targeted by the request.
+- If a corresponding bridge request scope can't be located or restored then the
+bridge must ensure that none of the state described above is restored. In
+particular, when relying on Faces to manage the view state, the bridge must
+ensure that the view isn't restored from this state in the event the
+corresponding bridge request scope has been lost (doesn't exist). This
+corresponds to ensuring that `ViewHandler.createView()` is used to establish the
+viewroot vs. `ViewHandler.restoreView()`. This behavior should occur
+automatically as a by-product of not being able to restore the request scope.
+The default Faces implementation relies on the value of the
+`ResponseStateManager.VIEW_STATE_PARAM` request parameter and
+`ResponseStateManager.isPostback()` to determine whether a targeted view has
+corresponding state to be restored. `ResponseStateManager.isPostback()` also
+depends on the `ResponseStateManager.VIEW_STATE_PARAM` request parameter. As the
+bridge manages the `ResponseStateManager.VIEW_STATE_PARAM` request parameter in
+its request scope, not restoring it should ensure the view is recreated.
 
-    Note: A straightforward implementation for managing the bridge request scope is identify the scope via a key stored as a portlet render parameter.  However, because the portlet model doesn't allow the bridge to set new portlet render parameters in a resource request, it must use a different technique to manage the such a newly created scope until such time as the technique becomes available (next action or event). 
+Note: A straightforward implementation for managing the bridge request scope is
+identify the scope via a key stored as a portlet render parameter. However,
+because the portlet model doesn't allow the bridge to set new portlet render
+parameters in a resource request, it must use a different technique to manage
+the such a newly created scope until such time as the technique becomes
+available (next action or event).
 
+#### <a name="5.1.2.1"></a>5.1.2.1 Excluding Attributes from the Bridge Request Scope
 
-5.1.2.1 Excluding Attributes from the Bridge Request Scope
-Though there is a long list of excluded attributes and objects cited in section 5.1.2, the extended bridge request scope is inclusive.  It includes application request scoped attributes except those specific few it knows are controlled by the standard runtime containers. However, there are times when application request attributes really are utilized on a per request basis and hence shouldn't be managed by the extended bridge request scope.  An example is a flag indicating which type of request this is.  e.g. a flag used during a partial page request.  If this flag were to be preserved, all subsequent requests within this scope would be marked as partial requests even if they are not.  In addition to the attributes cited above, the bridge will exclude from its request scope those attributes:
+Though there is a long list of excluded attributes and objects cited in section
+[5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2), the extended bridge
+request scope is inclusive. It includes application request scoped attributes
+except those specific few it knows are controlled by the standard runtime
+containers. However, there are times when application request attributes really
+are utilized on a per request basis and hence shouldn't be managed by the
+extended bridge request scope. An example is a flag indicating which type of
+request this is. e.g. a flag used during a partial page request. If this flag
+were to be preserved, all subsequent requests within this scope would be marked
+as partial requests even if they are not. In addition to the attributes cited
+above, the bridge will exclude from its request scope those attributes:
 
-    whose object class is annotated with javax.portlet.faces.annotation.ExcludeFromManagedRequestScope[5.10a]
-    whose attribute name is listed as an excluded attribute using the <bridge:excluded-attributes> element structure defined in the schema portlet2.0-bridge-faces1.2-faces-config-extensions.xsd when such element structure appears as a child of the <application-extension> element in any faces-config.xml reachable by this web application[5.10b].
+- whose object class is annotated with
+`javax.portlet.faces.annotation.ExcludeFromManagedRequestScope`<sup>[[5.10a](TCK-Tests.html#5.10)]</sup>
+- whose attribute name is listed as an excluded attribute using the
+`<bridge:excluded-attributes>` element structure defined in the schema
+[portlet2.0-bridge-faces1.2-faces-config-extensions.xsd](portlet2.0-bridge-faces1.2-faces-config-extensions.xsd)
+when such element structure appears as a child of the `<application-extension>`
+element in any `faces-config.xml` reachable by this web
+application<sup>[[5.10b](TCK-Tests.html#5.10)]</sup>.
 
-    For example:
+For example:
+
     <?xml version="1.0" encoding="windows-1252"?>
     <faces-config version="1.2" xmlns="http://java.sun.com/xml/ns/javaee"
         xmlns:bridge="http://www.apache.org/myfaces/xml/ns/bridge/bridge-extension">
@@ -82,74 +288,206 @@ Though there is a long list of excluded attributes and objects cited in section 
            </application-extension>    
         </application>
     </faces-config>
-    whose attribute name is in the immediate namespace listed as a wildcarded excluded attribute using the <bridge:excluded-attributes> element structure defined in the schema portlet2.0-bridge-faces1.2-faces-config-extensions.xsd when such element structure appears as a child of the <application-extension> element in any faces-config.xml reachable by this web application[5.10c].
-    whose attribute name appears in the List object of excluded attributes in the portlet context  attribute javax.portlet.faces.[portlet name].excludedRequestAttributes and that portlet is the target of the current request[5.10d].
-    whose attribute name appears in the immediate namespace listed as a wildcarded excluded attribute in the List object of excluded attributes in the portlet context  attribute javax.portlet.faces.[portlet name].excludedRequestAttributes and that portlet is the target of the current request[5.10e].
 
+- whose attribute name is in the immediate namespace listed as a wildcarded
+excluded attribute using the `<bridge:excluded-attributes>` element structure
+defined in the schema
+[portlet2.0-bridge-faces1.2-faces-config-extensions.xsd](portlet2.0-bridge-faces1.2-faces-config-extensions.xsd)
+when such element structure appears as a child of the `<application-extension>`
+element in any faces-config.xml reachable by this web
+application<sup>[[5.10c](TCK-Tests.html#5.10)]</sup>.
+- whose attribute name appears in the List object of excluded attributes in the
+portlet context attribute `javax.portlet.faces.[portlet
+name].excludedRequestAttributes` and that portlet is the target of the current
+request<sup>[[5.10d](TCK-Tests.html#5.10)]</sup>.
+- whose attribute name appears in the immediate namespace listed as a wildcarded
+excluded attribute in the List object of excluded attributes in the portlet
+context attribute `javax.portlet.faces.[portlet name].excludedRequestAttributes`
+and that portlet is the target of the current
+request<sup>[[5.10e](TCK-Tests.html#5.10)]</sup>.
 
-5.1.2.2 Considerations in Managing the VIEW_STATE_PARAM parameter
-The value of the VIEW_STATE_PARAM request parameter identifies the view state to be restored by the targeted view.  From a Faces specification perspective this value is opaque, i.e. implementation dependent. Because the bridge manages this parameter in its request scope, to properly support rerender within the same action (lifecycle), it must take care to keep the value of this managed parameter in sync with both the current (render) view and the current (saved) state.  One strategy for handling this is for the bridge to implement and configure its own StateManager implementation.  In this implementation the bridge overrides the writeState method.  It buffers the output of the delegated writeState and parses the result to extract the corresponding new value of the VIEW_STATE_PARAM written into the markup.    It then updates the value of the VIEW_STATE_PARAM parameter maintained within the current bridge request scope, ensuring that a subsequent rerender of this view in this scope will restore with the correct view state.
+#### <a name="5.1.2.2"></a>5.1.2.2 Considerations in Managing the VIEW_STATE_PARAM parameter
 
-5.1.2.3 Considerations for Managing Faces Messages
-The JSF 1.2 specification, section 6.1.5 requires that the various FacesContext methods that get Messages return those Messages in insertion order. The bridge must preserve this requirement while managing such Messages within the bridge request scope[5.11].
-5.2 Executing a Faces Request
-The bridge is called by the portlet to execute Faces requests.  A Faces request is one that targets a Faces view and expects to have the Faces lifecycle executed within the Faces environment.  The bridge acts as a Faces controller in a portlet environment; it determines the Faces view target, acquires the appropriate Faces lifecycle and context objects, restores managed lifecycle state, and executes the Faces lifecycle.   This is done as follows:
+The value of the `VIEW_STATE_PARAM`request parameter identifies the view state
+to be restored by the targeted view. From a Faces specification perspective this
+value is opaque, i.e. implementation dependent. Because the bridge manages this
+parameter in its request scope, to properly support rerender within the same
+action (lifecycle), it must take care to keep the value of this managed
+parameter in sync with both the current (render) view and the current (saved)
+state. One strategy for handling this is for the bridge to implement and
+configure its own `StateManager` implementation. In this implementation the
+bridge overrides the `writeState` method. It buffers the output of the delegated
+`writeState` and parses the result to extract the corresponding new value of the
+`VIEW_STATE_PARAM` written into the markup. It then updates the value of the
+`VIEW_STATE_PARAM` parameter maintained within the current bridge request scope,
+ensuring that a subsequent rerender of this view in this scope will restore with
+the correct view state.
 
-5.2.1 Acquiring a Faces Lifecycle
-To execute a Faces request within the portlet environment, the bridge uses the Faces Lifecycle object.  The bridge must get the Lifecycle object by calling a LifecycleFactory.  The bridge must acquire the LifecycleFactory by calling the Faces FactoryFinder passing the identifier FactoryFinder.LIFECYCLE_FACTORY. For example:
+#### <a name="5.1.2.3"></a>5.1.2.3 Considerations for Managing Faces Messages
 
-LifecycleFactory lifecycleFactory =
-    (LifecycleFactory) FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+The JSF 1.2 specification, section 6.1.5 requires that the various FacesContext
+methods that get Messages return those Messages in insertion order. The bridge
+must preserve this requirement while managing such Messages within the bridge
+request scope<sup>[[5.11](TCK-Tests.html#5.11)]</sup>.
 
-Distinct Lifecycle implementations are identified by an identifier.  The identifier used by the bridge to acquire a Lifecycle object from the LifecycleFactory is determined by:
+## <a name="5.2"></a>5.2 Executing a Faces Request
 
-    A PortletContext initParameter whose name is represented by the constant FacesServlet.LIFECYCLE_ID_ATTR.  For example:
+The bridge is called by the portlet to execute Faces requests. A Faces request
+is one that targets a Faces view and expects to have the Faces lifecycle
+executed within the Faces environment. The bridge acts as a Faces controller in
+a portlet environment; it determines the Faces view target, acquires the
+appropriate Faces lifecycle and context objects, restores managed lifecycle
+state, and executes the Faces lifecycle. This is done as follows:
+
+### <a name="5.2.1"></a>5.2.1 Acquiring a Faces Lifecycle
+
+To execute a Faces request within the portlet environment, the bridge uses the
+Faces `Lifecycle` object. The bridge must get the `Lifecycle` object by calling
+a `LifecycleFactory`. The bridge must acquire the `LifecycleFactory` by calling
+the Faces `FactoryFinder` passing the identifier
+`FactoryFinder.LIFECYCLE_FACTORY`. For example:
+
+    LifecycleFactory lifecycleFactory =
+        (LifecycleFactory) FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+
+Distinct `Lifecycle` implementations are identified by an identifier. The
+identifier used by the bridge to acquire a `Lifecycle` object from the
+`LifecycleFactory` is determined by:
+
+1. A `PortletContext` `initParameter` whose name is represented by the constant
+   `FacesServlet.LIFECYCLE_ID_ATTR`. For example:
 
         String lifecycleId =
             mPortletConfig.getPortletContext().getInitParameter(FacesServlet.LIFECYCLE_ID_ATTR);
 
-    If this initParameter doesn't exist or has an empty value then the default Lifecycle identifier is used: LifecycleFactory.DEFAULT_LIFECYCLE.
+2. If this `initParameter` doesn't exist or has an empty value then the default
+   `Lifecycle` identifier is used: `LifecycleFactory.DEFAULT_LIFECYCLE`.
 
-5.2.2 Acquiring the FacesContext
-For each doFacesRequest invocation processing a Faces target,  the bridge must acquire a FacesContext object. The bridge must acquire the FacesContext by calling the FacesContextFactory[5.12].  The FacesContextFactory must be acquired by calling the FactoryFinder passing the identifier FactoryFinder.FACES_CONTEXT_FACTORY.  For example:
+### <a name="5.2.2"></a>5.2.2 Acquiring the FacesContext
 
-FacesContextFactory contextFactory =
-    (FacesContextFactory) FactoryFinder.getFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
+For each `doFacesRequest` invocation processing a Faces target, the bridge must
+acquire a `FacesContext` object. The bridge must acquire the FacesContext by
+calling the `FacesContextFactory`<sup>[[5.12](TCK-Tests.html#5.12)]</sup>. The
+`FacesContextFactory` must be acquired by calling the `FactoryFinder` passing
+the identifier `FactoryFinder.FACES_CONTEXT_FACTORY`. For example:
 
-The FacesContext is acquired from the factory by passing the corresponding PortletContext, PortletRequest, PortletResponse objects and the Lifecycle acquired in section 5.2.1[5.13]. For example:
+    FacesContextFactory contextFactory =
+        (FacesContextFactory) FactoryFinder.getFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
 
-FacesContext context =
-    contextFactory.getFacesContext(portletContext, portletRequest, portletResponse, mLifecycle);
+The `FacesContext` is acquired from the factory by passing the corresponding
+`PortletContext`, `PortletRequest`, `PortletResponse` objects and the
+`Lifecycle` acquired in section
+[5.2.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.1)<sup>[[5.13](TCK-Tests.html#5.13)]</sup>.
+For example:
 
-5.2.2.1 Identifying the Portlet Request Phase
-Prior to acquiring the FacesContextFactory the bridge is required to set the following request attribute on the passed request object[5.14] :
+    FacesContext context =
+        contextFactory.getFacesContext(portletContext, portletRequest, portletResponse, mLifecycle);
 
-javax.portlet.faces.phase: The value of this attribute is an enumeration (javax.portlet.faces.Bridge.PortletPhase) that identifies which portlet request phase the bridge is operating within. Its purpose is to allow Faces implementations to determine its portlet execution context without using instanceof.  It is not indicative of the Faces lifecycle phases.  Possible phase values for a portlet based on the Java Portlet Specification 2.0 (JSR 286)  include: ACTION_PHASE, EVENT_PHASE, RENDER_PHASE, and RESOURCE_PHASE. The value ACTION_PHASE must be set when doFacesRequest() is passed an ActionRequest and ActionResponse.  The value EVENT_PHASE must be set when doFacesRequest() is passed an EventRequest and EventResponse. The value RENDER_PHASE must be set when doFacesRequest() is passed a RenderRequest and RenderResponse. The value RESOURCE_PHASE must be set when doFacesRequest() is passed an ResourceRequest and ResourceResponse.
-5.2.3 Determining the Target View
-To execute a Faces request, the bridge is responsible for determining the appropriate Faces viewId to target for this request and presenting this information to the Faces environment such that it can determine and utilize this viewId.  There are three mechanisms the bridge uses for determining the target view:
+#### <a name="5.2.2.1"></a>5.2.2.1 Identifying the Portlet Request Phase
 
-    The bridge is passed the target view by the portlet.
-    The bridge decodes the target view from information in the request it had encoded in a prior response.
-    The bridge uses a default view registered to it by the portlet during its initialization.
+Prior to acquiring the `FacesContextFactory` the bridge is required to set the
+following request attribute on the passed request
+object<sup>[[5.14](TCK-Tests.html#5.14)]</sup>:
 
-Specifically the bridge must process for the target view in the following order until a viewId is determined:
+`javax.portlet.faces.phase`: The value of this attribute is an enumeration
+(`javax.portlet.faces.Bridge.PortletPhase`) that identifies which portlet
+request phase the bridge is operating within. Its purpose is to allow Faces
+implementations to determine its portlet execution context without using
+`instanceof`. It is not indicative of the Faces lifecycle phases. Possible phase
+values for a portlet based on the Java Portlet Specification 2.0 (JSR 286)
+include: `ACTION_PHASE`, `EVENT_PHASE`, `RENDER_PHASE`, and `RESOURCE_PHASE`.
+The value `ACTION_PHASE` must be set when `doFacesRequest()` is passed an
+`ActionRequest` and `ActionResponse`. The value `EVENT_PHASE` must be set when
+`doFacesRequest()` is passed an `EventRequest` and `EventResponse`. The value
+`RENDER_PHASE` must be set when `doFacesRequest()` is passed a `RenderRequest`
+and `RenderResponse`. The value `RESOURCE_PHASE` must be set when
+`doFacesRequest()` is passed an `ResourceRequest` and `ResourceResponse`.
 
-    If the request attribute named javax.portlet.faces.viewId is non null then use this value as the target viewId[5.15].
-    If the request attribute named javax.portlet.faces.viewPath is non null then use this value to process the ContextPath relative path and extract the target viewId[5.16].  If unable to extract a viewId from the path throw javax.portlet.faces.BridgeInvalidViewPathException[5.17].
-    If the bridge is processing for the target view in a render request which occurs in the same portlet mode following another render request in which a redirect occurred and an action, event, or resource request hasn't been processed in the meantime, use the target viewId from the prior redirect[5.18].
+### <a name="5.2.3"></a>5.2.3 Determining the Target View
 
-    Note:  depending on the methodology the bridge relies on to encode the target viewId in responses the bridge may need an alternative mechanism to handle this redirect during render requirement.  For example, if the bridge encodes the target viewId in a portlet render parameter then it needs to implement a temporary in-memory cache for this redirect url management as the portlet model doesn't allow changes to render parameters during a render response.
-    If available, decode the target viewId from request information encoded by the bridge in a prior response. Use this viewId, if and only if, the current portlet mode is the same as the portlet mode in which the viewId was encoded into the response[5.19].  Details of such encoding/decoding are implementation specific.
-    Use the default viewId corresponding to the current portlet mode from the Map stored in the PortletContext attribute javax.portlet.faces.[portletName].defaultViewIdMap. The Map is keyed by portlet mode name.  If the bridge can't locate a default viewId for the current portlet mode or that default is null, throw javax.portlet.faces.BridgeDefaultViewNotSpecifiedException[5.20].
+To execute a Faces request, the bridge is responsible for determining the
+appropriate Faces `viewId` to target for this request and presenting this
+information to the Faces environment such that it can determine and utilize this
+`viewId`. There are three mechanisms the bridge uses for determining the target
+view:
 
-    Note:  In some circumstances a bridge may be able to determine that request doesn't represent a request for a Faces target and was therefore inappropriately passed to it.  In this circumstance the bridge may throw the javax.portlet.faces.BridgeNotAFacesRequestException instead of resolving to the default viewId.
+1. The bridge is passed the target view by the portlet.
+2. The bridge decodes the target view from information in the request it had
+   encoded in a prior response.
+3. The bridge uses a default view registered to it by the portlet during its
+   initialization.
 
-In a variety of the situations above, view information may optionally contain a query string.  When a query string is encountered the bridge must extract this information as part of its process of determining the viewId and expose the parameters in this query string as additional request parameters[5.21].
+Specifically the bridge must process for the target view in the following order
+until a `viewId` is determined:
 
-To pass the viewId to the Faces environment, the bridge must present the information as if it were encoded directly in the incoming request URI path.  I.e. Faces encodes the target viewId in the path portion of the action URLs it is instructed to manufacture.  The bridge inserts itself in this process to transform such URLs into properly encoded portlet action URLs.  As part of this transformation the bridge encodes the original target information so that it can reacquire it when the request is submitted.  Upon receiving such a request, the bridge reverses the process by determining the intended target and then presenting this information via the path information that existed in this original URL.  This is done by reverse engineering the URI paths from the viewId and providing this path information to Faces via the appropriate ExternalContext methods. Such reverse engineering must take into account whether the Faces servlet is prefix or suffix mapped and work correctly in both situations.  [Note: the current version of the Faces RI needs a workaround where one additionally sets this path information in the corresponding "javax.servlet.include." attributes when reverse engineering indicates Faces is extension mapped]. 
+- If the request attribute named `javax.portlet.faces.viewId` is non null then
+use this value as the target viewId<sup>[[5.15](TCK-Tests.html#5.15)]</sup>.
+- If the request attribute named `javax.portlet.faces.viewPath` is non null then
+use this value to process the `ContextPath` relative path and extract the target
+`viewId`<sup>[[5.16](TCK-Tests.html#5.16)]</sup>. If unable to extract a
+`viewId` from the path throw
+`javax.portlet.faces.BridgeInvalidViewPathException`<sup>[[5.17](TCK-Tests.html#5.17)]</sup>.
+- If the bridge is processing for the target view in a render request which
+occurs in the same portlet mode following another render request in which a
+redirect occurred and an action, event, or resource request hasn't been
+processed in the meantime, use the target `viewId` from the prior
+redirect<sup>[[5.18](TCK-Tests.html#5.18)]</sup>.
 
-It is recommended that this process of reverse engineering the paths from the bridge's stored viewId be done within its ExternalContext implementation and not done when/where it executes the Faces lifecycle.
-5.2.4 Executing a Portlet Action Request
+Note: depending on the methodology the bridge relies on to encode the target
+`viewId` in responses the bridge may need an alternative mechanism to handle this
+redirect during render requirement. For example, if the bridge encodes the
+target `viewId` in a portlet render parameter then it needs to implement a
+temporary in-memory cache for this redirect url management as the portlet model
+doesn't allow changes to render parameters during a render response.
+
+- If available, decode the target `viewId` from request information encoded by
+the bridge in a prior response. Use this `viewId`, if and only if, the current
+portlet mode is the same as the portlet mode in which the `viewId` was encoded
+into the response<sup>[[5.19](TCK-Tests.html#5.19)]</sup>. Details of such
+encoding/decoding are implementation specific.
+- Use the default viewId corresponding to the current portlet mode from the Map
+stored in the `PortletContext` attribute
+`javax.portlet.faces.[portletName].defaultViewIdMap`. The `Map` is keyed by
+portlet mode name. If the bridge can't locate a default `viewId` for the current
+portlet mode or that default is `null`, throw
+`javax.portlet.faces.BridgeDefaultViewNotSpecifiedException`<sup>[[5.20](TCK-Tests.html#5.20)]</sup>.
+
+Note: In some circumstances a bridge may be able to determine that request
+doesn't represent a request for a Faces target and was therefore inappropriately
+passed to it. In this circumstance the bridge may throw the
+`javax.portlet.faces.BridgeNotAFacesRequestException` instead of resolving to
+the default `viewId`.
+
+In a variety of the situations above, view information may optionally contain a
+query string. When a query string is encountered the bridge must extract this
+information as part of its process of determining the viewId and expose the
+parameters in this query string as additional request
+parameters<sup>[[5.21](TCK-Tests.html#5.21)]</sup>.
+
+To pass the `viewId` to the Faces environment, the bridge must present the
+information as if it were encoded directly in the incoming request `URI` path.
+I.e. Faces encodes the target viewId in the path portion of the action `URLs` it
+is instructed to manufacture. The bridge inserts itself in this process to
+transform such `URLs` into properly encoded portlet action `URLs`. As part of
+this transformation the bridge encodes the original target information so that
+it can reacquire it when the request is submitted. Upon receiving such a
+request, the bridge reverses the process by determining the intended target and
+then presenting this information via the path information that existed in this
+original URL. This is done by reverse engineering the `URI` paths from the
+`viewId` and providing this path information to Faces via the appropriate
+`ExternalContext` methods. Such reverse engineering must take into account
+whether the Faces servlet is prefix or suffix mapped and work correctly in both
+situations. [Note: the current version of the Faces RI needs a workaround where
+one additionally sets this path information in the corresponding
+"`javax.servlet.include`." attributes when reverse engineering indicates Faces
+is extension mapped].
+
+It is recommended that this process of reverse engineering the paths from the
+bridge's stored `viewId` be done within its `ExternalContext` implementation and
+not done when/where it executes the Faces lifecycle.
+
+### <a name="5.2.4"></a>5.2.4 Executing a Portlet Action Request
+
 The bridge processes a portlet action request when its doFacesRequest is called with the corresponding portlet Action request and response objects:
 
 public void doFacesRequest(
