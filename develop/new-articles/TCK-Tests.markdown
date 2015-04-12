@@ -593,7 +593,7 @@ hasn't yet been saved by Faces
 
 Test: Covered by Test [5.1](TCK-Tests.html#5.1)
 
-[<a name="5.33a-b"></a>5.33a-b] ensure that all `PhaseListeners` listening on the
+[<a name="5.33"></a>5.33a-b] ensure that all `PhaseListeners` listening on the
 before and after phase of the `PhaseId.RESTORE_VIEW` are called
 
 Test: Have test implement/add itself as `PhaseListener` -- in before/after, test
