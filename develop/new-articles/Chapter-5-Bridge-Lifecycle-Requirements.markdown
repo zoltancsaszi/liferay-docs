@@ -687,93 +687,212 @@ attribute<sup>[[5.38](TCK-Tests.html#5.38)]</sup>.
 
 ### <a name="5.2.7"></a>5.2.7 Executing a Portlet Resource Request
 
-The bridge processes a portlet resource request when its doFacesRequest is called with the corresponding portlet Resource request and response objects:
+The bridge processes a portlet resource request when its `doFacesRequest` is
+called with the corresponding portlet Resource `request` and `response` objects:
 
-public void doFacesRequest(
-     javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response);
+    public void doFacesRequest(
+        javax.portlet.ResourceRequest request, javax.portlet.ResourceResponse response);
 
-
-The bridge may be called to process a resource request for a Faces target or a non-Faces target.  
+The bridge may be called to process a resource request for a Faces target or a
+non-Faces target.
 
 In processing this request the bridge must:
 
-    throw the BridgeUninitializedException if the bridge isn't currently initialized (init() has been called following either the bridge's construction or a prior release())[5.62].
-    set the javax.portlet.faces.phase request attribute to Bridge.PortletPhase.RESOURCE_PHASE prior to acquiring the FacesContext[5.63].
-    If the request targets a non-Faces resource, acquire a portlet RequestDispatcher and use forward() to render the resource[5.64].
-    If the request targets a Faces resource:
-        acquire the FacesContext and Lifecycle as described above ensuring the appropriate target viewId will be processed [5.2.3].
-        do not reestablish the Faces request scope from the corresponding bridge request scope[5.65].
-        ensure the corresponding Faces view is (re)established for the targeted Faces viewId. This is accomplished by calling the execute method on the Lifecycle object acquired in section 5.2.1. For example:
+- throw the BridgeUninitializedException if the bridge isn't currently
+initialized (`init()` has been called following either the bridge's construction
+or a prior `release()`)<sup>[[5.62](TCK-Tests.html#5.62)]</sup>.
+- set the `javax.portlet.faces.phase` request attribute to
+`Bridge.PortletPhase.RESOURCE_PHASE` prior to acquiring the
+`FacesContext`<sup>[[5.63](TCK-Tests.html#5.63)]</sup>.
+- If the request targets a non-Faces resource, acquire a portlet
+`RequestDispatcher` and use `forward()` to render the
+resource<sup>[[5.64](TCK-Tests.html#5.64)]</sup>.
+- If the request targets a Faces resource:
+    - acquire the `FacesContext` and `Lifecycle` as described above ensuring the
+    appropriate target `viewId` will be processed
+    [5.2.3](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.3).
+    - do not reestablish the Faces request scope from the corresponding bridge
+    request scope<sup>[[5.65](TCK-Tests.html#5.65)]</sup>.
+    - ensure the corresponding Faces `view` is (re)established for the targeted
+    Faces `viewId`. This is accomplished by calling the `execute` method on the
+    `Lifecycle` object acquired in section
+    [5.2.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.1). For example:
 
-        lifecycle.execute(context);
+            lifecycle.execute(context);
 
-        Provide a PhaseListener that recognizes the RESTORE_VIEW afterPhase.  Within this notification process any public render parameters as per section 5.3.2
+    Provide a `PhaseListener` that recognizes the `RESTORE_VIEW afterPhase`.
+    Within this notification process any public render parameters as per section
+    [5.3.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.3.2).
+    
+    - execute the `render` phase of the Faces lifecycle. This is accomplished by
+    calling the `render` method on the `Lifecycle` object acquired in section
+    [5.2.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.2.1). For example:
 
-        execute the render phase of the Faces lifecycle.  This is accomplished by calling the render method on the Lifecycle object acquired in section 5.2.1. For example:
+            lifecycle.render(context);
 
-        lifecycle.render(context);
-        preserve any changes in the current request scope to the bridge request.  Reuse the existing bridge request scope if it exists, otherwise create one[5.66].
-        release the FacesContext[5.67].
-    remove the javax.portlet.faces.phase request attribute[5.68].
+    - preserve any changes in the current request scope to the bridge request.
+    Reuse the existing bridge request scope if it exists, otherwise create
+    one<sup>[[5.66](TCK-Tests.html#5.66)]</sup>.
+    - release the FacesContext<sup>[[5.67](TCK-Tests.html#5.67)]</sup>.
+- remove the `javax.portlet.faces.phase` request attribute<sup>[[5.68](TCK-Tests.html#5.68)]</sup>.
 
-5.2.8 Releasing the FacesContext
-If the bridge has acquired the FacesContext within a doFacesRequest call, it must release it before it returns regardless of the disposition of the result. E.g.
+### <a name="5.2.8"></a>5.2.8 Releasing the FacesContext
 
-context.release();
+If the bridge has acquired the FacesContext within a doFacesRequest call, it
+must release it before it returns regardless of the disposition of the result.
+E.g.
 
-5.3 Processing Public Render Parameters
-The bridge automates the processing of public render parameters. A public render parameter can be mapped to an object's accessor (get/set method) designed to handle a String representation of the value via a Faces ValueExpression.  When a new public render parameter value is received in a request, the bridge sets the value by calling the ValueExpression's setValue().  At the end of an action or event request, if the current value of any mapped public render parameter doesn't match the current incoming value, the bridge sets the new value in an outgoing public render parameter (if feasible in the given phase).  The bridge doesn't directly support updating or removing a public render parameter from its mapped model during either a render or resource request.
+    context.release();
 
-5.3.1 Configuring a Public Render Parameter Mapping
-A public render parameter can be mapped to an object's accessor (get/set method) designed to handle a String representation of the value. This mapping is described in the bridge's application-extension section of the face-config.xml.  The syntax for this is described in portlet2.0-bridge-faces1.2-faces-config-extensions.xsd.  The mapping names both the public render parameter being mapped and the Faces EL representation of the object that maintains and/or processes this value.  For example the following maps a public render parameter called name to the lastName data member of the UserBean object:
-<application>
-   <application-extension>
-      <bridge:public-parameter-mappings>
-         <bridge:public-parameter-mapping>
-            <parameter>name</parameter>
-            <model-el>UserBean.lastName</model-el>
-          </bridge:public-parameter-mapping>
-       </bridge:public-parameter-mappings>      
-    </application-extension>
-</application>
+## <a name="5.3"></a>5.3 Processing Public Render Parameters
 
-In the above example, because the parameter name is not qualified, any portlet in the web application that supports this public render parameter will have its model updated by the bridge through execution of the EL.  To limit processing, a qualified form of the parameter name can be specified that identifies the specific portlet (by name) that the mapping applies to.  This can be useful  for distinguishing between two portlets that use the same public render parameter but different mappings.  The syntax of a qualified parameter name is portletName:paramName. For example:
-<application>
-   <application-extension>
-      <bridge:public-parameter-mappings>
-         <bridge:public-parameter-mapping>
-            <parameter>MyPortlet:name</parameter>
-            <model-el>${UserBean.lastName}</model-el>
-          </bridge:public-parameter-mapping>
-         <bridge:public-parameter-mapping>
-            <parameter>AnotherPortlet:name</parameter>
-            <model-el>${AnotherUser.name}</model-el>
-          </bridge:public-parameter-mapping>
-       </bridge:public-parameter-mappings>      
-    </application-extension>
-</application>
+The bridge automates the processing of public render parameters. A public render
+parameter can be mapped to an object's accessor (get/set method) designed to
+handle a `String` representation of the value via a Faces `ValueExpression`.
+When a new public render parameter value is received in a request, the bridge
+sets the value by calling the `ValueExpression`'s `setValue()`. At the end of an
+action or event request, if the current value of any mapped public render
+parameter doesn't match the current incoming value, the bridge sets the new
+value in an outgoing public render parameter (if feasible in the given phase).
+The bridge doesn't directly support updating or removing a public render
+parameter from its mapped model during either a render or resource request.
 
-This example describes the mapping of the public render parameter name to two different beans in two different portlets.  In the first declaration, when processing the public render parameters in a request for the portlet MyPortlet, the bridge evaluates EL to set the lastName value in UserBean.  In the second declaration, when processing the public render parameters in a request for the portlet MyPortlet, the bridge evaluates EL to set the name value in AnotherUser.
+### <a name="5.3.1"></a>5.3.1 Configuring a Public Render Parameter Mapping
 
-When a parameter name is not qualified, the bridge maps the public render parameter regardless of which portlet is the target of the current request.  Because new portlets may be added to the application over time, it is recommended to always qualify each parameter even when not current needed to avoid future conflicts.
+A public render parameter can be mapped to an object's accessor (get/set method)
+designed to handle a `String` representation of the value. This mapping is
+described in the bridge's `application-extension` section of the
+`face-config.xml`. The syntax for this is described in
+`portlet2.0-bridge-faces1.2-faces-config-extensions.xsd`. The mapping names both
+the public render parameter being mapped and the Faces `EL` representation of
+the object that maintains and/or processes this value. For example the following
+maps a public render parameter called `name` to the `lastName` data member of
+the `UserBean` object:
 
-It is also recommended that to achieve the best mapping to the portlet public render parameter semantics one only map to a request scope object that is explicitly excluded from the bridge request scope.  Portlet public render parameters are consumer managed state whose current values are passed on each request.  By only mapping to bridge request scope excluded (request) scope objects one ensures the portlet doesn't maintain this state between requests.
-5.3.2 Processing incoming Public Render Parameters
-When a bridge processes a Faces request it processes incoming public render parameters after the RESTORE_VIEW phase of the Faces lifecycle has executed and before any other phase runs[5.69].  This allows the bridge to move the values of the public render parameters directly into their mapped models before Faces updates the values in the view component's based on these models.  The process  works as follows:  For each public render parameter in the incoming request that is named in a mapping in the public-parameter-mappings section of the faces-config.xml application-extension section [See 5.3.1], the bridge calls the set accessor of the associated bean's mapped data member[5.70].  The accessor must accept a String input (the bridge does no type conversion). After processing all mapped public render parameters, if and only if the portlet has registered a public render parameter handler, call its processUpdates() passing the FacesContext[5.71]. This gives the portlet an opportunity to trigger needed model updates or recomputations.
-5.3.3  Processing outgoing Public Render Parameters (changes)
-Before returning from processing a Faces action[5.72] or event[5.73] request, the bridge reprocesses the public parameter mappings to determine if any model values that are mapped to a public parameter have changed.  If a value has changed, the public parameter is set in the response.  This occurs after completing the Faces processing. The updated public parameters are encoded directly into the response.  
+    <application>
+        <application-extension>
+            <bridge:public-parameter-mappings>
+                <bridge:public-parameter-mapping>
+                    <parameter>name</parameter>
+                    <model-el>UserBean.lastName</model-el>
+                </bridge:public-parameter-mapping>
+            </bridge:public-parameter-mappings>      
+        </application-extension>
+    </application>
 
-Processing model changes and reflecting them in the portlet response involves processing each mapped model [5.3.1].  For each mapped model in the public-parameter-mappings section of the faces-config.xml application-extension section that pertains to this portlet, the bridge calls the get accessor of the associated bean's mapped data member.  If this value is different than the value that existed prior to running the Faces lifecycle then the bridge considers the value changed and should be updated in the portlet response.  This is done by calling setParameter on the named public render parameter.
+In the above example, because the `parameter` name is not qualified, any portlet
+in the web application that supports this public render parameter will have its
+model updated by the bridge through execution of the EL. To limit processing, a
+qualified form of the `parameter` name can be specified that identifies the
+specific portlet (by name) that the mapping applies to. This can be useful for
+distinguishing between two portlets that use the same public render parameter
+but different mappings. The syntax of a qualified `parameter name` is
+`portletName:paramName`. For example:
 
-5.4 Supporting PortletMode changes
-The portlet model supports a concept of render modes called PortletMode.  A PortletMode represents a distinct render path within an application.  There are three standard modes: view, edit, and help. Each is usually represented by a distinct set of views or pages.  A consumer can render a portlet in any mode at any time.  I.e. portlet's aren't allowed to assume that once they are in a mode they will remain in the mode until the portlet switches.  
+    <application>
+        <application-extension>
+            <bridge:public-parameter-mappings>
+                <bridge:public-parameter-mapping>
+                    <parameter>MyPortlet:name</parameter>
+                    <model-el>${UserBean.lastName}</model-el>
+                </bridge:public-parameter-mapping>
+                <bridge:public-parameter-mapping>
+                    <parameter>AnotherPortlet:name</parameter>
+                    <model-el>${AnotherUser.name}</model-el>
+                </bridge:public-parameter-mapping>
+            </bridge:public-parameter-mappings>      
+        </application-extension>
+    </application>
 
-5.4.1 Mode changes and Lifecycle management
+This example describes the mapping of the public render parameter name to two
+different beans in two different portlets. In the first declaration, when
+processing the public render parameters in a request for the portlet
+`MyPortlet`, the bridge evaluates EL to set the `lastName` value in `UserBean`.
+In the second declaration, when processing the public render parameters in a
+request for the portlet `MyPortlet`, the bridge evaluates EL to set the `name`
+value in `AnotherUser`.
+
+When a parameter name is not qualified, the bridge maps the public render
+parameter regardless of which portlet is the target of the current request.
+Because new portlets may be added to the application over time, it is
+recommended to always qualify each parameter even when not current needed to
+avoid future conflicts.
+
+It is also recommended that to achieve the best mapping to the portlet public
+render parameter semantics one only map to a request scope object that is
+explicitly excluded from the bridge request scope. Portlet public render
+parameters are consumer managed state whose current values are passed on each
+request. By only mapping to bridge request scope excluded (request) scope
+objects one ensures the portlet doesn't maintain this state between requests.
+
+### <a name="5.3.2"></a>5.3.2 Processing incoming Public Render Parameters
+
+When a bridge processes a Faces request it processes incoming public render
+parameters after the `RESTORE_VIEW` phase of the Faces lifecycle has executed
+and before any other phase runs<sup>[[5.69](TCK-Tests.html#5.69)]</sup>. This
+allows the bridge to move the values of the public render parameters directly
+into their mapped models before Faces updates the values in the view component's
+based on these models. The process works as follows: For each public render
+parameter in the incoming request that is named in a mapping in the
+`public-parameter-mappings` section of the `faces-config.xml
+application-extension` section See
+[5.3.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.3.1), the bridge calls
+the set accessor of the associated bean's mapped data
+member<sup>[[5.70](TCK-Tests.html#5.70)]</sup>. The accessor must accept a
+`String` input (the bridge does no type conversion). After processing all mapped
+public render parameters, if and only if the portlet has registered a public
+render parameter handler, call its `processUpdates()` passing the
+`FacesContext`<sup>[[5.71](TCK-Tests.html#5.71)]</sup>. This gives the portlet
+an opportunity to trigger needed model updates or recomputations.
+
+### <a name="5.3.3"></a>5.3.3  Processing outgoing Public Render Parameters (changes)
+
+Before returning from processing a Faces
+action<sup>[[5.72](TCK-Tests.html#5.72)]</sup> or
+event<sup>[[5.73](TCK-Tests.html#5.73)]</sup> request, the bridge reprocesses
+the public parameter mappings to determine if any model values that are mapped
+to a public parameter have changed. If a value has changed, the public parameter
+is set in the response. This occurs after completing the Faces processing. The
+updated public parameters are encoded directly into the response.
+
+Processing model changes and reflecting them in the portlet response involves
+processing each mapped model
+[5.3.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.3.1). For each mapped
+model in the `public-parameter-mappings` section of the `faces-config.xml
+application-extension` section that pertains to this portlet, the bridge calls
+the get accessor of the associated bean's mapped data member. If this value is
+different than the value that existed prior to running the Faces lifecycle then
+the bridge considers the value changed and should be updated in the portlet
+response. This is done by calling `setParameter` on the named public render
+parameter.
+
+## <a name="5.4"></a>5.4 Supporting PortletMode changes
+
+The portlet model supports a concept of render modes called `PortletMode`. A
+PortletMode represents a distinct render path within an application. There are
+three standard modes: *view*, *edit*, and *help*. Each is usually represented by
+a distinct set of views or pages. A consumer can render a portlet in any mode at
+any time. I.e. portlet's aren't allowed to assume that once they are in a mode
+they will remain in the mode until the portlet switches.
+
+### <a name="5.4.1"></a>5.4.1 Mode changes and Lifecycle management
+
 Mode changes impacts the bridge lifecyle management in a number of ways:
 
-    the bridge must not use the encoded target view if its from a prior mode.  I.e.  the bridge encodes the target viewId of all action URLs (and action navigation responses).  This target viewId must only be used if the mode it was encoded to be used with is the same as the current request mode.  If it is not, this target viewId must be ignored and the mode's default viewId used instead[5.39].
-    the bridge must not restore the encoded bridge request scope if the portlet mode has changed.  I.e. bridge request scopes are maintained on a per mode basis and must only be used when you (re)render in the same mode[5.40].
-    the bridge must ensure that the VIEW_STATE_PARAM request parameter is not exposed during a render in which the mode has changed.  Typically this occurs automatically as a result of not restoring the bridge request scope[5.41].
+- the bridge must not use the encoded target view if its from a prior mode. I.e.
+the bridge encodes the target viewId of all action URLs (and action navigation
+responses). This target viewId must only be used if the mode it was encoded to
+be used with is the same as the current request mode. If it is not, this target
+viewId must be ignored and the mode's default `viewId` used
+instead<sup>[[5.39](TCK-Tests.html#5.39)]</sup>.
+- the bridge must not restore the encoded bridge request scope if the portlet
+mode has changed. I.e. bridge request scopes are maintained on a per mode basis
+and must only be used when you (re)render in the same
+mode<sup>[[5.40](TCK-Tests.html#5.40)]</sup>.
+- the bridge must ensure that the `VIEW_STATE_PARAM` request parameter is not
+exposed during a render in which the mode has changed. Typically this occurs
+automatically as a result of not restoring the bridge request
+scope<sup>[[5.41](TCK-Tests.html#5.41)]</sup>.
 
 5.4.2 Encoding PortletMode changes in Faces navigation
 PortletMode changes are indicated using portlet specific APIs in constructing an action response or action (render) URL.  There is no Face's ExternalContext container independent method for changing a mode.  Though modes are inherently portlet specific, the bridge provides mechanisms for encoding mode changes without having to get and operate on portlet specific objects.  The bridge's ExternalContext.encodeActionURL recognizes the query string parameter javax.portlet.faces.PortletMode and uses this parameter's value to set the portlet mode on the underlying portlet actionURL or response.  Once processed it then removes this parameter from the query string.  This means the following navigation rule causes one to render the \edit.jspx viewId in the portlet edit mode[5.42]:
