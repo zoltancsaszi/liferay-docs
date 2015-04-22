@@ -734,7 +734,8 @@ resource<sup>[[5.64](TCK-Tests.html#5.64)]</sup>.
     Reuse the existing bridge request scope if it exists, otherwise create
     one<sup>[[5.66](TCK-Tests.html#5.66)]</sup>.
     - release the FacesContext<sup>[[5.67](TCK-Tests.html#5.67)]</sup>.
-- remove the `javax.portlet.faces.phase` request attribute<sup>[[5.68](TCK-Tests.html#5.68)]</sup>.
+- remove the `javax.portlet.faces.phase` request
+attribute<sup>[[5.68](TCK-Tests.html#5.68)]</sup>.
 
 ### <a name="5.2.8"></a>5.2.8 Releasing the FacesContext
 
@@ -894,34 +895,103 @@ exposed during a render in which the mode has changed. Typically this occurs
 automatically as a result of not restoring the bridge request
 scope<sup>[[5.41](TCK-Tests.html#5.41)]</sup>.
 
-5.4.2 Encoding PortletMode changes in Faces navigation
-PortletMode changes are indicated using portlet specific APIs in constructing an action response or action (render) URL.  There is no Face's ExternalContext container independent method for changing a mode.  Though modes are inherently portlet specific, the bridge provides mechanisms for encoding mode changes without having to get and operate on portlet specific objects.  The bridge's ExternalContext.encodeActionURL recognizes the query string parameter javax.portlet.faces.PortletMode and uses this parameter's value to set the portlet mode on the underlying portlet actionURL or response.  Once processed it then removes this parameter from the query string.  This means the following navigation rule causes one to render the \edit.jspx viewId in the portlet edit mode[5.42]:
-<navigation-rule>
-   <from-view-id>/register.jspx</from-view-id>
-   <navigation-case>
-     <from-outcome>edit</from-outcome>
-     <to-view-id>/edit.jspx?javax.portlet.faces.PortletMode=edit</to-view-id>
-  </navigation-case>
-</navigation-rule>
+### <a name="5.4.2"></a>5.4.2 Encoding `PortletMode` changes in Faces navigation
 
-5.4.3 Navigating to a mode's last viewId
-By default a mode change will start in the mode's default view without any (prior) existing state.  One common portlet pattern when returning to the mode one left after entering another mode (e.g.. view -> edit -> view) is to return to the last view  (and state) of this origin mode.  For example, if a portlet's view mode contains three views and you enter edit mode from the second view, a common portlet pattern when navigating back from edit to view mode is to return to the second view in the state that existed prior to it entering edit mode. Though a common pattern, the portlet container doesn't provide direct support for this behavior.  Instead a portlet must explicitly encode the necessary information so that when returning to a prior mode it can target the appropriate view and restore the appropriate state.   As the bridge manages such view and state encoding it is responsible for providing the following mechanism so portlet's can support this pattern:
+`PortletMode` changes are indicated using portlet specific APIs in constructing
+an action response or action (render) `URL`. There is no Face's
+`ExternalContext` container independent method for changing a mode. Though modes
+are inherently portlet specific, the bridge provides mechanisms for encoding
+mode changes without having to get and operate on portlet specific objects. The
+bridge's `ExternalContext.encodeActionURL` recognizes the query string parameter
+`javax.portlet.faces.PortletMode` and uses this parameter's value to set the
+portlet mode on the underlying portlet `actionURL` or response. Once processed
+it then removes this parameter from the query string. This means the following
+navigation rule causes one to render the `\edit.jspx viewId` in the portlet
+*edit* mode<sup>[[5.42](TCK-Tests.html#5.42)]</sup>:
 
-        the bridge must maintain a set of session attributes named javax.portlet.faces.viewIdHistory.[mode] where there is one such attribute per supported portlet mode[5.43].  The value of this attribute is the last viewId that was active for a given mode[5.44]. If a mode has never been active then this attribute's value must be the same as the that mode's default viewId[5.45].  Furthermore, if not encoding the default viewId,  this viewId value must be encoded with all the current render parameters except those added by the bridge to maintain the view target. Finally, this viewId value must be encoded with the corresponding portlet mode it represents.   These extra parameters must be encoded in the viewId in a manner that conforms to JSF expectations for valid viewIds and which will be processed correctly when passed through the calls ViewHandler.getActionURL and the bridge's ExternalContext.encodeActionURL such that it results in a valid portlet actionURL and/or actionResponse which not only targets the associated viewId in the associated PortletMode but also returns to that view with the same state (both in the bridge's request scope, view state, and any other render parameters) as existed when this view was added to the history list[5.46].
+    <navigation-rule>
+        <from-view-id>/register.jspx</from-view-id>
+        <navigation-case>
+            <from-outcome>edit</from-outcome>
+            <to-view-id>/edit.jspx?javax.portlet.faces.PortletMode=edit</to-view-id>
+        </navigation-case>
+    </navigation-rule>
 
-        Example viewId:  /myView2.jspx?javax.portlet.faces.PortletMode=view&_bridgeScopeId=3g6dxxxxxx
+### <a name="5.4.3"></a>5.4.3 Navigating to a mode's last `viewId`
 
-        Note:  In Portlet 1.0 there is no direct API for distinguishing between a request's render parameters and regular (post) parameters.  To meet the above requirements concerning encoding render parameters, it is recommended that the history list only be updated during the render phase.  As Portlet 1.0 doesn't carry forward postback parameters into the render phase one can infer the render parameters during the render phase as they should be the only parameters received.
-        the bridge must allow, recognize, and evaluate faces-config.xml navigation rules where the <to-view-id> element is a JSF expression[5.47].  
+By default a mode change will start in the mode's default view without any
+(prior) existing state. One common portlet pattern when returning to the mode
+one left after entering another mode (e.g.. view &rarr; edit &rarr; view) is to
+return to the last view (and state) of this origin mode. For example, if a
+portlet's view mode contains three views and you enter edit mode from the second
+view, a common portlet pattern when navigating back from edit to view mode is to
+return to the second view in the state that existed prior to it entering edit
+mode. Though a common pattern, the portlet container doesn't provide direct
+support for this behavior. Instead a portlet must explicitly encode the
+necessary information so that when returning to a prior mode it can target the
+appropriate view and restore the appropriate state. As the bridge manages such
+view and state encoding it is responsible for providing the following mechanism
+so portlet's can support this pattern:
 
-        The above maintained session attributes are intended to be used by developers to navigate back from a mode to the last location and state of a prior mode.  As such a developer needs to describe a dynamic navigation: "from view X return to the last view of mode y".  This is most easily expressed via an EL expression.  E.g.
+- the bridge must maintain a set of session attributes named
+`javax.portlet.faces.viewIdHistory.[mode]` where there is one such attribute per
+supported portlet mode<sup>[[5.43](TCK-Tests.html#5.43)]</sup>. The value of
+this attribute is the last `viewId` that was active for a given
+mode<sup>[[5.44](TCK-Tests.html#5.44)]</sup>. If a mode has never been active
+then this attribute's value must be the same as the that mode's default
+`viewId`<sup>[[5.45](TCK-Tests.html#5.45)]</sup>. Furthermore, if not encoding
+the default `viewId`, this `viewId` value must be encoded with all the current
+render parameters except those added by the bridge to maintain the view target.
+Finally, this `viewId` value must be encoded with the corresponding portlet mode
+it represents. These extra parameters must be encoded in the `viewId` in a
+manner that conforms to JSF expectations for valid viewIds and which will be
+processed correctly when passed through the calls `ViewHandler.getActionURL` and
+the bridge's `ExternalContext.encodeActionURL` such that it results in a valid
+portlet `actionURL` and/or `actionResponse` which not only targets the
+associated `viewId` in the associated `PortletMode` but also returns to that
+view with the same state (both in the bridge's request scope, view state, and
+any other render parameters) as existed when this view was added to the history
+list<sup>[[5.46](TCK-Tests.html#5.46)]</sup>.
 
-        <navigation-rule>
-          <from-view-id>/edit.jspx*</from-view-id>
-          <navigation-case>
+Example `viewId`:
+`/myView2.jspx?javax.portlet.faces.PortletMode=view&_bridgeScopeId=3g6dxxxxxx`
+
+**Note:** In Portlet 1.0 there is no direct API for distinguishing between a
+request's render parameters and regular (post) parameters. To meet the above
+requirements concerning encoding render parameters, it is recommended that the
+history list only be updated during the render phase. As Portlet 1.0 doesn't
+carry forward postback parameters into the render phase one can infer the render
+parameters during the render phase as they should be the only parameters
+received.
+
+- the bridge must allow, recognize, and evaluate `faces-config.xml` navigation
+rules where the `<to-view-id>` element is a JSF
+expression<sup>[[5.47](TCK-Tests.html#5.47)]</sup>.
+
+The above maintained session attributes are intended to be used by developers to
+navigate back from a mode to the last location and state of a prior mode. As
+such a developer needs to describe a dynamic navigation: "from view X return to
+the last view of mode y". This is most easily expressed via an EL expression.
+E.g.
+
+    <navigation-rule>
+        <from-view-id>/edit.jspx*</from-view-id>
+        <navigation-case>
             <from-outcome>view</from-outcome>
             <to-view-id>#{sessionScope['javax.portlet.faces.viewIdHistory.view']}</to-view-id>
-          </navigation-case>
-        </navigation-rule>
+        </navigation-case>
+    </navigation-rule>
 
-        Note to portlet developers:  depending on the bridge implementation, when using values from these session scoped attributes or any viewIds which may contain query string parameters it may be necessary to use the wildcard syntax when identifying the rule target.  For example, the above <to-view-id> expression returns a viewId of the form /viewId?javax.portlet.faces.PortletMode=view&.... Without wildcarding, when a subsequent navigation occurs  from this new view, the navigation rules wouldn't resolve because there wouldn't be an exact match.  Likewise, the above edit.jspx <from-view-id> is wildcarded because there are navigation rules that target it that use a query string (<to-view-id> /edit.jspx?javax.portlet.faces.PortletMode=edit </to-view-id>).  Developers are encouraged to use such wildcarding to ensure they execute properly in the broadest set of bridge implementations. 
+**Note to portlet developers:** depending on the bridge implementation, when
+using values from these session scoped attributes or any viewIds which may
+contain query string parameters it may be necessary to use the wildcard syntax
+when identifying the rule target. For example, the above `<to-view-id>` expression
+returns a `viewId` of the form
+`/viewId?javax.portlet.faces.PortletMode=view&....`
+Without wildcarding, when a subsequent navigation occurs from this new view, the
+navigation rules wouldn't resolve because there wouldn't be an exact match.
+Likewise, the above `edit.jspx <from-view-id>` is wildcarded because there are
+navigation rules that target it that use a query string (`<to-view-id>`
+`/edit.jspx?javax.portlet.faces.PortletMode=edit </to-view-id>`). Developers are
+encouraged to use such wildcarding to ensure they execute properly in the
+broadest set of bridge implementations.
