@@ -10,8 +10,8 @@ function and the Portlet model.
 
 ## <a name="6.1"></a>6.1 ExternalContext
 
-The Faces `ExternalContext` provides the container independent abstraction of the
-request and response to the Faces runtime environment. By implementing an
+The Faces `ExternalContext` provides the container independent abstraction of
+the request and response to the Faces runtime environment. By implementing an
 `ExternalContext`, the portlet bridge provides access to the portlet request and
 response.
 
@@ -166,186 +166,583 @@ when running in the `EVENT_PHASE` is undefined although it must not be `null`.
             - Following this url type indicator is an optional query string.
             Parameter value pairs in the query string are the parameters that
             are to be encoded into the `portletURL`. 
+<pre></pre>
+            To generate a link to a Faces view, encode the view as the value of
+            either the `_jsfBridgeViewId` or `_jsfBridgeViewPath` parameter
+            (depending on whether you are encoding the viewId or the viewPath).
+            Targets of such references are run in new empty scopes. An exception
+            is made when the target is the current view and either of the above
+            parameters is included in the query string with a value of
+            `_jsfBridgeCurrentView`. In this case the url is encoded with the
+            current render parameters and hence retains access to its
+            state/scope. In all cases the bridge removes the above parameter(s)
+            from the query string before generating the encoded url.
+<pre></pre>
+            For a resource url, a Faces view is only encoded if one of the
+            `_jsfBridgeViewId` or `_jsfBridgeViewPath` parameters is included in
+            the query string, otherwise a nonFaces resource url is generated.
+            The `_jsfBridgeCurrentView` value is used as a shortcut to indicate
+            the resource targets the current view.
+<pre></pre>
+            A simplified BNF is:<br>
+            `portletURL = Scheme URLType [QueryString]`<br>
+            `Scheme = "portlet:"`<br>
+            `URLType = ("action" | "render" | "resource")`<br>
+            `QueryString = "?" ParameterPair {"&" ParameterPair}`<br>
+            `ParameterPair =  Text "=" Text`<br>
+<pre></pre>
+         - If the `inputURL` contains a full or relative path then analyze the
+         path information to determine whether it encodes a request to a Faces
+         view or a nonFaces view. If it is a reference to a Faces view the
+         target is the encoded Faces viewId<sup>[[6.10](TCK-Tests.html#6.10),
+         [6.18](TCK-Tests.html#6.18)]</sup>. If it is a reference to a nonFaces
+         view, the target is the path that follows the context path (or if
+         relative, constructed relative to the current view path).
+             - To determine if the `URL` represents a Faces request, determine
+             if the servlet container would map this URL to the Faces servlet.
+             This can be done by reading the servlet definitions in the web
+             application's `web.xml` to determine how the Faces servlet is
+             mapped and then checking the `URL` to see if it would be mapped. If
+             a Faces `URL`, derive the view identifier encoded in this `URL`, as
+             follows: (Note: all resulting `viewIds` start with a "/")
+                 - If prefix mapping (such as “/faces/*”) is used for the
+                 `FacesServlet`, the `viewId` is set from the extra path
+                 information of the request `URI`. This corresponds to the path
+                 that follows the prefix mapping. e.g. a prefix mapped URL such
+                 as /faces/mypage.jsp would have a `viewId` of "/mypage.jsp".
+                 - If suffix mapping (such as “*.faces”) is used for
+                 `FacesServlet`, the `viewId` is set from the servlet path
+                 information of the request URI, after replacing the suffix with
+                 the value of the context initialization parameter named by the
+                 symbolic constant `ViewHandler.DEFAULT_SUFFIX_PARAM_NAME` (if
+                 no such context initialization parameter is present, use the
+                 value of the symbolic constant `ViewHandler.DEFAULT_SUFFIX` as
+                 the replacement suffix). This corresponds to the path that
+                 follows the context path. e.g. a suffix mapped URL such as
+                 /pages/secondpage.jsf would have a `viewId` of
+                 "/pages/secondpage.jsp" (assuming .jsp is the replacement
+                 suffix).
+    - Process PortletURL related state modifications.
+        - The portlet model allows one to encode changes to the portlet's mode,
+        window state and or security (access) level in self-referencing URLs or
+        as a response to an action request. Because the form of this encoding is
+        not specified by the portlet standard these values aren't manipulated in
+        the portlet URL's query string. Rather changes are expressed by
+        operating directly on a `PortletURL` object (render phase) or the
+        `actionResponse` (action phase). As `encodeActionURL()` isolates Faces
+        clients from these APIs/objects, an alternative technique is provided so
+        `encodeActionURL()` can recognize and incorporate the necessary changes.
+        This technique recognizes special query string parameters in the
+        `inputURL` which are extracted and processed using the corresponding
+        APIs. encodeActionURL() processing must:
+            - recognize the query string parameter
+            `javax.portlet.faces.PortletMode` and use the value of this
+            parameter to identify the mode that should be encoded in the
+            generated reference<sup>[[6.11](TCK-Tests.html#6.11),
+            [6.19](TCK-Tests.html#6.19)]</sup>. If the value doesn't identify a
+            valid mode then no encoding action is
+            taken<sup>[[6.12](TCK-Tests.html#6.12),
+            [6.19](TCK-Tests.html#6.19)]</sup>. Regardless of validity, it must
+            also prevent this query string parameter from being carried forward
+            directly in the generated reference.
+            - recognize the query string parameter
+            `javax.portlet.faces.WindowState` and use the value of this
+            parameter to identify the window state that should be encoded in the
+            generated reference<sup>[[6.13](TCK-Tests.html#6.13),
+            [6.21](TCK-Tests.html#6.21)]</sup>. If the value doesn't identify a
+            valid window state then no encoding action is
+            taken<sup>[[6.14](TCK-Tests.html#6.14),
+            [6.22](TCK-Tests.html#6.22)]</sup>. Regardless of validity, it must
+            also prevent this query string parameter from being carried forward
+            directly in the generated reference.
+            - recognize the query string parameter `javax.portlet.faces.Secure`
+            and use the value of this parameter to identify the security level
+            that should be encoded in the generated
+            reference<sup>[[6.15](TCK-Tests.html#6.15),
+            [6.23](TCK-Tests.html#6.23)]</sup>. A value of true or false is
+            translated into the boolean true/false respectively regardless of
+            case. Any other value is ignored<sup>[[6.16](TCK-Tests.html#6.16),
+            [6.24](TCK-Tests.html#6.24)]</sup>. Regardless of validity, it must
+            also prevent this query string parameter from being carried forward
+            directly in the generated reference.
+            - All other query string parameters are added to the PortletURL as
+            parameters<sup>[[6.17](TCK-Tests.html#6.17),
+            [6.25](TCK-Tests.html#6.25)]</sup>.
+    - Perform the encoding: 
+        - If executed during the `ACTION_PHASE` encode into the `ActionResponse`
+        and return a non null `URL` as
+        follows<sup>[[6.10-6.17](TCK-Tests.html#6.10)]</sup>:
+            - the target, if the target is not the portlet itself (as identified
+            by use of the `portlet: URI`). When the target is a Faces `viewId`,
+            it is encoded in an implementation dependent manner. When the target
+            is a nonFaces view, the target is encoded as the value of the
+            parameter named `_jsfBridgeNonFacesView`.
+            - the identified state modifications
+            - any additional query string parameters that were in the
+            `inputURL`. 
+         - If executed during the `EVENT_PHASE` encode into the `EventResponse`
+         and return a non null `URL` as follows<sup>[[6.103-6.110](TCK-Tests.html#6.103)]</sup>:
+             - the target (see action description)
+             - the identified state modifications
+             - any additional query string parameters that were in the
+             `inputURL`. 
+         - If executed during the `RENDER_PHASE` or `RESOURCE_PHASE` and the
+         target was determined by url path (not portlet: syntax) and that target
+         is a Faces viewId, construct and return an `actionURL` by calling
+         `getResponse().createActionURL().toString()` as
+         follows<sup>[[6.18-6.25](TCK-Tests.html#6.18),
+         [6.111-6.118](TCK-Tests.html#6.111)]</sup>:
+             - encode the target determined above (in an implementation
+             dependent manner).
+             - the identified state modifications,
+             - any additional query string parameters that were in the
+             `inputURL`. 
+         - If executed during the `RENDER_PHASE` or `RESOURCE_PHASE` and the
+         target was determined by its url path (not portlet: syntax) and that
+         target is a nonFaces `viewId`, construct and return a `renderURL` by
+         calling `getResponse().createRenderURL().toString()` as
+         follows<sup>[[6.136-6.152](TCK-Tests.html#6.136)]</sup>:
+             - encode the target determined above as the value of the parameter
+             named `_jsfBridgeNonFacesView`.
+             - the identified state modifications.
+             - any additional query string parameters that were in the
+             `inputURL`.
+         - If executed during the `RENDER_PHASE` or `RESOURCE_PHASE` and the
+         target was determined from the portlet: syntax (not by path), construct
+         the appropriate `URL` type determined from the path portion of the
+         based on the `urlTypeInputURL` and return its value in `String` form
+         (using `toString()`) as follows:
+             - encode the identified state modifications.
+             - any additional query string parameters that were in the
+             `inputURL`.
+             - if the target of this url is the current JSF view as determined
+             by the use of the `_jsfBridgeCurrentView` value, additionally
+             encode all current render parameters into the portletURL. Return
+             `portletURL.toString()`.
+<pre></pre>
+         Note on encoding/xml escaping: because renderkits have their own
+         pre/post processing to deal with situations calling for xml escaping in
+         urls, the bridge must return an url that contains the identical xml
+         escaping (or not) used in the url passed to encodeActionURL. I.e. if
+         the incoming url is xml escaped the the returned url must also be xml
+         escaped, likewise if the incoming url isn't escaped the returned url
+         must not be escaped. In the case xml escaping can't be determined from
+         the incoming url, the bridge must assume the url is not xml escaped and
+         return an unescaped url
+         accordingly.<sup>[[6.99](TCK-Tests.html#6.99)]</sup>
 
-            To generate a link to a Faces view, encode the view as the value of either the _jsfBridgeViewId or _jsfBridgeViewPath parameter (depending on whether you are encoding the viewId or the viewPath). Targets of such references are run in new empty scopes.  An exception is made when the target is the current view and either of the above parameters is included in the query string with a value of _jsfBridgeCurrentView.  In this case the url is encoded with the current render parameters and hence retains access to its state/scope.  In all cases the bridge removes the above parameter(s) from the query string before generating the encoded url.
+- `encodeResourceURL()`:
+<pre></pre>
+In Portlet 1.0 resources were not served by the portlet but rather accessed
+directly by the consumer using an http (resource) request. Portlet 2.0
+introduces a second type of resourceURL, a (in-protocol) portlet served
+resource. A resourceURL of this type signifies that the portlet itself should be
+called by the consumer to generate the resource. The Portlet 2.0 APIs provide
+distinct calls for creating a reference to portlet served resource to one that
+is accessed directly. As Faces only has a single concept of a resourceURL, the
+bridge uses a heuristic to determine which of these two access methods it uses
+to reference the resource. In summary, resourceURLs that target a Faces view are
+constructed to be served by the portlet while those that don't target a Faces
+view are constructed to be accessed directly.
+<pre></pre>
+This method returns the inputURL after performing any rewriting needed to ensure
+that it will correctly identify an addressable resource. To process such an
+inputURL correctly, this method must:
+    - If the `inputURL` is *opaque*, in that it is an absolute URI with a
+    scheme-specific part that doesn't begin with a slash character (e.g.
+    `mailto:java-net@java.sun.com`) and the scheme isn't portlet:, return the
+    `inputURL` unchanged<sup>[[6.26](TCK-Tests.html#6.26)]</sup>.
+    - If the inputURL 's scheme specific part is portlet: or its not opaque and
+    its query string contains the parameter javax.portlet.faces.ViewLink with a
+    value equal to true[6.34], then return an url representing a view
+    navigation. This is done by:
+        - if its exists, remove the `javax.portlet.faces.ViewLink` query string
+        parameter. Note: This supports use cases such as using h:outputLink to
+        navigate to a new view.
+        - if it exists, replace the `javax.portlet.faces.BackLink` query string
+        parameter with a parameter whose name is the value of this parameter and
+        whose value is the `String` (`URL` path) returned after calling
+        `ViewHandler.getActionURL()` passing the current
+        `viewId`<sup>[[6.27](TCK-Tests.html#6.27)]</sup>.
+<pre></pre>
+        This encodes a "back link" into the resource URL allowing the targeted
+        resource a way back to the calling portlet page for use in the situation
+        where the `resourceURL` actually is used as a page link. E.g. use of
+        `h:outputLink`.
+        - returning the result of calling `encodeActionURL` passing this
+        transformed `inputURL`<sup>[[6.33](TCK-Tests.html#6.33),
+        [6.34](TCK-Tests.html#6.34)]</sup>.
+    - If the `inputURL` is *hierarchical*, in that it is either an an absolute
+    URI whose scheme-specific part begins with a slash character, or a relative
+    URI, that is, a URI that does not specify a scheme, and it targets a
+    resource that is external to this application:
+        - check to see if the `inputURL` contains a query string parameter named
+        `javax.portlet.faces.BackLink`. If it does replace it with a parameter
+        whose name is the value of this parameter and whose value is the
+        `String` (`URL` path) returned after calling
+        `ViewHandler.getActionURL()` passing the current `viewId` followed by
+        `ExternalContext.encodeActionURL()`<sup>[[6.27](TCK-Tests.html#6.27)]</sup>.
+<pre></pre>
+        This encodes a "back link" into the resource `URL` allowing the targeted
+        resource a way back to the calling portlet page for use in the situation
+        where the `resourceURL` actually is used as a page link. E.g. use of
+        `h:outputLink`.
+<pre></pre>
+        - return
+        `getResponse().encodeURL(inputURL)`<sup>[[6.28](TCK-Tests.html#6.28)]</sup>.
+    - If the `inputURL` is *hierarchical* and targets a resource that is within
+    this application:
+        - if the `inputURL` is a relative `URL` (i.e. it is neither absolute nor
+        starts with a '/') then the `inputURL` must be turned into a context
+        path relative URL by constructing a new url based on going relative to
+        the current path<sup>[[6.29](TCK-Tests.html#6.29)]</sup>. The current
+        path is defined as the path that would be used to `dispatch()` to the
+        current view.
+        - ensure that the `inputURL` (potentially modified by the previous step)
+        is a fully qualified path `URI` (i.e. contains the context
+        path)<sup>[[6.31](TCK-Tests.html#6.31)]</sup>.
+        - if the resulting `inputURL` contains a query string parameter named
+        `javax.portlet.faces.BackLink` then replace it with a parameter whose
+        name is the value of this parameter and whose value is the `String`
+        (`URL` path) returned after calling `ViewHandler.getActionURL()` passing
+        the current `viewId`<sup>[[6.30](TCK-Tests.html#6.30)]</sup>.
+<pre></pre>
+        This encodes a "back link" into the resource URL allowing the targeted
+        resource a way back to the calling portlet page. E.g. use of
+        `h:outputLink`.
+        - determine whether the targeted resources will be satisfied using
+        Portlet 2.0 in protocol resource serving support or Portlet 1.0 out of
+        band http support. The bridge must encode the resource to be satisfied
+        by the in protocol resource serving support if:
+            - the query string contains the parameter
+            `javax.portlet.faces.InProtocolResourceLink`
+            - the target is a Faces resource, one that in a servlet environment
+            would be processed running through the `FacesServlet`.
+<pre></pre>
+            Note: The bridge can choose the strategy for acquiring
+            (representing) all other resources though it is noted that out of
+            band (http) resource access is generally more efficient.
+        - if returning an in protocol resource, return the `String`
+        representation of a `resourceURL` created using
+        `response.createResourceURL()` after processing `PortletURL` related
+        state modifications:
+            - as you can't change a portlet's mode in a resource request, remove
+            and ignore the query string parameter
+            `javax.portlet.faces.PortletMode` if it exists.
+            - as you can't change a portlet's window state in a resource
+            request, remove and ignore the query string parameter
+            `javax.portlet.faces.WindowState` if it exists.
+            - recognize the query string parameter `javax.portlet.faces.Secure`
+            and use the value of this parameter to identify the security level
+            that should be encoded in the generated reference. A value of `true`
+            or `false` is translated into the `boolean true/false` respectively
+            regardless of case. Any other value is ignored. Regardless of
+            validity, it must also prevent this query string parameter from
+            being carried forward directly in the generated reference.
+            - All other query string parameters are added to the `ResourceURL`
+            as parameters.
+            - if returning an out of band (http) resource return
+            `getResponse().encodeURL(inputURL)`<sup>[[6.28](TCK-Tests.html#6.28)]</sup>.
+<pre></pre>
+    Note on encoding/xml escaping: because renderkits have their own pre/post
+    processing to deal with situations calling for xml escaping in urls, the
+    bridge must return an url that contains the identical xml escaping (or not)
+    used in the url passed to `encodeActionURL`. I.e. if the incoming url is xml
+    escaped the the returned url must also be xml escaped, likewise if the
+    incoming url isn't escaped the returned url must not be escaped. In the case
+    xml escaping can't be determined from the incoming url, the bridge must
+    assume the url is not xml escaped and return an unescaped url
+    accordingly<sup>[[6.99](TCK-Tests.html#6.99)]</sup>. Also, because there are
+    situations where Faces components will further encode returned URL strings
+    by replacing <spaces> in the `URL` with the '+' which not all portlet
+    containers may be able to subsequently process, the bridge can (should)
+    `URL`-encode the space character (%20) prior to returning the `URL`
+    regardless of any stipulation regarding base encoding.
 
-                For a resource url, a Faces view is only encoded if one of the _jsfBridgeViewId or _jsfBridgeViewPath parameters is included in the query string,  otherwise a nonFaces resource url is generated. The _jsfBridgeCurrentView value is used as a shortcut to indicate the resource targets the current view.
+- `getRequest()`:
 
-            A simplified BNF is:
-            portletURL = Scheme URLType [QueryString]
-            Scheme = "portlet:"
-            URLType = ("action" | "render" | "resource")
-            QueryString = "?" ParameterPair {"&" ParameterPair}
-            ParameterPair =  Text "=" Text
-            If the inputURL contains a full or relative path then analyze the path information to determine whether it encodes a request to a Faces view or a nonFaces view.  If it is a reference to a Faces view the target is the encoded Faces viewId[6.10, 6.18].  If  it is a reference to a nonFaces view, the target is the path that follows the context path (or if relative, constructed relative to the current view path).
-                To determine if the URL represents a Faces request, determine if the servlet container would map this URL to the Faces servlet.  This can be done by reading the servlet definitions in the web application's web.xml to determine how the Faces servlet is mapped and then checking the URL to see if it would be mapped.   If a Faces URL, derive the view identifier encoded in this URL, as follows:
-                      Note: all resulting viewIds start with a "/".
-                    If prefix mapping (such as “/faces/*”) is used for the FacesServlet, the viewId is set from the extra path information of the request URI.  This corresponds to the path that follows the prefix mapping.  e.g. a prefix mapped URL such as /faces/mypage.jsp would have a viewId of "/mypage.jsp".
-                    If suffix mapping (such as “*.faces”) is used for FacesServlet, the viewId is set from the servlet path information of the request URI, after replacing the suffix with the value of the context initialization parameter named by the symbolic constant ViewHandler.DEFAULT_SUFFIX_PARAM_NAME (if no such context initialization parameter is present, use the value of the symbolic constant ViewHandler.DEFAULT_SUFFIX as the replacement suffix).  This corresponds to the path that follows the context path. e.g. a suffix mapped URL such as /pages/secondpage.jsf would have a viewId of "/pages/secondpage.jsp" (assuming .jsp is the replacement suffix).
+    Return the environment-specific object instance for the current request.
+    This must be the last request object set as a consequence of calling
+    `setRequest()`<sup>[[6.35](TCK-Tests.html#6.35)]</sup> or if none set, the
+    request object passed to this instance's constructor.
+- `setRequest()`:
 
-        Process PortletURL related state modifications.
+    Set the environment-specific request to be returned by subsequent calls to
+    `getRequest()`<sup>[[6.35](TCK-Tests.html#6.35)]</sup>. This may be used to
+    install a wrapper for the request.
+- `setRequestCharacterEncoding()`:
 
-            The portlet model allows one to encode changes to the portlet's mode, window state and or security (access) level in self-referencing URLs or as a response to an action request.  Because the form of this encoding is not specified by the portlet standard these values aren't manipulated in the portlet URL's query string. Rather changes are expressed by operating directly on a PortletURL object (render phase) or the actionResponse (action phase).  As encodeActionURL() isolates Faces clients from these APIs/objects, an alternative technique is provided so encodeActionURL() can recognize and incorporate the necessary changes. This technique recognizes special query string parameters in the inputURL which are extracted and processed using the corresponding APIs.  encodeActionURL() processing must:
-                recognize the query string parameter javax.portlet.faces.PortletMode and use the value of this parameter to identify the mode that should be encoded in the generated reference[6.11,6.19].  If the value doesn't identify a valid mode then no encoding action is taken[6.12, 6.20].  Regardless of validity, it must also prevent this query string parameter from being carried forward directly in the generated reference.
-                recognize the query string parameter javax.portlet.faces.WindowState and use the value of this parameter to identify the window state that should be encoded in the generated reference[6.13, 6.21]. If the value doesn't identify a valid window state then no encoding action is taken[6.14, 6.22].  Regardless of validity, it must also prevent this query string parameter from being carried forward directly in the generated reference.
-                recognize the query string parameter javax.portlet.faces.Secure and use the value of this parameter to identify the security level that should be encoded in the generated reference[6.15, 6.23].  A value of true or false is translated into the boolean true/false respectively regardless of case.  Any other value is ignored[6.16, 6.24]. Regardless of validity, it must also prevent this query string parameter from being carried forward directly in the generated reference.
-                All other query string parameters are added to the PortletURL as parameters[6.17, 6.25].
+    Overrides the name of the character encoding used in the body of this
+    request<sup>[[6.37](TCK-Tests.html#6.37)]</sup>.
 
-            Perform the encoding: 
+    Calling this method after reading request parameters or reading input has no
+    effect and throws no exceptions. Calling this method during the RENDER_PHASE
+    is has no effect and throws no
+    exceptions<sup>[[6.36](TCK-Tests.html#6.36)]</sup>.
+- `getRequestHeaderMap()`:  
 
-            If executed during the ACTION_PHASE encode into the ActionResponse and return a non null URL as follows[6.10-6.17]:
+    Return an immutable `Map` whose keys are the set of request header names
+    included in the current request, and whose values (of type `String`) are the
+    first (or only) value for each header name returned by the underlying
+    request<sup>[[6.38](TCK-Tests.html#6.35), [6.39](TCK-Tests.html#6.39),
+    [6.119](TCK-Tests.html#6.119), [6.120](TCK-Tests.html#6.120)]</sup>. The
+    returned `Map` must implement the entire contract for an unmodifiable `Map`
+    as described in the JavaDocs for
+    `java.util.Map`<sup>[[6.38](TCK-Tests.html#6.38),
+    [6.39](TCK-Tests.html#6.39), [6.119](TCK-Tests.html#6.119),
+    [6.120](TCK-Tests.html#6.120)]</sup>. In addition, key comparisons must be
+    performed in a case insensitive manner.
 
-                the target, if the target is not the portlet itself (as identified by use of the portlet: URI).  When the target is a Faces viewId, it is encoded in an implementation dependent manner.  When the target is a nonFaces view, the target is encoded as the value of the parameter named _jsfBridgeNonFacesView.
-                the identified state modifications
-                any additional query string parameters that were in the inputURL. 
-            If executed during the EVENT_PHASE encode into the EventResponse and return a non null URL as follows[6.103-6.110]:
-                the target (see action description)
-                the identified state modifications
-                any additional query string parameters that were in the inputURL. 
-            If executed during the RENDER_PHASE or RESOURCE_PHASE and the target was determined by url path (not portlet: syntax) and that target is a  Faces viewId, construct and return an actionURL by calling getResponse().createActionURL().toString()as follows[6.18-6.25, 6.111-6.118]:
-                encode the target determined above (in an implementation dependent manner).
-                 the identified state modifications,
-                any additional query string parameters that were in the inputURL. 
-            If executed during the RENDER_PHASE or RESOURCE_PHASE and the target was determined by its url path (not portlet: syntax) and that target is a nonFaces viewId, construct and return a renderURL by calling getResponse().createRenderURL().toString() as follows[ 6.136-6.152]:
-                encode the target determined above as the value of the parameter named _jsfBridgeNonFacesView.
-                the identified state modifications.
-                any additional query string parameters that were in the inputURL. 
-            If executed during the RENDER_PHASE or RESOURCE_PHASE and the target was determined from the portlet: syntax (not by path), construct the appropriate URL type determined from the path portion of the based on the urlTypeInputURL and return its value in String form (using toString()) as follows:
-                encode the identified state modifications.
-                 any additional query string parameters that were in the inputURL. 
-                if the target of this url is the current JSF view as determined by the use of the _jsfBridgeCurrentView value, additionally encode all current render parameters into the portletURL.  Return portletURL.toString().
+    This Map must include the set of properties available via the
+    `javax.portlet.PortletRequest` methods `getProperty()` and
+    `getPropertyNames()` except when executing a `RENDER_REQUEST` or an
+    `EVENT_REQUEST`. Within a `RENDER_REQUEST` or `EVENT_REQUEST`, the map must
+    exclude the `CONTENT-TYPE` and `CONTENT-LENGTH properties` (if they are
+    present in the underlying request)<sup>[[6.38](TCK-Tests.html#6.38),
+    [6.119](TCK-Tests.html#6.119)]</sup>.
+    
+    In addition, to provide compatibility with servlets, the bridge must ensure
+    that the following entries exist in the `Map` when the bridge is executing
+    during an `ACTION_PHASE` or `RESOURCE_PHASE`: `Accept`, `Accept-Language`,
+    `Content-Type`, and `Content-Length`<sup>[[6.39](TCK-Tests.html#6.39),
+    [6.120](TCK-Tests.html#6.120)]</sup>. When executing during a `RENDER_PHASE`
+    or an `EVENT_PHASE` the bridge must only ensure that `Accept` and
+    `Accept-Language` exist (and as noted above that `Content-Type` and
+    `Content-Length` don't exist)<sup>[[6.38](TCK-Tests.html#6.38),
+    [6.119](TCK-Tests.html#6.119)]</sup>. The values for these headers are
+    derived as follows:
 
-            Note on encoding/xml escaping: because renderkits have their own pre/post processing to deal with situations calling for xml escaping in urls, the bridge must return an url that contains the identical xml escaping (or not) used in the url passed to encodeActionURL.  I.e. if the incoming url is xml escaped the the returned url must also be xml escaped, likewise if the incoming url isn't escaped the returned url must not be escaped.  In the case xml escaping can't be determined from the incoming url, the bridge must assume the url is not xml escaped and return an unescaped url accordingly.[6.99]
+    - `Accept`: The value returned for this header must be the result of properly
+    encoding the values returned by `getResponseContentTypes()` as a string
+    conforming to the [HTTP 1.1 Accept header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.1.
 
-    encodeResourceURL():
+    - `Accept-Language`: The value returned for this header must be the result of
+    properly encoding the values returned by `getLocales()` as a string
+    conforming to the [HTTP 1.1 Accept-Language header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.4.
+    
+    - `Content-Type`: The value returned for this header must be the result of
+    properly encoding the values returned by `getContentType()` and
+    `getCharacterEncoding()` as a string conforming to the [HTTP 1.1
+    Content-Type header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.17. This header value must only be represented if
+    `getContentType()` returns a non-null value. The character set portion of
+    this header must only be represented if `getCharacterEncoding()` returns a
+    non-null value.
+    
+    - `Content-Length`: The value returned for this header must be the result of
+    properly encoding the values returned by `getContentLength()` as a string
+    conforming to the [HTTP 1.1 Content-Length header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.13. This header value must only be represented if
+    `getContentLength()` returns a value other then -1.
+    
+- `getRequestHeaderValuesMap()`: 
 
-    In Portlet 1.0 resources were not served by the portlet but rather accessed directly by the consumer using an http (resource) request. Portlet 2.0 introduces a second type of resourceURL, a (in-protocol) portlet served resource.  A resourceURL of this type signifies that the portlet itself should be called by the consumer to generate the resource. The Portlet 2.0 APIs provide distinct calls for creating a reference to portlet served resource to one that is accessed directly.  As Faces only has a single concept of a resourceURL, the bridge uses a heuristic to determine which of these two access methods it uses to reference the resource.  In summary, resourceURLs that target a Faces view are constructed to be served by the portlet while those that don't target a Faces view are constructed to be accessed directly.
+    Return an immutable `Map` whose keys are the set of request header names
+    included in the current request, and whose values (of type `String[]`) are
+    all of the value for each header name returned by the underlying
+    request<sup>[[6.40](TCK-Tests.html#6.40), [6.41](TCK-Tests.html#6.41),
+    [6.121](TCK-Tests.html#6.121), [6.122](TCK-Tests.html#6.122)]</sup>. The
+    returned `Map` must implement the entire contract for an unmodifiable `Map`
+    as described in the JavaDocs for
+    `java.util.Map`<sup>[[6.40](TCK-Tests.html#6.40),
+    [6.41](TCK-Tests.html#6.41), [6.121](TCK-Tests.html#6.121),
+    [6.122](TCK-Tests.html#6.122)]</sup>. In addition, key comparisons must be
+    performed in a case insensitive manner.
 
-    This method returns the inputURL after performing any rewriting needed to ensure that it will correctly identify an addressable resource. To process such an inputURL correctly, this method must:
-        If the inputURL is opaque, in that it is an absolute URI with a scheme-specific part that doesn't begin with a slash character (e.g. mailto:java-net@java.sun.com) and the scheme isn't portlet:, return the inputURL unchanged[6.26].
-        If the inputURL 's scheme specific part is portlet: or its not opaque and its query string contains the parameter javax.portlet.faces.ViewLink with a value equal to true[6.34], then return an url representing a view navigation.  This is done by:
-            if its exists, remove the javax.portlet.faces.ViewLink query string parameter.
-            Note:  This supports use cases such as using h:outputLink to navigate to a new view.
-            if it exists, replace the javax.portlet.faces.BackLink query string parameter with a parameter whose name is the value of this parameter and whose value is the String (URL path) returned after calling ViewHandler.getActionURL() passing the current viewId[6.27].
+    This `Map` must include the set of property names and values available via
+    the `javax.portlet.PortletRequest` methods `getProperty()` and
+    `getPropertyNames()` except when executing a `RENDER_REQUEST` or an
+    `EVENT_REQUEST`. Within a `RENDER_REQUEST` or `EVENT_REQUEST`, the map must
+    exclude the `CONTENT-TYPE` property (if it is present in the underlying
+    request)<sup>[[6.40](TCK-Tests.html#6.40),
+    [6.121](TCK-Tests.html#6.121)]</sup>.
+    
+    In addition, to provide compatibility with servlets, the bridge must ensure
+    that the following entries exist in the Map when the bridge is executing
+    during an `ACTION_PHASE` or `RESOURCE_PHASE`: `Accept`, `Accept-Language`,
+    `Content-Type`, and `Content-Length`<sup>[[6.41](TCK-Tests.html#6.41),
+    [6.122](TCK-Tests.html#6.122)]</sup>. When executing during a `RENDER_PHASE`
+    or an `EVENT_PHASE` the bridge must only ensure that `Accept` and
+    `Accept-Language` exist (and as noted above that `Content-Type` doesn't
+    exist)<sup>[[6.40](TCK-Tests.html#6.40),
+    [6.121](TCK-Tests.html#6.121)]</sup>. The values for these headers are
+    derived as follows:
 
-            This encodes a "back link" into the resource URL allowing the targeted resource a way back to the calling portlet page for use in the situation where the resourceURL actually is used as a page link.  E.g. use of h:outputLink.
-            returning the result of calling encodeActionURL passing this transformed inputURL[6.33, 6.34].
-        If the inputURL is hierarchical, in that it is either an an absolute URI whose scheme-specific part begins with a slash character, or a relative URI, that is, a URI that does not specify a scheme, and it targets a resource that is external to this application:
-            check to see if the inputURL contains a query string parameter named javax.portlet.faces.BackLink.  If it does replace it with a parameter whose name is the value of this parameter and whose value is the String (URL path) returned after calling ViewHandler.getActionURL() passing the current viewId followed by ExternalContext.encodeActionURL()[6.27].
+    - `Accept`: The value returned for this header must be the result of
+    properly encoding the values returned by `getResponseContentTypes()` as a
+    string conforming to the [HTTP 1.1 Accept header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.1.
+    
+    - `Accept-Language`: The value returned for this header must be the result
+    of properly encoding the values returned by `getLocales()` as a string
+    conforming to the [HTTP 1.1 Accept-Language header format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined by
+    RFC2616 Section 14.4.
+    
+    - `Content-Type`: The value returned for this header must be the result of
+    properly encoding the values returned by `getContentType()` and
+    `getCharacterEncoding()` as a string conforming to the [HTTP 1.1
+    Content-Type header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.17. This header value must only be represented if
+    `getContentType()` returns a non-null value. The character set portion of
+    this header must only be represented if `getCharacterEncoding()` returns a
+    non-null value.
+    
+    - `Content-Length`: The value returned for this header must be the result of
+    properly encoding the values returned by `getContentLength()` as a string
+    conforming to the [HTTP 1.1 Content-Length header
+    format](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html) as defined
+    by RFC2616 Section 14.13. This header value must only be represented if
+    `getContentLength()` returns a value other then -1.
+    
+- `getRequestMap()`:
 
-            This encodes a "back link" into the resource URL allowing the targeted resource a way back to the calling portlet page for use in the situation where the resourceURL actually is used as a page link.  E.g. use of h:outputLink.
+    Return a mutable `Map` representing the request scope attributes for the
+    current application<sup>[[6.42](TCK-Tests.html#6.42)]</sup>. The returned
+    `Map` must implement the entire contract for a modifiable map as described
+    in the JavaDocs for `java.util.Map`. Modifications made in the `Map` must
+    cause the corresponding changes in the set of request scope attributes.
+    Particularly the `clear()`, `remove()`, `put()`, `putAll()`, and `get()`
+    operations must take the appropriate action on the underlying data
+    structure<sup>[[6.42](TCK-Tests.html#6.42)]</sup>.
 
-            return getResponse().encodeURL(inputURL)[6.28].
-        If the inputURL is hierarchical and targets a resource that is within this application:
-            if  the inputURL is a relative URL (i.e. it is neither absolute nor starts with a '/') then the inputURL must be turned into a context path relative URL by constructing a new url based on going relative to the current path[6.29]. The current path is defined as the path that would be used to dispatch() to the current view.
-            ensure that the inputURL (potentially modified by the previous step) is a fully qualified path URI (i.e.contains the context path)[6.31].
-            if the resulting inputURL contains a query string parameter named javax.portlet.faces.BackLink then replace it with a parameter whose name is the value of this parameter and whose value is the String (URL path) returned after calling ViewHandler.getActionURL() passing the current viewId[6.30].  
+    For any of the Map methods that cause an element to be removed from the
+    underlying data structure, the following occurs
+    [6.8](Chapter-6-Bridge-Requirements-for-Managing-Faces#6.8):
 
-            This encodes a "back link" into the resource URL allowing the targeted resource a way back to the calling portlet page. E.g. use of h:outputLink.
-            determine whether the targeted resources will be satisfied using Portlet 2.0 in protocol resource serving support or Portlet 1.0 out of band http support.  The bridge must encode the resource to be satisfied by the in protocol resource serving support if:
-                the query string contains the parameter javax.portlet.faces.InProtocolResourceLink
-                the target is a Faces resource, one that in a servlet environment would be processed running through the FacesServlet.
+    - If the attribute is excluded from the bridge request scope and the
+    attribute's value is a managed-bean, and it has one or more public
+    no-argument void return methods annotated with
+    `javax.annotation.PreDestroy`, then each such method must be called before
+    the element is removed from the underlying data structure. Elements that are
+    not managed-beans, but do happen to have methods with that annotation must
+    not have those methods called on removal.
+    
+    - If the attribute is included in the bridge request scope then regardless
+    of whether the attribute is a managed-bean or not, if the attribute's value
+    has one or more public no-argument void return methods annotated with
+    `javax.portlet.faces.annotation.PreDestroy`, then each such method must be
+    called before the element is removed from the underlying data
+    structure<sup>[[6.42](TCK-Tests.html#6.42)/[nt](TCK-Tests.html#nt)]</sup>.
+    
+    Any exception thrown by either of these `PreDestroy` annotated methods must
+    by caught and not rethrown. The exception may be logged.
 
-            Note:  The bridge can choose the strategy for acquiring (representing) all other resources though it is noted that out of band (http) resource access is generally more efficient.
-            if returning an in protocol resource, return the String representation of a resourceURL created using response.createResourceURL() after processing PortletURL related state modifications:
-                as you can't change a portlet's mode in a resource request, remove and ignore the query string parameter javax.portlet.faces.PortletMode if it exists.
-                as you can't change a portlet's window state in a resource request, remove and ignore the query string parameter javax.portlet.faces.WindowState if it exists.
-                recognize the query string parameter javax.portlet.faces.Secure and use the value of this parameter to identify the security level that should be encoded in the generated reference.  A value of true or false is translated into the boolean true/false respectively regardless of case.  Any other value is ignored. Regardless of validity, it must also prevent this query string parameter from being carried forward directly in the generated reference.
-                All other query string parameters are added to the ResourceURL as parameters.
-            if returning an out of band (http) resource return getResponse().encodeURL(inputURL)[6.28].
+    The `Map` must contain the set of attributes available via the
+    `javax.portlet.PortletRequest` methods `getAttribute()`,
+    `getAttributeNames()`, `removeAttribute()`, and `setAttribute()`.
+    Furthermore these attributes must be managed across portlet requests
+    according to the rules defined in section
+    [5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2)<sup>[[6.43](TCK-Tests.html#6.43)]</sup>.
+    
+- `getRequestParameterMap()`: 
 
+    Return an immutable `Map` whose keys are the set of request parameters names
+    included in the current request, and whose values (of type `String`) are the
+    first (or only) value for each parameter name returned by the underlying
+    request<sup>[[6.45](TCK-Tests.html#6.45)]</sup>. The returned `Map` must
+    implement the entire contract for an unmodifiable map as described in the
+    JavaDocs for `java.util.Map`.
+    
+    This `Map` must be composed from the set of parameters available via the
+    `javax.portlet.PortletRequest` methods `getParameter()` and
+    `getParameterNames()` plus any additional parameter names encoded in the
+    (query string) of the `viewId`<sup>[[6.47](TCK-Tests.html#6.47)]</sup>. This
+    later situation primarily occurs when using a default `viewId` provided by
+    the portlet.
+    
+    In addition, during a portlet's `RENDER_PHASE`, if not otherwise already in
+    the `Map`, the bridge must include those parameters managed in the
+    corresponding bridge request scope. This always includes the
+    `ResponseStateManger.VIEW_STATE_PARAM
+    parameter`<sup>[[6.45](TCK-Tests.html#6.45)]</sup>. The
+    preservation/inclusion of the rest of the action parameters depends on the
+    `javax.portlet.faces.[portlet name].preserveActionParams` portlet context
+    attribute. If this context attribute exists and has a value of
+    `Boolean.TRUE`, the additional action parameters are
+    preserved/included<sup>[[6.46](TCK-Tests.html#6.46)]</sup>, otherwise they
+    aren't.
 
-    Note on encoding/xml escaping: because renderkits have their own pre/post processing to deal with situations calling for xml escaping in urls, the bridge must return an url that contains the identical xml escaping (or not) used in the url passed to encodeActionURL.  I.e. if the incoming url is xml escaped the the returned url must also be xml escaped, likewise if the incoming url isn't escaped the returned url must not be escaped.  In the case xml escaping can't be determined from the incoming url, the bridge must assume the url is not xml escaped and return an unescaped url accordingly[6.99].  Also, because there are situations where Faces components will further encode returned URL strings by replacing <spaces> in the URL with the '+' which not all portlet containers may be able to subsequently process, the bridge can (should) URL-encode the space character (%20) prior to returning the URL regardless of any stipulation regarding base encoding.
+- `getRequestParameterNames()`:
 
-    getRequest():
+    Return an `Iterator` over the names of all request parameters included in
+    the current request. This must be an `Iterator` over the values returned by
+    the `javax.portlet.PortletRequest` method
+    `getParameterNames()`<sup>[[6.48](TCK-Tests.html#6.48)]</sup> plus any
+    additional parameter names encoded in the (query string) of the
+    `viewId`<sup>[[6.50](TCK-Tests.html#6.50)]</sup>. This later situation
+    primarily occurs when using a default `viewId` provided by the portlet.
+    
+    In addition, during a portlet's `RENDER_PHASE`, if not otherwise already in
+    the `Iterator`, the bridge must include those parameter names managed in the
+    corresponding bridge request scope. This always includes the
+    `ResponseStateManger.VIEW_STATE_PARAM`
+    parameter<sup>[[6.48](TCK-Tests.html#6.48)]</sup>. The
+    preservation/inclusion of the rest of the action parameters depends on the
+    `javax.portlet.faces.[portlet name].preserveActionParams` portlet context
+    attribute. If this context attribute exists and has a value of
+    `Boolean.TRUE`, the additional action parameters are
+    preserved/included<sup>[[6.49](TCK-Tests.html#6.49)]</sup>, otherwise they
+    aren't.
+    
+- `getRequestParameterValuesMap()`:
 
-    Return the environment-specific object instance for the current request.  This must be the last request object set as a consequence of calling setRequest()[6.35] or if none set, the request object passed to this instance's constructor.
+    Return an immutable `Map` whose keys are the set of request parameters names
+    included in the current request, and whose values (of type `String[]`) are
+    all of the values for each parameter name returned by the underlying
+    request<sup>[[6.51](TCK-Tests.html#6.51)]</sup>. The returned `Map` must
+    implement the entire contract for an unmodifiable map as described in the
+    JavaDocs for `java.util.Map`.
+    
+    This must be the set of parameter values available via the
+    `javax.portlet.PortletRequest` methods `getParameterValues()` and
+    `getParameterNames()` plus any additional parameter names encoded in the
+    (query string) of the `viewId`<sup>[[6.53](TCK-Tests.html#6.53)]</sup>. This
+    later situation primarily occurs when using a default `viewId` provided by
+    the portlet.
+    
+    In addition, during a portlet's `RENDER_PHASE`, if not otherwise already in
+    the `Map`, the bridge must include those parameter names managed in the
+    corresponding bridge request scope. This always includes the
+    `ResponseStateManger.VIEW_STATE_PARAM`
+    parameter<sup>[[6.51](TCK-Tests.html#6.51)]</sup>. The
+    preservation/inclusion of the rest of the action parameters depends on the
+    `javax.portlet.faces.[portlet name].preserveActionParams` portlet context
+    attribute<sup>[[6.52](TCK-Tests.html#6.52)]</sup>. If this context attribute
+    exists and has a value of `Boolean.TRUE`, the additional action parameters
+    are preserved/included, otherwise they aren't.
 
-    setRequest():
+- `getRequestPathInfo()`:
 
-    Set the environment-specific request to be returned by subsequent calls to getRequest()[6.35]. This may be used to install a wrapper for the request.  
+    Return the extra path information (if any) included in the request `URI`;
+    otherwise, return `null`. This value must represent the path portion of the
+    current target `viewId`.
 
-    setRequestCharacterEncoding():
-
-    Overrides the name of the character encoding used in the body of this request[6.37].
-
-    Calling this method after reading request parameters or reading input has no effect and throws no exceptions.  Calling this method during the RENDER_PHASE is has no effect and throws no exceptions[6.36].
-    getRequestHeaderMap():  
-
-    Return an immutable Map whose keys are the set of request header names included in the current request, and whose values (of type String) are the first (or only) value for each header name returned by the underlying request[6.38,6.39, 6.119, 6.120]. The returned Map must implement the entire contract for an unmodifiable Map as described in the JavaDocs for java.util.Map[6.38,6.39, 6.119,  6.120]. In addition, key comparisons must be performed in a case insensitive manner.
-
-    This Map must include the set of properties available via the javax.portlet.PortletRequest methods getProperty() and getPropertyNames() except when executing a RENDER_REQUEST or an EVENT_REQUEST.  Within a RENDER_REQUEST or EVENT_REQUEST, the map must exclude the CONTENT-TYPE and CONTENT-LENGTH properties (if they are present in the underlying request)[6.38, 6.119].
-
-    In addition, to provide compatibility with servlets,  the bridge must ensure that the following entries exist in the Map when the bridge is executing during an ACTION_PHASE or RESOURCE_PHASE:  Accept, Accept-Language, Content-Type, and Content-Length[6.39, 6.120].  When executing during a RENDER_PHASE or an EVENT_PHASE the bridge must only ensure that Accept and Accept-Language exist (and as noted above that Content-Type and Content-Length don't exist)[6.38, 6.119].  The values for these headers are derived as follows:
-    Accept:   The value returned for this header must be the result of properly encoding the values returned by getResponseContentTypes() as a string conforming to the  HTTP 1.1 Accept header format as defined by RFC2616 Section 14.1
-
-    Accept-Language:  The value returned for this header must be the result of properly encoding the values returned by getLocales() as a string conforming to the HTTP 1.1 Accept-Language header format as defined by RFC2616 Section 14.4.
-
-    Content-Type   The value returned for this header must be the result of properly encoding the values returned by getContentType() and getCharacterEncoding() as a string conforming to the  HTTP 1.1 Content-Type header format as defined by RFC2616 Section 14.17.  This header value must only be represented if getContentType() returns a non-null value.  The character set portion of this header must only be represented if getCharacterEncoding() returns a non-null value.
-
-    Content-Length:  The value returned for this header must be the result of properly encoding the values returned by getContentLength() as a string conforming to the HTTP 1.1 Content-Length header format as defined by RFC2616 Section 14.13.  This header value must only be represented if getContentLength() returns a value other then -1.
-
-    getRequestHeaderValuesMap(): 
-
-    Return an immutable Map whose keys are the set of request header names included in the current request, and whose values (of type String[]) are all of the value for each header name returned by the underlying request[6.40, 6.41, 6.121,  6.122]. The returned Map must implement the entire contract for an unmodifiable Map as described in the JavaDocs for java.util.Map[6.40, 6.41, 6.121, 6.122]. In addition, key comparisons must be performed in a case insensitive manner.
-
-    This Map must include the set of property names and values available via the javax.portlet.PortletRequest methods getProperty() and getPropertyNames() except when executing a RENDER_REQUEST or an EVENT_REQUEST.  Within a RENDER_REQUEST or EVENT_REQUEST, the map must exclude the CONTENT-TYPE property (if it is present in the underlying request)[6.40, 6.121].
-
-    In addition, to provide compatibility with servlets,  the bridge must ensure that the following entries exist in the Map when the bridge is executing during an ACTION_PHASE or RESOURCE_PHASE:  Accept, Accept-Language, Content-Type, and Content-Length[ 6.41, 6.122].  When executing during a RENDER_PHASE or an EVENT_PHASE the bridge must only ensure that Accept and Accept-Language exist (and as noted above that Content-Type doesn't exist)[6.40, 6.121].  The values for these headers are derived as follows:
-    Accept:   The value returned for this header must be the result of properly encoding the values returned by getResponseContentTypes() as a string conforming to the  HTTP 1.1 Accept header format as defined by RFC2616 Section 14.1
-
-    Accept-Language:  The value returned for this header must be the result of properly encoding the values returned by getLocales() as a string conforming to the HTTP 1.1 Accept-Language header format as defined by RFC2616 Section 14.4.
-
-    Content-Type   The value returned for this header must be the result of properly encoding the values returned by getContentType() and getCharacterEncoding() as a string conforming to the  HTTP 1.1 Content-Type header format as defined by RFC2616 Section 14.17.  This header value must only be represented if getContentType() returns a non-null value.  The character set portion of this header must only be represented if getCharacterEncoding() returns a non-null value.
-
-    Content-Length:  The value returned for this header must be the result of properly encoding the values returned by getContentLength() as a string conforming to the HTTP 1.1 Content-Length header format as defined by RFC2616 Section 14.13.  This header value must only be represented if getContentLength() returns a value other then -1.
-
-    getRequestMap():
-
-    Return a mutable Map representing the request scope attributes for the current application[6.42]. The returned Map must implement the entire contract for a modifiable map as described in the JavaDocs for java.util.Map. Modifications made in the Map must cause the corresponding changes in the set of request scope attributes. Particularly the clear(), remove(), put(), putAll(), and get() operations must take the appropriate action on the underlying data structure[6.42].
-
-    For any of the Map methods that cause an element to be removed from the underlying data structure, the following occurs [6.8]:
-    If the attribute is excluded from the bridge request scope and the attribute's value is a managed-bean, and it has one or more public no-argument void return methods annotated with javax.annotation.PreDestroy, then each such method must be called before the element is removed from the underlying data structure. Elements that are not managed-beans, but do happen to have methods with that annotation must not have those methods called on removal.
-
-    If the attribute is included in the bridge request scope then regardless of whether the attribute is a managed-bean or not, if the attribute's value has one or more public no-argument void return methods annotated with javax.portlet.faces.annotation.PreDestroy, then each such method must be called before the element is removed from the underlying data structure[6.44/nt]. 
-
-
-    Any exception thrown by either of these PreDestroy annotated methods must by caught and not rethrown. The exception may be logged.
-
-    The Map must contain  the set of attributes available via the javax.portlet.PortletRequest methods getAttribute(), getAttributeNames(), removeAttribute(), and setAttribute().  Furthermore these attributes must be managed across portlet requests according to the rules defined in section [5.1.2][6.43].
-    getRequestParameterMap(): 
-
-    Return an immutable Map whose keys are the set of request parameters names included in the current request, and whose values (of type String) are the first (or only) value for each parameter name returned by the underlying request[6.45].  The returned Map must implement the entire contract for an unmodifiable map as described in the JavaDocs for java.util.Map
-
-    This Map must be composed from the set of parameters available via the javax.portlet.PortletRequest methods getParameter() and getParameterNames() plus any additional parameter names encoded in the (query string) of the viewId[6.47]. This later situation primarily occurs when using a default viewId provided by the portlet.
-
-    In addition, during a portlet's RENDER_PHASE, if not otherwise already in the Map, the bridge must include those parameters managed in the corresponding bridge request scope. This always includes the ResponseStateManger.VIEW_STATE_PARAM parameter[6.45]. The preservation/inclusion of the rest of the action parameters depends on the javax.portlet.faces.[portlet name].preserveActionParams portlet context attribute.  If this context attribute exists and has a value of Boolean.TRUE, the additional action parameters are preserved/included[6.46], otherwise they aren't.
-    getRequestParameterNames():
-
-    Return an Iterator over the names of all request parameters included in the current request.  This must be an Iterator over the values returned by the javax.portlet.PortletRequest method getParameterNames()[6.48] plus any additional parameter names encoded in the (query string) of the viewId[6.50].  This later situation primarily occurs when using a default viewId provided by the portlet.
-
-    In addition, during a portlet's RENDER_PHASE, if not otherwise already in the Iterator, the bridge must include those parameter names managed in the corresponding bridge request scope.  This always includes the ResponseStateManger.VIEW_STATE_PARAM parameter[6.48]. The preservation/inclusion of the rest of the action parameters depends on the javax.portlet.faces.[portlet name].preserveActionParams portlet context attribute.  If this context attribute exists and has a value of Boolean.TRUE, the additional action parameters are preserved/included[6.49], otherwise they aren't.
-
-    getRequestParameterValuesMap():
-
-    Return an immutable Map whose keys are the set of request parameters names included in the current request, and whose values (of type String[]) are all of the values for each parameter name returned by the underlying request[6.51]. The returned Map must implement the entire contract for an unmodifiable map as described in the JavaDocs for java.util.Map.
-
-    This must be the set of parameter values available via the javax.portlet.PortletRequest methods getParameterValues() and getParameterNames() plus any additional parameter names encoded in the (query string) of the viewId[6.53]. This later situation primarily occurs when using a default viewId provided by the portlet.
-
-    In addition, during a portlet's RENDER_PHASE, if not otherwise already in the Map, the bridge must include those parameter names managed in the corresponding bridge request scope.  This always includes the ResponseStateManger.VIEW_STATE_PARAM parameter[6.51]. The preservation/inclusion of the rest of the action parameters depends on the javax.portlet.faces.[portlet name].preserveActionParams portlet context attribute[6.52].  If this context attribute exists and has a value of Boolean.TRUE, the additional action parameters are preserved/included, otherwise they aren't.
-    getRequestPathInfo():
-
-    Return the extra path information (if any) included in the request URI; otherwise, return null.  This value must represent the path portion of the current target viewId.
-
-    Because the portlet model doesn't support a (servlet) equivalent notion of pathInfo and servletPath, the bridge must manufacture these values based on the target viewId.  The bridge determines the target view from request parameter(s) it has previously encoded. If this information doesn't exist, the target view is the default viewId defined by the portlet.  The associated pathInfo and servletPath are constructed by determining the servlet mapping of the Faces servlet and constructing the appropriate paths such that they conform to the paths the servlet container generates when processing an http request which targets this view as defined in SRV .4.4 in the Servlet 2.5 specification[6.54].
+    Because the portlet model doesn't support a (servlet) equivalent notion of
+    `pathInfo` and `servletPath`, the bridge must manufacture these values based on
+    the target `viewId`. The bridge determines the target view from request
+    parameter(s) it has previously encoded. If this information doesn't exist,
+    the target view is the default `viewId` defined by the portlet. The associated
+    pathInfo and servletPath are constructed by determining the servlet mapping
+    of the Faces servlet and constructing the appropriate paths such that they
+    conform to the paths the servlet container generates when processing an http
+    request which targets this view as defined in SRV .4.4 in the Servlet 2.5
+    specification<sup>[[6.54](TCK-Tests.html#6.54)]</sup>.
 
     Examples:
-    Faces servlet mapping 	viewId 	servletPath 	pathInfo
-    /faces/*  (prefix mapping) 	myView.jspx 	/faces 	myView.jspx
-    *.jsf     (suffix mapping) 	myView.jspx 	myView.jsf 	null
+    | Faces servlet mapping     | viewId      | servletPath | pathInfo    |
+    |---------------------------|-------------|-------------|-------------|
+    | /faces/* (prefix mapping) | myView.jspx | /faces      | myView.jspx |
+    | *.jsf (suffix mapping)    | myView.jspx | myView.jsf  | null        |
 
-
-    getRequestServletPath():
+- `getRequestServletPath()`:
 
     Returns the part of this request's URL that calls the servlet. This path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include any extra path information or a query string. 
 
