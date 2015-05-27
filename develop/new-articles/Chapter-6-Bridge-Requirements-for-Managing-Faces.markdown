@@ -737,356 +737,793 @@ inputURL correctly, this method must:
     specification<sup>[[6.54](TCK-Tests.html#6.54)]</sup>.
 
     Examples:
-    | Faces servlet mapping     | viewId      | servletPath | pathInfo    |
+
+    <table border="1">
+        <tr>
+            <th>Faces servlet mapping</th>
+            <th>viewId</th>
+            <th>servletPath</th>
+            <th>pathInfo</th>
+        </tr>
+        <tr>
+            <td>/faces/* (prefix mapping)</td>
+            <td>myView.jspx</td>
+            <td>/faces</td>
+            <td>myView.jspx</td>
+        </tr>
+        <tr>
+            <td>*.jsf (suffix mapping)</td>
+            <td>myView.jspx</td>
+            <td>myView.jsf</td>
+            <td>null</td>
+        </tr>
+    </table>
+
+<!--| Faces servlet mapping     | viewId      | servletPath | pathInfo    |
     |---------------------------|-------------|-------------|-------------|
     | /faces/* (prefix mapping) | myView.jspx | /faces      | myView.jspx |
-    | *.jsf (suffix mapping)    | myView.jspx | myView.jsf  | null        |
+    | *.jsf (suffix mapping)    | myView.jspx | myView.jsf  | null        |-->
 
 - `getRequestServletPath()`:
 
-    Returns the part of this request's URL that calls the servlet. This path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include any extra path information or a query string. 
+    Returns the part of this request's URL that calls the servlet. This path
+    starts with a "/" character and includes either the servlet name or a path
+    to the servlet, but does not include any extra path information or a query
+    string.
 
-    This method will return an empty string ("") if the servlet used to process this request was matched using the "/*" pattern.
+    This method will return an empty string ("") if the servlet used to process
+    this request was matched using the "/*" pattern.
 
-    Because the portlet model doesn't support a (servlet) equivalent notion of pathInfo and servletPath, the bridge must manufacture these values based on the target viewId.  The bridge determines the target view from request parameter(s) it has previously encoded. If this information doesn't exist, the target view is the default viewId defined by the portlet.  The associated pathInfo and servletPath are constructed by determining the servlet mapping of the Faces servlet and constructing the appropriate paths such that they conform to the paths the servlet container generates when processing an http request which targets this view as defined in SRV .4.4 in the Servlet 2.5 specification[6.55].
+    Because the portlet model doesn't support a (servlet) equivalent notion of
+    `pathInfo` and `servletPath`, the bridge must manufacture these values based on
+    the target `viewId`. The bridge determines the target view from request
+    parameter(s) it has previously encoded. If this information doesn't exist,
+    the target view is the default `viewId` defined by the portlet. The associated
+    pathInfo and servletPath are constructed by determining the servlet mapping
+    of the Faces servlet and constructing the appropriate paths such that they
+    conform to the paths the servlet container generates when processing an http
+    request which targets this view as defined in SRV .4.4 in the Servlet 2.5
+    specification<sup>[[6.55](TCK-Tests.html#6.55)]</sup>.
 
-    Examples:
-    Faces servlet mapping 	viewId 	servletPath 	pathInfo
-    /faces/*  (prefix mapping) 	myView.jspx 	/faces 	myView.jspx
-    *.jsf     (suffix mapping) 	myView.jspx 	myView.jsf 	null
-    getRequestCharacterEncoding(): 
+        Examples:
 
-    Return the character encoding currently being used to interpret this request.  If called during the ACTION_PHASE or RESOURCE_PHASE, returns the value from the corresponding action request.getCharacterEncoding()[6.57, 6.123].  If called during the RENDER_PHASE or EVENT_PHASE it returns null[6.56, 6.124].
+    <table border="1">
+        <tr>
+            <th>Faces servlet mapping</th>
+            <th>viewId</th>
+            <th>servletPath</th>
+            <th>pathInfo</th>
+        </tr>
+        <tr>
+            <td>/faces/* (prefix mapping)</td>
+            <td>myView.jspx</td>
+            <td>/faces</td>
+            <td>myView.jspx</td>
+        </tr>
+        <tr>
+            <td>*.jsf (suffix mapping)</td>
+            <td>myView.jspx</td>
+            <td>myView.jsf</td>
+            <td>null</td>
+        </tr>
+    </table>
 
-    getRequestContentType(): 
+<!--| Faces servlet mapping     | viewId      | servletPath | pathInfo    |
+    |---------------------------|-------------|-------------|-------------|
+    | /faces/* (prefix mapping) | myView.jspx | /faces      | myView.jspx |
+    | *.jsf (suffix mapping)    | myView.jspx | myView.jsf  | null        |-->
 
-    Return the MIME Content-Type for this request. If called during the ACTION_PHASE or RESOURCE_PHASE, returns the value from the corresponding action request.getContentType()[6.59, 6.125].  If called during he RENDER_PHASE or EVENT_PHASE it returns null[6.58, 6.126].
+- `getRequestCharacterEncoding()`: 
 
-    getResponseCharacterEncoding(): 
+    Return the character encoding currently being used to interpret this
+    request. If called during the `ACTION_PHASE` or `RESOURCE_PHASE`, returns
+    the value from the corresponding action
+    `request.getCharacterEncoding()`<sup>[[6.57](TCK-Tests.html#6.57),
+    [6.123](TCK-Tests.html#6.123)]</sup>. If called during the `RENDER_PHASE` or
+    `EVENT_PHASE` it returns `null`<sup>[[6.56](TCK-Tests.html#6.56),
+    [6.124](TCK-Tests.html#6.124)]</sup>.
 
-    Returns the name of the character encoding (MIME charset) used for the body sent in this response.  If called during the RENDER_PHASE or RESOURCE_PHASE, returns the value from the corresponding render response.getCharacterEncoding()[6.60, 6.127].  If called during the ACTION_PHASE or EVENT_PHASE it throws an IllegalStateException[6.61, 6.128].
+- `getRequestContentType()`: 
 
-    getResponseContentType(): 
+    Return the MIME Content-Type for this request. If called during the
+    `ACTION_PHASE` or `RESOURCE_PHASE`, returns the value from the corresponding
+    action `request.getContentType()`<sup>[[6.59](TCK-Tests.html#6.59),
+    [6.125](TCK-Tests.html#6.125)]</sup>. If called during he `RENDER_PHASE` or
+    `EVENT_PHASE` it returns `null`<sup>[[6.58](TCK-Tests.html#6.58),
+    [6.126](TCK-Tests.html#6.126)]</sup>.
 
-    Return the MIME Content-Type for this response. If called during the RENDER_PHASE or RESOURCE_PHASE, returns the value from the corresponding render response.getContentType()[6.62, 6.129].  If called during the ACTION_PHASE or EVENT_PHASE it throws an IllegalStateException[6.63, 6.130].
-     
-    getResponse():
+- `getResponseCharacterEncoding()`: 
 
-    Return the environment-specific object instance for the current response.  This must be the last response object set as a consequence of calling setResponse() or if none set, the response object passed to this instance's constructor.
+    Returns the name of the character encoding (MIME charset) used for the body
+    sent in this response. If called during the `RENDER_PHASE` or
+    `RESOURCE_PHASE`, returns the value from the corresponding render
+    `response.getCharacterEncoding()`<sup>[[6.60](TCK-Tests.html#6.60),
+    [6.127](TCK-Tests.html#6.127)]</sup>. If called during the `ACTION_PHASE` or
+    `EVENT_PHASE` it throws an
+    `IllegalStateException`<sup>[[6.61](TCK-Tests.html#6.61),
+    [6.128](TCK-Tests.html#6.128)]</sup>.
 
-    setResponse():
+- `getResponseContentType()`: 
 
-    Set the environment-specific response to be returned by subsequent calls to getResponse(). This may be used to install a wrapper for the response.
+    Return the MIME Content-Type for this response. If called during the
+    `RENDER_PHASE` or `RESOURCE_PHASE`, returns the value from the corresponding
+    render `response.getContentType()`<sup>[[6.62](TCK-Tests.html#6.62),
+    [6.129](TCK-Tests.html#6.129)]</sup>. If called during the `ACTION_PHASE` or
+    `EVENT_PHASE` it throws an
+    `IllegalStateException`<sup>[[6.63](TCK-Tests.html#6.63),
+    [6.130](TCK-Tests.html#6.130)]</sup>.
 
-    redirect():
+- `getResponse()`:
 
-    Redirect a request to the specified URL.
+    Return the environment-specific object instance for the current response.
+    This must be the last response object set as a consequence of calling
+    `setResponse()` or if none set, the `response` object passed to this
+    instance's constructor.
 
-    Because the portlet redirect semantics differ from servlets the bridge implements the following support:
+- `setResponse()`:
 
+    Set the environment-specific response to be returned by subsequent calls to
+    `getResponse()`. This may be used to install a wrapper for the response.
 
-    During an Action Request[6.64]:
-
-        if the redirect target url starts with '#', references a resource outside of this web application, or contains the query string parameter javax.portlet.faces.DirectLink with a value of "true", call ActionResponse.sendRedirect() passing the url.
-
+- `redirect()`:
+<pre></pre>
+    Redirect a request to the specified `URL`.
+<pre></pre>
+    Because the portlet redirect semantics differ from servlets the bridge
+    implements the following support:
+<pre></pre>
+    - During an Action Request<sup>[[6.64](TCK-Tests.html#6.64)]</sup>:
+<pre></pre>
+        - if the redirect target url starts with '#', references a resource
+        outside of this web application, or contains the query string parameter
+        `javax.portlet.faces.DirectLink` with a value of "`true`", call
+        `ActionResponse.sendRedirect()` passing the `url`.
+<pre></pre>
         This causes the client to redirect from the consumer page to this target.
-
-        otherwise, ensure that the action response is set to cause the subsequent render to target this redirect view. Typically this merely involves ensuring that encodeActionURL() has been called on the target.
-
-        This is equivalent to a regular faces navigation, the client doesn't redirect, rather the consumer page renders the portlet's new target.
-
-        Note:  in either case, FacesContext.responseComplete() must be called before returning.
-
-    During an Event Request[6.131]:
-        if the redirect target url starts with '#', references a resource outside of this web application, or contains the query string parameter javax.portlet.faces.DirectLink with a value of "true".
-
+<pre></pre>
+        - otherwise, ensure that the action response is set to cause the
+        subsequent render to target this redirect view. Typically this merely
+        involves ensuring that `encodeActionURL()` has been called on the
+        target.
+<pre></pre>
+        This is equivalent to a regular faces navigation, the client doesn't
+        redirect, rather the consumer page renders the portlet's new target.
+<pre></pre>
+        Note: in either case, `FacesContext.responseComplete()` must be called
+        before returning.
+<pre></pre>
+    - During an Event Request<sup>[[6.131](TCK-Tests.html#6.131)]</sup>:
+<pre></pre>
+        - if the redirect target url starts with '#', references a resource
+        outside of this web application, or contains the query string parameter
+        `javax.portlet.faces.DirectLink` with a value of "`true`".
+<pre></pre>
+         The redirect is ignored.
+<pre></pre>
+        - otherwise, ensure that the event response is set to cause the
+        subsequent render to target this redirect view. Typically this merely
+        involves ensuring that `encodeActionURL()` has been called on the
+        target.
+<pre></pre>
+        This is equivalent to a regular faces navigation, the client doesn't
+        redirect, rather the consumer page renders the portlet's new target.
+<pre></pre>
+        Note: in either case, `FacesContext.responseComplete()` must be called
+        before returning.
+<pre></pre>
+    - During a Render Request:
+<pre></pre>
+        - if the redirect target url starts with '#', references a resource
+        outside of this web application, or contains the query string parameter
+        `javax.portlet.faces.DirectLink` with a value of "`true`".
+<pre></pre>
         The redirect is ignored.
+<pre></pre>
+        - if the redirect target url references a nonFaces view then throw an
+        `IllegalStateException`<sup>[[6.66](TCK-Tests.html#6.66)]</sup>.
+<pre></pre>
+        - otherwise, encode the redirect target and call
+        `FacesContext.responseComplete()` to ensure the bridge will cease
+        rendering its current view prior to returning any response content.
+        Instead, render the redirect target and returns its output as the
+        response<sup>[[6.65](TCK-Tests.html#6.65)]</sup>. In addition, support
+        this behavior so that subsequent rerenders will ignore the (original)
+        request target and instead render with the (cached) redirect target URL
+        and its preserved saved (render) view state. Special care is needed in
+        managing public render parameters during a render redirect. The bridge
+        must ensure that the public render parameters passed to this request are
+        carried forward and processed during the rendering of the redirect that
+        occurs within the same render request. However, if subsequent rerender
+        (requests), the bridge must not use any of the public render parameters
+        used in the initial render (redirect) but rather use the public render
+        parameters that are reflected in the (new) request.
+<pre></pre>
+    - During a Resource Request<sup>[[nt](TCK-Tests.html#nt)]</sup>:
+<pre></pre>
+        The redirect is ignored. Take no action.
+
+#### <a name="6.1.3.2">6.1.3.2 Methods that conform with Faces 1.2 Javadoc
+
+The following methods require an implementation that are adequately described in
+the Faces 1.2 ExternalContext javadoc. This includes the implicit requirement
+that each access to the portlet `request` or `response` object be done by using the
+last `request` or `response` object set using the corresponding `setRequest()` or
+`setResponse()` methods or the original objects passed to the constructor if none
+have been directly set.
+
+- `encodeNamespace()`:
+
+    Return the specified name, after prefixing it with a namespace that ensures
+    that it will be unique within the context of a particular page. The returned
+    value must be the input value prefixed by the value returned by the
+    `javax.portlet.RenderResponse` method
+    `getNamespace()`<sup>[[6.67](TCK-Tests.html#6.67)]</sup>.
+
+- `getApplicationMap()`:
+
+    Return a mutable `Map` representing the application scope attributes for the
+    current application<sup>[[6.68](TCK-Tests.html#6.68)]</sup>. This must be
+    the set of attributes available via the `javax.portlet.PortletContext`
+    methods `getAttribute()`, `getAttributeNames()`, `removeAttribute()`, and
+    `setAttribute()`. The returned `Map` must implement the entire contract for
+    a modifiable map as described in the JavaDocs for `java.util.Map`.
+    Modifications made in the `Map` must cause the corresponding changes in the
+    set of application scope attributes. Particularly the `clear()`, `remove()`,
+    `put()`, `putAll()`, and `get()` operations must take the appropriate action
+    on the underlying data structure.
+
+    For any of the `Map` methods that cause an element to be removed from the
+    underlying data structure, the following action regarding managed-beans must
+    be taken. If the element to be removed is a managed-bean, and it has one or
+    more public no-argument void return methods annotated with
+    `javax.annotation.PreDestroy`, each such method must be called before the
+    element is removed from the underlying data structure. Elements that are not
+    managed-beans, but do happen to have methods with that annotation must not
+    have those methods called on removal. Any exception thrown by the
+    `PreDestroy` annotated methods must by caught and not rethrown. The
+    exception may be logged.
+
+- `getAuthType()`:
+
+    Return the name of the authentication scheme used to authenticate the
+    current user, if any; otherwise, return
+    `null`<sup>[[6.69](TCK-Tests.html#6.69)]</sup>. For standard authentication
+    schemes, the returned value will match one of the following constants:
+    `BASIC_AUTH`, `CLIENT_CERT_AUTH`, `DIGEST_AUTH`, or `FORM_AUTH`. This must
+    be the value returned by the `javax.portlet.http.PortletRequest` method
+    `getAuthType()`.
+
+- `getContext()`:
+
+    Return the application environment object instance for the current
+    application. This must be the current application's
+    `javax.portlet.PortletContext`
+    instance<sup>[[6.70](TCK-Tests.html#6.70)]</sup>.
+
+- `getInitParameter()`:
+
+    Return the value of the specified application initialization parameter (if
+    any). This must be the result of the `javax.portlet.PortletContext` method
+    `getInitParameter(name)`<sup>[[6.71](TCK-Tests.html#6.71)]</sup>.
+
+- `getInitParameterMap()`:
+
+    Return an immutable `Map` whose keys are the set of application
+    initialization parameter names configured for this application, and whose
+    values are the corresponding parameter
+    values<sup>[[6.72](TCK-Tests.html#6.72)]</sup>. The returned `Map` must
+    implement the entire contract for an unmodifiable map as described in the
+    JavaDocs for `java.util.Map`. This result must be as if it were synthesized
+    by calling the `javax.portlet.PortletContext` method
+    `getInitParameterNames`, and putting each configured parameter name/value
+    pair into the result.
+
+- `getRemoteUser()`:
+
+    Return the login name of the user making the current request if any;
+    otherwise, return `null`. This must be the value returned by the
+    `javax.portlet.http.PortletRequest` method
+    `getRemoteUser()`<sup>[[6.73](TCK-Tests.html#6.73)]</sup>.
+
+- `getRequestContextPath()`:
+
+    Return the portion of the request URI that identifies the web application
+    context for this request. This must be the value returned by the
+    `javax.portlet.PortletRequest` method
+    `getContextPath()`<sup>[[6.74](TCK-Tests.html#6.74)]</sup>.
+
+- `getRequestCookieMap()`:
+
+    Return an immutable `Map` whose keys are the set of cookie names included in
+    the current request, and whose values (of type `javax.servlet.http.Cookie`)
+    are the first (or only) cookie for each cookie name returned by the
+    underlying request. The returned `Map` must implement the entire contract
+    for an unmodifiable map as described in the JavaDocs for `java.util.Map`.
+
+    This must be an empty Map<sup>[[6.75](TCK-Tests.html#6.75)]</sup>.
 
-        otherwise, ensure that the event response is set to cause the subsequent render to target this redirect view. Typically this merely involves ensuring that encodeActionURL() has been called on the target.
+- `getRequestLocale()`:
 
-        This is equivalent to a regular faces navigation, the client doesn't redirect, rather the consumer page renders the portlet's new target.
-
-        Note:  in either case, FacesContext.responseComplete() must be called before returning.
-
-    During a Render Request:
-        if the redirect target url starts with '#', references a resource outside of this web application, or contains the query string parameter javax.portlet.faces.DirectLink with a value of "true".
-
-        The redirect is ignored.
-        if the redirect target url references a nonFaces view then throw an IllegalStateException[6.66].
-
-        otherwise, encode the redirect target and call  FacesContext.responseComplete()to ensure the bridge will cease rendering its current view prior to returning any response content.  Instead, render the redirect target and returns its output as the response[6.65]. In addition, support this behavior so that  subsequent rerenders will ignore the (original) request target and instead render with the (cached) redirect target URL and its preserved saved (render) view state.  Special care is needed in managing public render parameters during a render redirect.  The bridge must ensure that the public render parameters passed to this request are carried forward and processed during the rendering of the redirect that occurs within the same render request.   However,  if subsequent rerender (requests), the bridge must not use any of the public render parameters used in the initial  render (redirect) but rather use the public render parameters that are reflected in the (new) request.  
-
-    During a Resource Request[nt]:
-
-        The redirect is ignored.  Take no action.
-
-6.1.3.2 Methods that conform with Faces 1.2 Javadoc
-The following methods require an implementation that are adequately described in the Faces 1.2 ExternalContext javadoc. This includes the implicit requirement that each access to the portlet request or response object be done by using the last request or response object set using the corresponding setRequest() or setResponse() methods or the original objects passed to the constructor if none have been directly set.
-
-    encodeNamespace():
-
-    Return the specified name, after prefixing it with a namespace that ensures that it will be unique within the context of a particular page.  The returned value must be the input value prefixed by the value returned by the javax.portlet.RenderResponse method getNamespace()[6.67].
-    getApplicationMap():
-
-    Return a mutable Map representing the application scope attributes for the current application[6.68]. This must be the set of attributes available via the javax.portlet.PortletContext methods getAttribute(), getAttributeNames(), removeAttribute(), and setAttribute().  The returned Map must implement the entire contract for a modifiable map as described in the JavaDocs for java.util.Map. Modifications made in the Map must cause the corresponding changes in the set of application scope attributes. Particularly the clear(), remove(), put(), putAll(), and get() operations must take the appropriate action on the underlying data structure.
-
-    For any of the Map methods that cause an element to be removed from the underlying data structure, the following action regarding managed-beans must be taken. If the element to be removed is a managed-bean, and it has one or more public no-argument void return methods annotated with javax.annotation.PreDestroy, each such method must be called before the element is removed from the underlying data structure. Elements that are not managed-beans, but do happen to have methods with that annotation must not have those methods called on removal. Any exception thrown by the PreDestroy annotated methods must by caught and not rethrown. The exception may be logged.
-
-    getAuthType():
-
-    Return the name of the authentication scheme used to authenticate the current user, if any; otherwise, return null[6.69]. For standard authentication schemes, the returned value will match one of the following constants: BASIC_AUTH, CLIENT_CERT_AUTH, DIGEST_AUTH, or FORM_AUTH.  This must be the value returned by the javax.portlet.http.PortletRequest method getAuthType().
-
-    getContext():
-
-    Return the application environment object instance for the current application.  This must be the current application's javax.portlet.PortletContext instance[6.70].
-
-    getInitParameter():
-
-    Return the value of the specified application initialization parameter (if any).  This must be the result of the javax.portlet.PortletContext method getInitParameter(name)[6.71].
-
-    getInitParameterMap():
-
-    Return an immutable Map whose keys are the set of application initialization parameter names configured for this application, and whose values are the corresponding parameter values[6.72]. The returned Map must implement the entire contract for an unmodifiable map as described in the JavaDocs for java.util.Map.  This result must be as if it were synthesized by calling the javax.portlet.PortletContext method getInitParameterNames, and putting each configured parameter name/value pair into the result.
-
-    getRemoteUser():
-
-    Return the login name of the user making the current request if any; otherwise, return null.  This must be the value returned by the javax.portlet.http.PortletRequest method getRemoteUser()[6.73].
-
-    getRequestContextPath():
-
-    Return the portion of the request URI that identifies the web application context for this request.  This must be the value returned by the javax.portlet.PortletRequest method getContextPath()[6.74].
-
-    getRequestCookieMap():
-
-    Return an immutable Map whose keys are the set of cookie names included in the current request, and whose values (of type javax.servlet.http.Cookie) are the first (or only) cookie for each cookie name returned by the underlying request.  The returned Map must implement the entire contract for an unmodifiable map as described in the JavaDocs for java.util.Map.
-
-    This must be an empty Map[6.75].
-
-    getRequestLocale():
-
-    Return the preferred Locale in which the client will accept content.  This must be the value returned by the javax.portlet.PortletRequest method getLocale()[6.76].
-
-    getRequestLocales():
-
-    Return an Iterator over the preferred Locales specified in the request, in decreasing order of preference.  This must be an Iterator over the values returned by the javax.portlet.PortletRequest method getLocales()[6.77].
-
-    getResource():
-
-    Return a URL for the application resource mapped to the specified path, if it exists; otherwise, return null.  This must be the value returned by the javax.portlet.PortletContext method getResource(path)[6.78].
-
-    getResourceAsStream():
-
-    Return an InputStream for an application resource mapped to the specified path, if it exists; otherwise, return null.  This must be the value returned by the javax.portlet.PortletContext method getResourceAsStream(path)[6.79].
-
-    getResourcePaths():
-
-    Return the Set of resource paths for all application resources whose resource path starts with the specified argument.  This must be the value returned by the javax.portlet.PortletContext method getResourcePaths(path)[6.80].
-
-    setResponseCharacterEncoding():
-
-    Sets the character encoding (MIME charset) of the response being sent to the client, for example, to UTF-8.  This method must take no action[6.81].
-
-    getSession():
-
-    If the create parameter is true, create (if necessary) and return a session instance associated with the current request. If the create parameter is false return any existing session instance associated with the current request, or return null if there is no such session.  This method must return the result of calling getPortletSession(create) on the underlying javax.portlet.PortletRequest instance[6.82].
-    getSessionMap():  
-
-    Return a mutable Map representing the session (PORTLET_SCOPE) scope attributes for the current portlet[6.83]. The returned Map must implement the entire contract for a modifiable map as described in the JavaDocs for java.util.Map. Modifications made in the Map must cause the corresponding changes in the set of session scope attributes. Particularly the clear(), remove(), put(), and get() operations must take the appropriate action on the underlying data structure. Accessing attributes via this Map must cause the creation of a session associated with the current request, if such a session does not already exist.
-
-    For any of the Map methods that cause an element to be removed from the underlying data structure, the following action regarding managed-beans must be taken. If the element to be removed is a managed-bean, and it has one or more public no-argument void return methods annotated with javax.annotation.PreDestroy, each such method must be called before the element is removed from the underlying data structure[6.84]. Elements that are not managed-beans, but do happen to have methods with that annotation must not have those methods called on removal. Any exception thrown by the PreDestroy annotated methods must by caught and not rethrown. The exception may be logged.
-    This Map must be composed from the set of attributes that exist in the PORTLET_SCOPE available via the javax.portlet.PortletSession methods getAttribute(), getAttributeNames(), removeAttribute(), and setAttribute(). 
-
-    getUserPrincipal():
-
-    Return the Principal object containing the name of the current authenticated user, if any; otherwise, return null.  This must be the value returned by the javax.portlet.http.PortletRequest method getUserPrincipal()[6.85].
-
-    isUserInRole():
-
-    Return true if the currently authenticated user is included in the specified role. Otherwise, return false.  This must be the value returned by the javax.portlet.http.PortletRequest method isUserInRole(role).
-
-    log():
-
-    Log the specified message to the application object.  This must be performed by calling the equivalent form of the javax.portlet.PortletContext method log().
-
-
-6.2 ViewHandler
-The Faces ViewHandler is the pluggability mechanism that allows implementations to extend the JavaServer Faces specification to provide their own handling of the activities in the Render Response and Restore View phases of the request processing lifecycle. This allows for implementations to support different response generation technologies, as well as different state saving/restoring approaches.
-
-The bridge is required to provide an implementation of the ViewHandler[nt].  This implementation must be configured in the faces-config.xml file packaged into the bridge's jar file[nt]. The implementation must implement the decorator design pattern described in section 10.4.5 in the JSF 1.2 specification[nt].  
-
-Because configuration is limited to using the faces-config.xml file packaged into the bridge's jar file, ViewHandler order can't be defined if other Faces extensions relying on the same ViewHandler configuration technique exist in the environment.  The bridge implementation must safely cohabit with these other ViewHandlers regardless of precedence order in the particular runtime environment they execute in[nt].  To satisfy this the bridge must delegate to its parent ViewHandler for all methods unless otherwise indicated to do so by a configuration parameter.  For most methods this will be a strict delegation with no pre/post processing of the call.  If pre/post processing is necessary it must be done in a manner that doesn't interfere with the normally processing of the other ViewHandlers in the chain. To facilitate this, implementations are encouraged to subclass javax.faces.application.ViewHandlerWrapper.
-
-Furthermore, where ever the bridge provides bridge specific ViewHandler behavior, it must ensure this behavior is only executed when executing a request via the bridge[nt].  Because the ViewHandler is a general Faces extension the bridge's ViewHandler methods will be called if the bridge is in this application's classpath regardless of whether the current request has been dispatched through the bridge.
-6.2.1 Method Requirements
-The following ViewHandler methods must meet specific bridge requirements (i.e. have expected pre/post delegation processing):
-
-    createView():
-    createView() is responsible for returning the UIViewRoot for the newly created view tree. The bridge, during a portlet request, should return a UIViewRoot from its createView() that supports (is annotated by)  javax.portlet.faces.annotation.PortletNamingContainer. Such a NamingContainer ensures all ids in the tree are unique on a per portlet (instance) basis [6.6].  This type of UIViewRoot must be returned unless the bridge delegates UIViewRoot creation and the result of that delegation is a UIViewRoot whose implementation class (not instanceof) is not javax.faces.component.UIViewRoot[6.86].
-
-    renderView():
-    The bridge must implement renderView as follows:
-
-    If the request isn't a portlet request, delegate renderView to the parent and return the result without taking any further action. Otherwise[6.87]:
-        DEFAULT behavior:  return the result by delegating the call to its parent within a try/catch block that catches Throwable.  If and only if a Throwable is caught, render the view directly accordingly to the rules described below.
-        ALWAYS_DELEGATE behavior:  return the result by delegating the call to its parent regardless of whether the delegation results in raising a Throwable.  I.e. never render the view accordingly to the rules described below.
-        NEVER_DELEGATE behavior: never delegate the call to its parent.  Rather always render the view directly according to the rules described below.
-
-        where DEFAULT, ALWAYS_DELEGATE, and NEVER_DELEGATE are the corresponding values of the per portlet bridge initialization attribute renderPolicy as described in [3.2].  If no such setting exists renderView implements DEFAULT behavior.
-
-    When directly rendering the view, the bridge must render in a manner that provides the semantics defined by section 7.5.2 in the JSF 1.2 specification. Specifically it must attempt to ensure that it is possible for the markup generated by the view to be interleaved with native markup in a manner that preserves order as indicated in that section.  Unfortunately, such interleaving can only be accomplished using Faces implementation dependent code and hence isn't provided natively by the bridge.  Rather, the bridge defines mechanism(s) that allow a portlet to configure an appropriate render handler to support this behavior.  There are two mechanisms  [see Chapter 7]:
-        the portlet 1.0 bridge mechanism that relied on configuring a servlet filter that wraps the response with a wrapper that supports the Faces implementation specific APIs for handling the JSP write before/after response behavior.
-        provide a Portlet 2.0 PortletResponseWrapper which supports the same APIs.
-
-
-    To support these mechanisms, the bridge's render(), prior to calling dispatch()  must:
-        Add an attribute named javax.portlet.faces.RenderContentAfterView with a java.lang.Boolean value of Boolean.TRUE to the request object[6.88].
-        Cache the current response (known to the Faces ExternalContext) so it can be reset later.
-        Create an instance of a PortletResponseWrapper object that implements javax.portlet.faces.BridgeWriteBehindResponse and set it in the Faces ExternalContext by calling ExternalContext.setResponse()[6.132]
-
-        If an instance class is configured [see 7.2], it must be used[6.133, 6.134].
-
-    Immediately following the dispatch():
-         Reset the Faces ExternalContext response by calling ExternalContext.setResponse() with the (current) response cached in the step above.
-         If the BridgeWriteBehindResponse object's hasFacesWriteBehindMarkup() method returns true and something (servlet filter) hasn't already set the javax.portlet.faces.AfterViewContent attribute, support the write behind behavior by holding onto the BridgeWriteBehindResponse object or the content it is buffering until after the view has been rendered. Otherwise write the content directly to the response.
-
-    After the dispatch and after rendering the view (when one hasn't already written the content directly to the response):
-        retrieve buffered content that should be positioned after the rendered view from the request attribute javax.portlet.faces.AfterViewContent (via a call to ExternalContext.getRequestMap()).  If non-null, the type of this value is either byte[] or a char[]. 
-        If non-null, copy the content into the response and remove the attribute from the request Map[6.89].
-        (otherwise) if a BridgeWriteBehindResponse has been used and your bridge implementation doesn't rely on this request attribute to cache the content until after the view is rendered, output its buffered content.
-
-6.2.2 Other Methods
-The following ViewHandler methods have no specific bridge requirements and hence its expected they will always be delegated.  If a bridge implementation does more then merely delegate if must satisfy the above cohabitation requirements.  This is particularly true for writeState as overriding this commonly interferes with the application developers desired state management.  If getActionURL is modified the bridge must ensure the resulting String it returns is a valid URL.  In particular it can't be an URL derived from a portletResponse.createActionURL().
-
-    calculateCharacterEncoding()
-    calculateLocale()
-    calculateRenderKitId()
-    getActionURL()
-    getResourceURL()
-    initView()
-    restoreView()
-    writeState()
-
-6.3 StateManager
-To properly maintain references to (updated) view state the bridge will likely have to provide its own StateManager in order to override the state writing process allowing it to inspect and preserve (update) the value of the VIEW_STATE_PARAM parameter it manages in its extended bridge scope [5.1.2.2].  For example the bridge can override StateManager.writeState(FacesContext context, Object state):
-
-    replace the ResponseWriter with one it manufactures that writes to a StringWriter
-    delegate the call so the state is output.
-    copy the output back into the original ResponseWriter
-    parse the output in the StringWriter locating the VIEW_STATE_PARAM parameter and value
-    copy the value and place it on a request attribute for the bridge to process later
-
-6.4 Phase Listeners
-The bridge must prevent the Faces action phases (ApplyRequestValues, ProcessValidations, UpdateModel, and InvokeApplication) from executing if processing an event or rendering in a restored bridge request scope[6.90] [5.1.2].  I.e. during either a portlet's EVENT_PHASE or RENDER_PHASE, when the Faces Lifecycle is executed to restore the view, the bridge must ensure the lifecycle falls directly through to render after the view is restored. This is most conveniently supported by implementing a PhaseListener and calling FacesContext.renderResponse() when invoked in the RestoreView phase.
-
-6.5 Expression Language Resolution
-Faces relies on the Unified Expression Language architecture to ensure consistent EL evaluation in a JSP page where JSP expressions and Faces expressions can coexist.  During a JSP EL resolution Faces extends the JSP resolvers to process/expose Faces unique variables.  During a Faces EL resolution Faces provides the base resolvers that not only expose the Faces unique variables but also those that the JSP resolvers otherwise have access to during the scope of the page.  In a servlet environment, this ensures evaluation consistency for the same expression whether within a JSP expression or a Faces expression.  However because the EL types are resolved by different resolvers in different contexts when running in a portlet environment evaluation isn't always consistent.  Its important to be aware of the following subtle differences in implicit object evaluation.
-
-6.5.1 Implicit Objects
-When running in a JSP context, JSP provides an ELResolver that recognizes and resolves the following implicit objects[6.100]:
-applicationScope -> a Map that maps application-scoped attribute names to their values
-cookie -> a Map that maps cookie names to a single Cookie object. Cookies are retrieved according to the semantics of HttpServletRequest.getCookies(). 
-header -> a Map that maps header names to a single String header value (obtained by calling HttpServletRequest.getHeader(String name))
-headerValues -> a Map that maps header names to a String[] of all values for that header (obtained by calling HttpServletRequest.getHeaders(String))
-initParam -> a Map that maps context initialization parameter names to their String parameter value (obtained by calling ServletContext.getInitParameter(String name))
-pageContext -> the PageContext
-pageScope -> a Map that maps page-scoped attribute names to their values
-param -> a Map that maps parameter names to a single String parameter value (obtained by calling ServletRequest.getParameter(String name))
-paramValues -> Map that maps parameter names to a String[] of all values for that parameter (obtained by calling ServletRequest.getParameterValues(String name))
-requestScope -> a Map that maps request-scoped attribute names to their values
-sessionScope -> a Map that maps session-scoped attribute names to their values
-
-When the <portlet:defineObjects> tag is used within this JSP page, the following variables are exposed and will be implicitly resolved by this JSP EL resolver[6.100]:
-
-portletConfig: object of type javax.portlet.PortletConfig
-actionRequest: object of type javax.portlet.ActionRequest (only accessible in an ActionRequest)
-actionResponse: object of type javax.portlet.ActionResponse (only accessible in an ActionRequest)
-eventRequest: object of type javax.portlet.EventRequest (only accessible in an EventRequest)
-eventResponse: object of type javax.portlet.EventResponse (only accessible in an EventRequest)
-renderRequest: object of type javax.portlet.RenderRequest (only accessible in an RenderRequest)
-renderResponse: object of type javax.portlet.RenderResponse (only accessible in an RenderRequest)
-resourceRequest: object of type javax.portlet.ResourceRequest (only accessible in an ResourceRequest)
-resourceResponse: object of type javax.portlet.ResourceResponse (only accessible in an ResourceRequest)
-portletSession: current PortletSession object.
-portletSessionScope:  immutable Map containing PortletSession attribute/values at PORTLET_SCOPE.
-portletPreferences:  current PortletPreferences object.
-portletPreferencesValues: immutable Map containing entries equivalent to PortletPreferences.getMap().
-
-Faces extends this behavior by providing its own ELResolver to recognize and resolve the following implicit objects[6.100]:
-
-facesContext -> the FacesContext for this request
-view -> facesContext.getViewRoot()
+    Return the preferred `Locale` in which the client will accept content. This
+    must be the value returned by the `javax.portlet.PortletRequest` method
+    `getLocale()`<sup>[[6.76](TCK-Tests.html#6.76)]</sup>.
+
+- `getRequestLocales()`:
+
+    Return an `Iterator` over the preferred `Locale`s specified in the request,
+    in decreasing order of preference. This must be an `Iterator` over the
+    values returned by the `javax.portlet.PortletRequest` method
+    `getLocales()`<sup>[[6.77](TCK-Tests.html#6.77)]</sup>.
+
+- `getResource()`:
+
+    Return a `URL` for the application resource mapped to the specified path, if
+    it exists; otherwise, return `null`. This must be the value returned by the
+    `javax.portlet.PortletContext` method
+    `getResource(path)`<sup>[[6.78](TCK-Tests.html#6.78)]</sup>.
+
+- `getResourceAsStream()`:
+
+    Return an `InputStream` for an application resource mapped to the specified
+    path, if it exists; otherwise, return `null`. This must be the value
+    returned by the `javax.portlet.PortletContext` method
+    `getResourceAsStream(path)`<sup>[[6.79](TCK-Tests.html#6.79)]</sup>.
+
+- `getResourcePaths()`:
+
+    Return the `Set` of resource paths for all application resources whose
+    resource path starts with the specified argument. This must be the value
+    returned by the `javax.portlet.PortletContext` method
+    `getResourcePaths(path)`<sup>[[6.80](TCK-Tests.html#6.80)]</sup>.
+
+- `setResponseCharacterEncoding()`:
+
+    Sets the character encoding (MIME charset) of the response being sent to the
+    client, for example, to UTF-8. This method must take no
+    action<sup>[[6.81](TCK-Tests.html#6.81)]</sup>.
+
+- `getSession()`:
+
+    If the `create` parameter is `true`, create (if necessary) and return a
+    session instance associated with the current request. If the `create`
+    parameter is `false` return any existing session instance associated with
+    the current request, or return `null` if there is no such session. This
+    method must return the result of calling `getPortletSession(create)` on the
+    underlying `javax.portlet.PortletRequest`
+    instance<sup>[[6.82](TCK-Tests.html#6.82)]</sup>.
+
+- `getSessionMap()`:  
+
+    Return a mutable `Map` representing the session (`PORTLET_SCOPE`) scope
+    attributes for the current portlet<sup>[[6.83](TCK-Tests.html#6.83)]</sup>.
+    The returned `Map` must implement the entire contract for a modifiable map
+    as described in the JavaDocs for `java.util.Map`. Modifications made in the
+    Map must cause the corresponding changes in the set of session scope
+    attributes. Particularly the `clear()`, `remove()`, `put()`, and `get()`
+    operations must take the appropriate action on the underlying data
+    structure. Accessing attributes via this `Map` must cause the creation of a
+    session associated with the current request, if such a session does not
+    already exist.
+
+    For any of the `Map` methods that cause an element to be removed from the
+    underlying data structure, the following action regarding managed-beans must
+    be taken. If the element to be removed is a managed-bean, and it has one or
+    more public no-argument void return methods annotated with
+    `javax.annotation.PreDestroy`, each such method must be called before the
+    element is removed from the underlying data
+    structure<sup>[[6.84](TCK-Tests.html#6.84)]</sup>. Elements that are not
+    managed-beans, but do happen to have methods with that annotation must not
+    have those methods called on removal. Any exception thrown by the
+    `PreDestroy` annotated methods must by caught and not rethrown. The
+    exception may be logged.
+
+    This `Map` must be composed from the set of attributes that exist in the
+    `PORTLET_SCOPE` available via the `javax.portlet.PortletSession` methods
+    `getAttribute()`, `getAttributeNames()`, `removeAttribute()`, and
+    `setAttribute()`.
+
+- `getUserPrincipal()`:
+
+    Return the `Principal` object containing the name of the current
+    authenticated user, if any; otherwise, return `null`. This must be the value
+    returned by the `javax.portlet.http.PortletRequest` method
+    `getUserPrincipal()`<sup>[[6.85](TCK-Tests.html#6.85)]</sup>.
+
+- `isUserInRole()`:
+
+    Return `true` if the currently authenticated user is included in the
+    specified role. Otherwise, return `false`. This must be the value returned
+    by the `javax.portlet.http.PortletRequest` method `isUserInRole(role)`.
+
+- `log()`:
+
+    Log the specified message to the application object. This must be performed
+    by calling the equivalent form of the `javax.portlet.PortletContext` method
+    `log()`.
+
+## <a name="6.2"></a>6.2 ViewHandler
+
+The Faces `ViewHandler` is the pluggability mechanism that allows implementations
+to extend the JavaServer Faces specification to provide their own handling of
+the activities in the Render Response and Restore View phases of the request
+processing lifecycle. This allows for implementations to support different
+response generation technologies, as well as different state saving/restoring
+approaches.
+
+The bridge is required to provide an implementation of the
+`ViewHandler`<sup>[[nt](TCK-Tests.html#nt)]</sup>. This implementation must be
+configured in the `faces-config.xml` file packaged into the bridge's `jar`
+file<sup>[[nt](TCK-Tests.html#nt)]</sup>. The implementation must implement the
+decorator design pattern described in section 10.4.5 in the JSF 1.2
+specification<sup>[[nt](TCK-Tests.html#nt)]</sup>.
+
+Because configuration is limited to using the `faces-config.xml` file packaged
+into the bridge's `jar` file, `ViewHandler` order can't be defined if other
+Faces extensions relying on the same `ViewHandler` configuration technique exist
+in the environment. The bridge implementation must safely cohabit with these
+other `ViewHandler`s regardless of precedence order in the particular runtime
+environment they execute in<sup>[[nt](TCK-Tests.html#nt)]</sup>. To satisfy this
+the bridge must delegate to its parent `ViewHandler` for all methods unless
+otherwise indicated to do so by a configuration parameter. For most methods this
+will be a strict delegation with no pre/post processing of the call. If pre/post
+processing is necessary it must be done in a manner that doesn't interfere with
+the normally processing of the other `ViewHandler`s in the chain. To facilitate
+this, implementations are encouraged to subclass
+`javax.faces.application.ViewHandlerWrapper`.
+
+Furthermore, where ever the bridge provides bridge specific `ViewHandler`
+behavior, it must ensure this behavior is only executed when executing a request
+via the bridge<sup>[[nt](TCK-Tests.html#nt)]</sup>. Because the `ViewHandler` is
+a general Faces extension the bridge's `ViewHandler` methods will be called if
+the bridge is in this application's classpath regardless of whether the current
+request has been dispatched through the bridge.
+
+### <a name="6.2.1"></a>6.2.1 Method Requirements
+
+The following `ViewHandler` methods must meet specific bridge requirements (i.e.
+have expected pre/post delegation processing):
+
+- `createView()`: is responsible for returning the `UIViewRoot` for the newly
+    created view tree. The bridge, during a portlet request, should return a
+    `UIViewRoot` from its `createView()` that supports (is annotated by)
+    `javax.portlet.faces.annotation.PortletNamingContainer`. Such a
+    `NamingContainer` ensures all ids in the tree are unique on a per portlet
+    (instance) basis
+    [6.6](Chapter-6-Bridge-Requirements-for-Managing-Faces.html#6.6). This type
+    of `UIViewRoot` must be returned unless the bridge delegates `UIViewRoot`
+    creation and the result of that delegation is a `UIViewRoot` whose
+    implementation class (not `instanceof`) is **not**
+    `javax.faces.component.UIViewRoot`<sup>[[6.86](TCK-Tests.html#6.86)]</sup>.
+
+- `renderView()`: The bridge must implement `renderView` as follows:
+<pre></pre>
+    If the request isn't a portlet request, delegate `renderView` to the parent
+    and return the result without taking any further action.
+    Otherwise<sup>[[6.87](TCK-Tests.html#6.87)]</sup>:
+<pre></pre>
+    - `DEFAULT` behavior: return the result by delegating the call to its parent
+    within a try/catch block that catches `Throwable`. If and only if a
+    `Throwable` is caught, render the view directly accordingly to the rules
+    described below.
+    - `ALWAYS_DELEGATE` behavior: return the result by delegating the call to
+    its parent regardless of whether the delegation results in raising a
+    `Throwable`. I.e. never render the view accordingly to the rules described
+    below.
+    - `NEVER_DELEGATE` behavior: never delegate the call to its parent. Rather
+    always render the view directly according to the rules described below.
+<pre></pre>
+    Where `DEFAULT`, `ALWAYS_DELEGATE`, and `NEVER_DELEGATE` are the
+    corresponding values of the per portlet bridge initialization attribute
+    `renderPolicy` as described in [3.2](Chapter-3-Bridge-Interface.html#3.2).
+    If no such setting exists `renderView` implements `DEFAULT` behavior.
+
+    When directly rendering the view, the bridge must render in a manner that
+    provides the semantics defined by section 7.5.2 in the JSF 1.2
+    specification. Specifically it must attempt to ensure that it is possible
+    for the markup generated by the view to be interleaved with native markup in
+    a manner that preserves order as indicated in that section. Unfortunately,
+    such interleaving can only be accomplished using Faces implementation
+    dependent code and hence isn't provided natively by the bridge. Rather, the
+    bridge defines mechanism(s) that allow a portlet to configure an appropriate
+    render handler to support this behavior. There are two mechanisms [see
+    [Chapter 7](Chapter-7-BridgeRenderFilter.html)]:
+    
+    1. the portlet 1.0 bridge mechanism that relied on configuring a servlet filter that wraps the response with a wrapper that supports the Faces implementation specific APIs for handling the JSP write before/after response behavior.
+    2. provide a Portlet 2.0 PortletResponseWrapper which supports the same APIs.
+
+    To support these mechanisms, the bridge's `render()`, prior to calling
+    `dispatch()` must:
+
+    - Add an attribute named `javax.portlet.faces.RenderContentAfterView` with a
+    `java.lang.Boolean` value of `Boolean.TRUE` to the `request`
+    object<sup>[[6.88](TCK-Tests.html#6.88)]</sup>.
+    - Cache the current response (known to the Faces `ExternalContext`) so it
+    can be reset later.
+    - Create an instance of a `PortletResponseWrapper` object that implements
+    `javax.portlet.faces.BridgeWriteBehindResponse` and set it in the Faces
+    `ExternalContext` by calling
+    `ExternalContext.setResponse()`<sup>[[6.132](TCK-Tests.html#6.132)]</sup>
+<pre></pre>
+    If an instance class is configured [see
+    [7.2](Chapter-7-BridgeRenderFilter.html#7.2)], it must be
+    used<sup>[[6.133](TCK-Tests.html#6.133),
+    [6.134](TCK-Tests.html#6.134)]</sup>.
+
+    Immediately following the `dispatch()`:
+
+    - Reset the Faces `ExternalContext` response by calling
+    `ExternalContext.setResponse()` with the (current) response cached in the
+    step above.
+    - If the `BridgeWriteBehindResponse` object's `hasFacesWriteBehindMarkup()`
+    method returns `true` and something (servlet filter) hasn't already set the
+    `javax.portlet.faces.AfterViewContent` attribute, support the write behind
+    behavior by holding onto the `BridgeWriteBehindResponse` object or the
+    content it is buffering until after the view has been rendered. Otherwise
+    write the content directly to the response.
+
+    After the dispatch and after rendering the view (when one hasn't already
+    written the content directly to the response):
+
+    - retrieve buffered content that should be positioned after the rendered
+    view from the request attribute `javax.portlet.faces.AfterViewContent` (via
+    a call to `ExternalContext.getRequestMap()`). If non-null, the type of this
+    value is either `byte[]` or a `char[]`.
+    - If non-null, copy the content into the response and remove the attribute
+    from the request `Map`<sup>[[6.89](TCK-Tests.html#6.89)]</sup>.
+    - (otherwise) if a `BridgeWriteBehindResponse` has been used and your bridge
+    implementation doesn't rely on this request attribute to cache the content
+    until after the view is rendered, output its buffered content.
+
+### <a name="6.2.2"></a>6.2.2 Other Methods
+
+The following `ViewHandler` methods have no specific bridge requirements and
+hence its expected they will always be delegated. If a bridge implementation
+does more then merely delegate if must satisfy the above cohabitation
+requirements. This is particularly true for `writeState` as overriding this
+commonly interferes with the application developers desired state management. If
+`getActionURL` is modified the bridge must ensure the resulting `String` it
+returns is a valid `URL`. In particular it can't be an `URL` derived from a
+`portletResponse.createActionURL()`.
+
+- `calculateCharacterEncoding()`
+- `calculateLocale()`
+- `calculateRenderKitId()`
+- `getActionURL()`
+- `getResourceURL()`
+- `initView()`
+- `restoreView()`
+- `writeState()`
+
+## <a name="6.3"></a>6.3 StateManager
+
+To properly maintain references to (updated) view state the bridge will likely
+have to provide its own `StateManager` in order to override the state writing
+process allowing it to inspect and preserve (update) the value of the
+`VIEW_STATE_PARAM` parameter it manages in its extended bridge scope
+[[5.1.2.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2.2)].
+For example the bridge can override `StateManager.writeState(FacesContext
+context, Object state)`:
+
+- replace the `ResponseWriter` with one it manufactures that writes to a
+`StringWriter`
+- delegate the call so the state is output.
+- copy the output back into the original `ResponseWriter`
+- parse the output in the `StringWriter` locating the `VIEW_STATE_PARAM`
+parameter and value
+- copy the value and place it on a request attribute for the bridge to process
+later
+
+## <a name="6.4"></a>6.4 Phase Listeners
+
+The bridge must prevent the Faces action phases (`ApplyRequestValues`,
+`ProcessValidations`, `UpdateModel`, and `InvokeApplication`) from executing if
+processing an event or rendering in a restored bridge request
+scope<sup>[[6.90](TCK-Tests.html#6.90)]</sup>
+[[5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2)]. I.e. during
+either a portlet's `EVENT_PHASE` or `RENDER_PHASE`, when the Faces `Lifecycle`
+is executed to restore the view, the bridge must ensure the lifecycle falls
+directly through to render after the view is restored. This is most conveniently
+supported by implementing a `PhaseListener` and calling
+`FacesContext.renderResponse()` when invoked in the `RestoreView` phase.
+
+## <a name="6.5"></a>6.5 Expression Language Resolution
+
+Faces relies on the Unified Expression Language architecture to ensure
+consistent EL evaluation in a JSP page where JSP expressions and Faces
+expressions can coexist. During a JSP EL resolution Faces extends the JSP
+resolvers to process/expose Faces unique variables. During a Faces EL resolution
+Faces provides the base resolvers that not only expose the Faces unique
+variables but also those that the JSP resolvers otherwise have access to during
+the scope of the page. In a servlet environment, this ensures evaluation
+consistency for the same expression whether within a JSP expression or a Faces
+expression. However because the EL types are resolved by different resolvers in
+different contexts when running in a portlet environment evaluation isn't always
+consistent. Its important to be aware of the following subtle differences in
+implicit object evaluation.
+
+### <a name="6.5.1"></a>6.5.1 Implicit Objects
+
+When running in a JSP context, JSP provides an ELResolver that recognizes and
+resolves the following implicit
+objects<sup>[[6.100](TCK-Tests.html#6.100)]</sup>:
+
+- `applicationScope` -> a `Map` that maps application-scoped attribute names to
+their values
+- `cookie` -> a `Map` that maps cookie names to a single `Cookie` object.
+Cookies are retrieved according to the semantics of
+`HttpServletRequest.getCookies()`.
+- `header` -> a `Map` that maps header names to a single `String` header value
+(obtained by calling `HttpServletRequest.getHeader(String name)`)
+- `headerValues` -> a `Map` that maps header names to a `String[]` of all values
+for that header (obtained by calling `HttpServletRequest.getHeaders(String)`)
+- `initParam` -> a `Map` that maps context initialization parameter names to
+their `String` parameter value (obtained by calling
+`ServletContext.getInitParameter(String name)`)
+- `pageContext` -> the `PageContext`
+- `pageScope` -> a `Map` that maps page-scoped attribute names to their values
+- `param` -> a `Map` that maps parameter names to a single `String` parameter
+value (obtained by calling `ServletRequest.getParameter(String name)`)
+- `paramValues` -> `Map` that maps parameter names to a `String[]` of all values
+for that parameter (obtained by calling
+`ServletRequest.getParameterValues(String name)`)
+- `requestScope` -> a `Map` that maps request-scoped attribute names to their
+values
+- `sessionScope` -> a `Map` that maps session-scoped attribute names to their
+values
+
+When the `<portlet:defineObjects>` tag is used within this JSP page, the
+following variables are exposed and will be implicitly resolved by this JSP EL
+resolver<sup>[[6.100](TCK-Tests.html#6.100)]</sup>:
+
+- `portletConfig`: object of type `javax.portlet.PortletConfig`
+- `actionRequest`: object of type `javax.portlet.ActionRequest` (only accessible
+in an `ActionRequest`)
+- `actionResponse`: object of type `javax.portlet.ActionResponse` (only
+accessible in an `ActionRequest`)
+- `eventRequest`: object of type `javax.portlet.EventRequest` (only accessible
+in an `EventRequest`)
+- `eventResponse`: object of type `javax.portlet.EventResponse` (only accessible
+in an `EventRequest`)
+- `renderRequest`: object of type `javax.portlet.RenderRequest` (only accessible
+in an `RenderRequest`)
+- `renderResponse`: object of type `javax.portlet.RenderResponse` (only
+accessible in an `RenderRequest`)
+- `resourceRequest`: object of type `javax.portlet.ResourceRequest` (only
+accessible in an `ResourceRequest`)
+- `resourceResponse`: object of type `javax.portlet.ResourceResponse` (only
+accessible in an `ResourceRequest`)
+- `portletSession`: current `PortletSession` object.
+- `portletSessionScope`: immutable `Map` containing `PortletSession`
+attribute/values at `PORTLET_SCOPE`.
+- `portletPreferences`: current `PortletPreferences` object.
+- `portletPreferencesValues`: immutable `Map` containing entries equivalent to
+`PortletPreferences.getMap()`.
+
+Faces extends this behavior by providing its own ELResolver to recognize and
+resolve the following implicit
+objects<sup>[[6.100](TCK-Tests.html#6.100)]</sup>:
+
+- `facesContext` -> the `FacesContext` for this request
+- `view` -> `facesContext.getViewRoot()`
 
 When running in a Faces context (outside of JSP execution) Faces provides the base implicit object resolver that recognizes and resolves the following implicit objects[6.101]:
 
-application -> externalContext.getContext()
-applicationScope -> externalContext.getApplicationMap()
-cookie -> externalContext.getRequestCookieMap()
-facesContext -> the FacesContext for this request
-header -> externalContext.getRequestHeaderMap()
-headerValues -> externalContext.getRequestHeaderValuesMap()
-initParam -> externalContext.getInitParameterMap()
-param -> externalContext.getRequestParameterMap()
-paramValues -> externalContext.getRequestParameterValuesMap()
-request -> externalContext.getRequest()
-requestScope -> externalContext.getRequestScope()
-session -> externalContext.getSession()
-sessionScope -> externalContext.getSessionMap()
-view -> facesContext.getViewRoot()
+- `application` -> `externalContext.getContext()`
+- `applicationScope` -> `externalContext.getApplicationMap()`
+- `cookie` -> `externalContext.getRequestCookieMap()`
+- `facesContext` -> the `FacesContext` for this request
+- `header` -> `externalContext.getRequestHeaderMap()`
+- `headerValues` -> `externalContext.getRequestHeaderValuesMap()`
+- `initParam` -> `externalContext.getInitParameterMap()`
+- `param` -> `externalContext.getRequestParameterMap()`
+- `paramValues` -> `externalContext.getRequestParameterValuesMap()`
+- `request` -> `externalContext.getRequest()`
+- `requestScope` -> `externalContext.getRequestScope()`
+- `session` -> `externalContext.getSession()`
+- `sessionScope` -> `externalContext.getSessionMap()`
+- `view` -> `facesContext.getViewRoot()`
 
-The primary difference between the ELResolvers used within the JSP context vs outside this context is that the base JSP ELResolver is used to resolve the bulk of the implicit objects and that this resolution is based on the JSPs servlet objects in the page while outside this context these objects are resolved via the ExternalContext.   In a portlet environment, because the JSP ELResolver evaluates based on the servlet objects generated when dispatched from the portlet environment while the JSF ELResolver evaluates based on the ExternalContext, the following difference needs to be considered:
+The primary difference between the `ELResolvers` used within the `JSP` context
+vs outside this context is that the base `JSP ELResolver` is used to resolve the
+bulk of the implicit objects and that this resolution is based on the `JSP`s
+servlet objects in the page while outside this context these objects are
+resolved via the `ExternalContext`. In a portlet environment, because the `JSP
+ELResolver` evaluates based on the servlet objects generated when dispatched
+from the portlet environment while the `JSF ELResolver` evaluates based on the
+`ExternalContext`, the following difference needs to be considered:
 
-sessionScope:  This Map contains the APPLICATION_SCOPE session attributes if used in JSP EL but PORTLET_SCOPE session attributes if used in Faces EL[6.100, 6.101].
+- `sessionScope`: This `Map` contains the `APPLICATION_SCOPE` session attributes
+if used in JSP EL but `PORTLET_SCOPE` session attributes if used in Faces
+EL<sup>[[6.100](TCK-Tests.html#6.100),[6.101](TCK-Tests.html#6.101)]</sup>.
 
+In addition one will note that the Faces implicit object ELResolver recognizes
+three objects that the JSP Resolver
+doesn't<sup>[[6.101](TCK-Tests.html#6.101)]</sup>:
 
-In addition one will note that the Faces implicit object ELResolver recognizes three objects that the JSP Resolver doesn't[6.101]:
-application
-session
-request
+- `application`
+- `session`
+- `request`
 
-In a JSP ELContext one references these objects indirectly via the PageContext[6.100].  I.e.
-${pageContext.servletContext}
-${pageContext.session}
-${pageContext.request}
+In a JSP ELContext one references these objects indirectly via the
+PageContext<sup>[[6.100](TCK-Tests.html#6.100)]</sup>. I.e.
 
-These differ from the objects returned by the Faces EL Resolver in that[6.101]:
-${pageContext.servletContext}: This is an object of type ServletContext while application is an object of type PortletContext.
-${pageContext.session}: This is an object of type servlet Session while session is an object of type PortletSession.  The key difference is that PortletSession by default references PORTLET_SCOPE attributes while the servlet Session is a window onto the portlet's APPLICATION_SCOPE.
-${pageContext.request}: This is an object of type ServletRequest (through wrapped by the portlet request) while request is an object of type PortletRequest.
+- `${pageContext.servletContext}`
+- `${pageContext.session}`
+- `${pageContext.request}`
 
-6.5.2 Bridge ELResolver
-As noted above, when the <portlet:defineObjects> tag is used, the following variables are exposed in the JSP page and will be implicitly resolved by the JSP EL resolver[6.100]:
+These differ from the objects returned by the Faces EL Resolver in
+that<sup>[[6.101](TCK-Tests.html#6.101)]</sup>:
 
-portletConfig: object of type javax.portlet.PortletConfig
-actionRequest: object of type javax.portlet.ActionRequest (only accessible in an ActionRequest)
-actionResponse: object of type javax.portlet.ActionResponse (only accessible in an ActionRequest)
-eventRequest: object of type javax.portlet.EventRequest (only accessible in an EventRequest)
-eventResponse: object of type javax.portlet.EventResponse (only accessible in an EventRequest)
-renderRequest: object of type javax.portlet.RenderRequest (only accessible in an RenderRequest)
-renderResponse: object of type javax.portlet.RenderResponse (only accessible in an RenderRequest)
-resourceRequest: object of type javax.portlet.ResourceRequest (only accessible in an ResourceRequest)
-resourceResponse: object of type javax.portlet.ResourceResponse (only accessible in an ResourceRequest)
-portletSession: current PortletSession object.
-portletSessionScope:  immutable Map containing PortletSession attribute/values at PORTLET_SCOPE.
-portletPreferences:  current PortletPreferences object.
-portletPreferencesValues: immutable Map containing entries equivalent to PortletPreferences.getMap().
+- `${pageContext.servletContext}`: This is an object of type `ServletContext`
+while application is an object of type `PortletContext`.
+- `${pageContext.session}`: This is an object of type servlet `Session` while
+`session` is an object of type `PortletSession`. The key difference is that
+`PortletSession` by default references `PORTLET_SCOPE` attributes while the
+servlet `Session` is a window onto the portlet's `APPLICATION_SCOPE`.
+- `${pageContext.request}`: This is an object of type `ServletRequest` (through
+wrapped by the portlet request) while `request` is an object of type
+`PortletRequest`.
 
-The bridge must provide a corresponding Faces EL resolver that recognizes these variable names and resolves them to the same object as the JSP resolver[6.101].  In addition, the bridge must not resolve these variables outside of a Faces expression[6.100].  Note:  The mechanism Faces provides for registering a EL resolver causes the EL resolver to be inserted into the resolution chain for both Faces expressions and JSP expressions.  For the above objects, the bridge's EL resolver must delegate resolution to the JSP resolver within JSP expressions while resolving them within Faces expressions.
+### <a name="6.5.2"></a>6.5.2 Bridge ELResolver
 
-Because JSP EL evaluation and Faces EL evaluation are handled by different resolvers, the following differences are noted:
-portletSessionScope:  This is an immutable Map when referenced in a JSP expression but a mutable Map when referenced in a Faces expression.
-6.5.2.1 Additional Implicit Object Support for Portlets
-The bridge's ELResolver must additionally recognize and resolve identically  the following EL object references regardless of whether its evaluating in a JSP or Faces expression[6.100, 6.101]:
+As noted above, when the `<portlet:defineObjects>` tag is used, the following
+variables are exposed in the JSP page and will be implicitly resolved by the JSP
+EL resolver<sup>[[6.100](TCK-Tests.html#6.100)]</sup>:
 
-httpSessionScope:  mutable Map containing PortletSession attribute/values at APPLICATION_SCOPE.
-mutablePortletPreferencesValues: mutable Map of type Map<String, javax.portlet.faces.preference.Preference>.  This  EL variable provides read/write access to each  portlet preference.
-6.5.2.2 ELResolver Requirements
-The bridge's ELResolver must be added through configuration within its faces-config.xml.  e.g.
-<el-resolver>
-     javax.portlet.faces.el.PortletELResolver
-</el-resolver>
+- `portletConfig`: object of type `javax.portlet.PortletConfig`
+- `actionRequest`: object of type `javax.portlet.ActionRequest` (only accessible in an `ActionRequest`)
+- `actionResponse`: object of type `javax.portlet.ActionResponse` (only accessible in an `ActionRequest`)
+- `eventRequest`: object of type `javax.portlet.EventRequest` (only accessible in an `EventRequest`)
+- `eventResponse`: object of type `javax.portlet.EventResponse` (only accessible in an `EventRequest`)
+- `renderRequest`: object of type `javax.portlet.RenderRequest` (only accessible in an `RenderRequest`)
+- `renderResponse`: object of type `javax.portlet.RenderResponse` (only accessible in an `RenderRequest`)
+- `resourceRequest`: object of type `javax.portlet.ResourceRequest` (only accessible in an `ResourceRequest`)
+- `resourceResponse`: object of type `javax.portlet.ResourceResponse` (only accessible in an `ResourceRequest`)
+- `portletSession`: current `PortletSession` object.
+- `portletSessionScope`:  immutable `Map` containing `PortletSession` attribute/values at `PORTLET_SCOPE`.
+- `portletPreferences`:  current `PortletPreferences` object.
+- `portletPreferencesValues`: immutable `Map` containing entries equivalent to `PortletPreferences.getMap()`.
 
+The bridge must provide a corresponding Faces EL resolver that recognizes these
+variable names and resolves them to the same object as the JSP
+resolver<sup>[[6.101](TCK-Tests.html#6.101)]</sup>. In addition, the bridge must
+not resolve these variables outside of a Faces
+expression<sup>[[6.100](TCK-Tests.html#6.100)]</sup>. Note: The mechanism Faces
+provides for registering a EL resolver causes the EL resolver to be inserted
+into the resolution chain for both Faces expressions and JSP expressions. For
+the above objects, the bridge's EL resolver must delegate resolution to the JSP
+resolver within JSP expressions while resolving them within Faces expressions.
 
-The ELResolver must be implemented as follows[6.100, 6.101]:
+Because JSP EL evaluation and Faces EL evaluation are handled by different
+resolvers, the following differences are noted:
+
+- `portletSessionScope`: This is an immutable `Map` when referenced in a JSP
+expression but a mutable `Map` when referenced in a Faces expression.
+
+#### <a name="6.5.2.1"></a>6.5.2.1 Additional Implicit Object Support for Portlets
+
+The bridge's ELResolver must additionally recognize and resolve identically the
+following EL object references regardless of whether its evaluating in a JSP or
+Faces
+expression<sup>[[6.100](TCK-Tests.html#6.100),[6.101](TCK-Tests.html#6.101)]</sup>:
+
+- `httpSessionScope`: mutable `Map` containing `PortletSession` attribute/values
+at `APPLICATION_SCOPE`.
+- `mutablePortletPreferencesValues`: mutable `Map` of type `Map<String,
+javax.portlet.faces.preference.Preference>`. This EL variable provides
+read/write access to each portlet preference.
+
+#### <a name="6.5.2.2"></a>6.5.2.2 ELResolver Requirements
+
+The bridge's ELResolver must be added through configuration within its
+faces-config.xml. e.g.
+
+    <el-resolver>
+        javax.portlet.faces.el.PortletELResolver
+    </el-resolver>
+
+The ELResolver must be implemented as
+follows<sup>[[6.100](TCK-Tests.html#6.100),[6.101](TCK-Tests.html#6.101)]</sup>:
 
 ELResolver method 	implementation requirements
 getValue 	If running in a non-portlet request or base is non-null return null.
