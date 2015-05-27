@@ -1532,105 +1532,490 @@ If base is null and property is null, throw PropertyNotFoundException.
 If none of the above and base is null and property is a String equal to one of the above names, call setPropertyResolved(true) on
 the argument ELContext and return result, where property and result are as follows:
 
+<!--HTML Table-->
 
-EL object name 	result
-portletConfig 	portletConfig object (recommended implementation is to place the portletConfig object on the ELContext so can pull it here).
-actionRequest 	If within an ActionRequest then ExternalContext.getRequest() otherwise throw an ELException.
-actionResponse 	If within an ActionRequest then ExternalContext.getResponse() otherwise throw an ELException.
-eventRequest 	If within an EventRequest then ExternalContext.getRequest() otherwise throw an ELException.
-eventResponse 	If within an EventRequest then ExternalContext.getResponse() otherwise throw an ELException.
-renderRequest 	If within an RenderRequest then ExternalContext.getRequest() otherwise throw an ELException
-renderResponse 	If within an RenderRequest then ExternalContext.getResponse() otherwise throw an ELException.
-resourceRequest 	If within an ResourceRequest then ExternalContext.getRequest() otherwise throw an ELException.
-resourceResponse 	If within an ResourceRequest then ExternalContext.getResponse() otherwise throw an ELException.
-portletSession 	ExternalContext.getSession()
-portletSessionScope 	ExternalContext.getSessionMap()
-httpSessionScope 	an internally constructed Map containing those portlet session attributes at APPLICATION_SCOPE.
-portletPreferences 	ExternalContext.getRequest()).getPreferences()
-portletPreferencesValues 	ExternalContext.getRequest()).getPreferences().getMap()
-mutablePortletPreferencesValues 	An internally constructed Map <String, javax.portlet.faces.preference.Preference>. There is one entry per portlet preference. The key is the preference name.  The value is an object representing a single portlet preference (as defined by this interface). Entries may not be added or deleted but and entry can be changed.
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td><span style="font-weight: bold;">ELResolver
+method</span></td>
+<td style="vertical-align: bottom;"><span style="font-weight: bold;">implementation requirements</span></td>
+</tr>
+<tr>
+<td style="text-align: left; vertical-align: top;"><span style="font-family: monospace;">getValue</span></td>
+<td>If running in a non-portlet request or base is non-null
+return <span style="font-family: monospace;">null</span>.<br>
+If evaluating a JSP expression (nonFaces expression) and property is
+either <span style="font-family: monospace;">portletConfig</span>,
+<span style="font-family: monospace;">renderRequest</span>,
+or <span style="font-family: monospace;">renderResponse</span>,
+return <span style="font-family: monospace;">null</span>.<br>
+If base is null and property is null, throw PropertyNotFoundException.<br>
+If none of the above and base is null and property is a String equal to
+one of the above
+names, call setPropertyResolved(true) on<br>
+the argument ELContext and return result, where property and
+result are as follows:<br>
+<div style="margin-left: 40px;"><span style="font-style: italic;"><br>
+</span><span style="font-family: monospace;"></span><span style="color: rgb(51, 51, 255);"></span><span style="font-family: monospace;"></span><br>
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="text-align: center;"><span style="font-style: italic;">EL object name</span></td>
+<td style="text-align: center;"><span style="font-style: italic;">result</span></td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">portletConfig</span></td>
+<td><span style="font-family: monospace; color: rgb(0, 0, 0);">portletConfig
+object (recommended implementation is to place the portletConfig object
+on the
+ELContext so can pull it here).</span></td>
+</tr>
+<tr>
+<td><span style="font-family: monospace;">actionRequest</span></td>
+<td>If within an <span style="font-family: monospace;">ActionRequest</span>
+then <span style="font-family: monospace;">ExternalContext.getRequest()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">actionResponse</td>
+<td>If within an <span style="font-family: monospace;">ActionRequest</span>
+then&nbsp;<span style="font-family: monospace;">ExternalContext.getResponse()
+</span>otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">eventRequest</td>
+<td>If within an <span style="font-family: monospace;">EventRequest</span>
+then <span style="font-family: monospace;">ExternalContext.getRequest()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">eventResponse</td>
+<td>If within an <span style="font-family: monospace;">EventRequest</span>
+then&nbsp;<span style="font-family: monospace;">ExternalContext.getResponse()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">renderRequest</span></td>
+<td>If within an <span style="font-family: monospace;">RenderRequest</span>
+then <span style="font-family: monospace;">ExternalContext.getRequest()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span><span style="font-family: monospace;"></span></td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">renderResponse</span></td>
+<td>If within an <span style="font-family: monospace;">RenderRequest</span>
+then&nbsp;<span style="font-family: monospace;">ExternalContext.getResponse()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.<span style="font-family: monospace;"></span></td>
+</tr>
+<tr>
+<td style="font-family: monospace;">resourceRequest</td>
+<td>If within an <span style="font-family: monospace;">ResourceRequest</span>
+then <span style="font-family: monospace;">ExternalContext.getRequest()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">resourceResponse</td>
+<td>If within an <span style="font-family: monospace;">ResourceRequest</span>
+then&nbsp;<span style="font-family: monospace;">ExternalContext.getResponse()</span>
+otherwise throw an <span style="font-family: monospace;">ELException</span>.</td>
+</tr>
+<tr>
+<td><span style="font-family: monospace;">portletSession</span></td>
+<td><span style="font-family: monospace;">ExternalContext.getSession()</span></td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">portletSessionScope</span></td>
+<td><span style="font-family: monospace;">ExternalContext.getSessionMap()</span></td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">httpSessionScope</span></td>
+<td><span style="font-family: monospace;">an
+internally constructed Map containing those portlet session attributes
+at APPLICATION_SCOPE</span><span style="font-family: monospace;">.</span></td>
+</tr>
+<tr>
+<td><span style="font-family: monospace;">portletPreferences</span></td>
+<td><span style="font-family: monospace;">ExternalContext.getRequest()).getPreferences()</span></td>
+</tr>
+<tr>
+<td><span style="font-family: monospace;">portletPreferencesValues</span></td>
+<td><span style="font-family: monospace;">ExternalContext.getRequest()).getPreferences().getMap()</span></td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0);"><span style="font-family: monospace;">mutablePortletPreferencesValues</span></td>
+<td style="color: rgb(0, 0, 0);"><span style="font-family: monospace;">An
+internally constructed Map &lt;String,
+javax.portlet.faces.preference.Preference&gt;. There is one entry
+per portlet preference. The key is the preference
+name. &nbsp;The value is an object representing a single portlet
+preference
+(as defined by this interface). Entries may not be added or deleted
+but and entry can be changed.</span></td>
+</tr>
+</tbody>
+</table>
+<span style="font-family: monospace; color: rgb(0, 0, 0);"></span><span style="font-family: monospace; color: rgb(51, 51, 255);"><br>
+</span><span style="font-family: monospace;"><span style="color: rgb(0, 0, 0);"></span> </span></div>
+<br>
+If base is null, and property does not match one of the above property
+names, return null.</td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">getType</span></td>
+<td>If running in a non-portlet request or base is
+non-null, return null.<br>
+If base is null and property is null, throw <span style="font-family: monospace;">PropertyNotFoundException</span>.<br>
+If base is null and property is a String equal to any of the above
+names, call setPropertyResolved(true) on the argument ELContext and
+return null to indicate that no types are accepted to setValue() for
+these attributes.<br>
+Otherwise, null;</td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">setValue</span></td>
+<td>If running in a non-portlet request or base is
+non-null, return null.<br>
+If base is null and property is null, throw <span style="font-family: monospace;">PropertyNotFoundException</span>.<br>
+If base is null and property is a String equal to any of the above
+names throw <span style="font-family: monospace;">javax.el.PropertyNotWriteableException</span>,
+since these&nbsp;objects are read-only.</td>
+</tr>
+<tr>
+<td style="vertical-align: top;"><span style="font-family: monospace;">isReadOnly</span></td>
+<td>If running in a non-portlet request or base is
+non-null, return null.<br>
+If base is null and property is null, throw <span style="font-family: monospace;">PropertyNotFoundException</span>.<br>
+If base is null and property is a String equal to any of the above
+names call <span style="font-family: monospace;">setPropertyResolved(true)</span>
+on the argument ELContext and return true.</td>
+</tr>
+<tr>
+<td style="color: rgb(51, 51, 255);"><br>
+<span style="color: rgb(0, 0, 0);">getFeatureDescriptors</span></td>
+<td style="color: rgb(51, 51, 255);"><span style="color: rgb(0, 0, 0);">If base is
+non-null, return null.</span><br style="color: rgb(0, 0, 0);">
+<span style="color: rgb(0, 0, 0);">If base is null,
+return an Iterator containing
+java.beans.FeatureDescriptor instances, one for each of the above
+names. It is required that all of these FeatureDescriptor instances set
+Boolean.TRUE as the value of the ELResolver.RESOLVABLE_AT_DESIGN_TIME
+attribute. For the name and short of FeatureDescriptor, return the EL
+object name. The appropriate Class must be stored as the value
+of the ELResolver.TYPE attribute as follows:</span><br>
+<table style="text-align: left; width: 658px; height: 200px;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top; font-style: italic; text-align: center; color: rgb(0, 0, 0);">EL
+object name</td>
+<td style="vertical-align: top; font-style: italic; text-align: center; color: rgb(0, 0, 0);">ELResolver.TYPE
+value</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">portletConfig</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">javax.portlet.PortletConfig.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">actionRequest</td>
+<td style="font-family: monospace;">javax.portlet.ActionRequest.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">actionResponse</td>
+<td style="font-family: monospace;">javax.portlet.ActionResponse.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">eventRequest</td>
+<td style="font-family: monospace;">javax.portlet.EventRequest.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">eventResponse</td>
+<td style="font-family: monospace;">javax.portlet.EventResponse.class</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">renderRequest</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">javax.portlet.RenderRequest.class</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">renderResponse</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">javax.portlet.RenderResponse.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">resourceRequest</td>
+<td style="font-family: monospace;">javax.portlet.ResourceRequest.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">resourceResponse</td>
+<td style="font-family: monospace;">javax.portlet.ResourceResponse.class</td>
+</tr>
+<tr>
+<td><span style="font-family: monospace;">portletSession</span></td>
+<td style="font-family: monospace;">javax.portlet.PortletSession.class</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">portletSessionScope</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">Map.class</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">httpSessionScope</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">Map.class</td>
+</tr>
+<tr>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">portletPreferences</td>
+<td style="vertical-align: top; color: rgb(0, 0, 0); font-family: monospace;">javax.portlet.PortletPreferences.class<br>
+</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">portletPreferencesValues</td>
+<td style="font-family: monospace;">Map.class</td>
+</tr>
+<tr>
+<td style="font-family: monospace;">mutablePortletPreferencesValues</td>
+<td style="font-family: monospace;">Map.class</td>
+</tr>
+</tbody>
+</table>
+<br>
+&nbsp;<br>
+<span style="color: rgb(0, 0, 0);">The
+shortDescription must be a suitable description depending on the
+implementation. The expert and hidden properties must be false. The
+preferred property must be true.</span></td>
+</tr>
+<tr>
+<td style="color: rgb(51, 51, 255);"><span style="color: rgb(0, 0, 0);">getCommonPropertyType</span><br>
+</td>
+<td style="color: rgb(0, 0, 0);">If base is
+non-null, return null.<br>
+If base is null and return String.class</td>
+</tr>
+</tbody>
+</table>
 
+#### <a name="6.5.2.3"></a>6.5.2.3 The javax.portlet.faces.preference.Preference interface
 
-If base is null, and property does not match one of the above property names, return null.
-getType 	If running in a non-portlet request or base is non-null, return null.
-If base is null and property is null, throw PropertyNotFoundException.
-If base is null and property is a String equal to any of the above names, call setPropertyResolved(true) on the argument ELContext and return null to indicate that no types are accepted to setValue() for these attributes.
-Otherwise, null;
-setValue 	If running in a non-portlet request or base is non-null, return null.
-If base is null and property is null, throw PropertyNotFoundException.
-If base is null and property is a String equal to any of the above names throw javax.el.PropertyNotWriteableException, since these objects are read-only.
-isReadOnly 	If running in a non-portlet request or base is non-null, return null.
-If base is null and property is null, throw PropertyNotFoundException.
-If base is null and property is a String equal to any of the above names call setPropertyResolved(true) on the argument ELContext and return true.
+The mutablePortletPreferencesValues EL object allows one to read and update a
+portlet preference via EL. It relies on the bridge defined
+`javax.portlet.faces.preference.Preference` interface which allows one to expose
+each portlet preference as an individual object making operations on portlet
+preferences EL accessible. Consult the
+`javax.portlet.faces.preference.Preference` javadoc for specific descriptions
+and requirements of objects implementing this interface. In general there is a
+corresponding method for each operation in `javax.portlet.Preferences` that can
+be done on a specific preference. For example, a preference named "title"
+managed by the `javax.portlet.Preferences` object could have its value accessed
+using its corresponding `javax.portlet.faces.preference.Preference` instance via
+`title.PrefObj.getValue()` rather than the typical
+`preferences.getValue("title")`. Equivalent EL access would be:
+"`#{mutablePortletPreferencesValues['title'].value"`.
 
-getFeatureDescriptors 	If base is non-null, return null.
-If base is null, return an Iterator containing java.beans.FeatureDescriptor instances, one for each of the above names. It is required that all of these FeatureDescriptor instances set Boolean.TRUE as the value of the ELResolver.RESOLVABLE_AT_DESIGN_TIME attribute. For the name and short of FeatureDescriptor, return the EL object name. The appropriate Class must be stored as the value of the ELResolver.TYPE attribute as follows:
-EL object name 	ELResolver.TYPE value
-portletConfig 	javax.portlet.PortletConfig.class
-actionRequest 	javax.portlet.ActionRequest.class
-actionResponse 	javax.portlet.ActionResponse.class
-eventRequest 	javax.portlet.EventRequest.class
-eventResponse 	javax.portlet.EventResponse.class
-renderRequest 	javax.portlet.RenderRequest.class
-renderResponse 	javax.portlet.RenderResponse.class
-resourceRequest 	javax.portlet.ResourceRequest.class
-resourceResponse 	javax.portlet.ResourceResponse.class
-portletSession 	javax.portlet.PortletSession.class
-portletSessionScope 	Map.class
-httpSessionScope 	Map.class
-portletPreferences 	javax.portlet.PortletPreferences.class
-portletPreferencesValues 	Map.class
-mutablePortletPreferencesValues 	Map.class
+Though operations performed on `javax.portlet.faces.preference.Preference`
+objects are immediately passed through to the underlying `portletPreferences`
+object, because the `portletPreferences` object requires an explicit commit to
+preserve these changes, developers must take care to finalize changes by calling
+`portletPreferences.store()` directly before the request ends. Typically this is
+done in the clients `ActionHandler` executed during the `InvokeApplication`
+phase.
 
- 
-The shortDescription must be a suitable description depending on the implementation. The expert and hidden properties must be false. The preferred property must be true.
-getCommonPropertyType
-	If base is non-null, return null.
-If base is null and return String.class
+## <a name="6.6"></a>6.6 Namespacing
 
-6.5.2.3 The javax.portlet.faces.preference.Preference interface
-The mutablePortletPreferencesValues EL object allows one to read and update a portlet preference via EL.  It relies on the bridge defined  javax.portlet.faces.preference.Preference interface which allows one to expose each portlet preference as an individual object making operations on portlet preferences EL accessible.  Consult the javax.portlet.faces.preference.Preference javadoc for specific descriptions and requirements of objects implementing this interface.  In general there is a corresponding method for each operation in javax.portlet.Preferences that can be done on a specific preference.   For example, a preference named "title" managed by  the javax.portlet.Preferences object could have its value accessed using its corresponding javax.portlet.faces.preference.Preference instance via title.PrefObj.getValue() rather than the typical preferences.getValue("title").  Equivalent EL access would be: "#{mutablePortletPreferencesValues['title'].value".
+Portlets are components that are aggregated by another application into a
+response page. As such a portlet is responsible for namespacing its markup to
+ensure its names don't collide with other parts of the aggregated page even when
+that aggregated page contains additional instances of this portlet.
+Traditionally, because the Java Portlet standard assumes the aggregated page
+isolates each portlet in a manner that allows discrete forms, namespacing is
+only required for global names such as javascript functions and variables.
+Unfortunately, many of today's Faces renderkits rely on this type of client side
+javascript necessitating namespacing when run in the portlet environment.
 
-Though operations performed on javax.portlet.faces.preference.Preference objects are immediately passed through to the underlying portletPreferences object, because the portletPreferences object requires an explicit commit to preserve these changes, developers must take care to finalize changes by calling portletPreferences.store() directly before the request ends.  Typically this is done in the clients ActionHandler executed during the InvokeApplication phase.
-6.6 Namespacing
-Portlets are components that are aggregated by another application into a response page.  As such a portlet is responsible for namespacing its markup to ensure its names don't collide with other parts of the aggregated page even when that aggregated page contains additional instances of this portlet.  Traditionally, because the Java Portlet standard assumes the aggregated page isolates each portlet in a manner that allows discrete forms,  namespacing is only required for global names such as javascript functions and variables. Unfortunately, many of today's Faces renderkits rely on this type of client side javascript necessitating namespacing when run in the portlet environment.
+Additionally, with the emergence of consumer environments based on JSF and .NET
+in which such forms are collapsed into a a single all encompassing page form,
+the issue of namespacing form fields has emerged. Though from the standards
+perspective such consumers still have the burden of parsing and transforming the
+portlet markup to work in the single form environment, the ability for consumers
+to do this is restricted by both its needs to return a response to the user
+quickly and the complexity of locating (javascript) references to field names.
+Portlets, therefore, though not required, are encouraged to namespace not only
+their global (client) references but also their form fields as well.
 
-Additionally, with the emergence of consumer environments based on JSF and .NET in which such forms are collapsed into a a single all encompassing page form, the issue of namespacing form fields has emerged.  Though from the standards perspective such consumers still have the burden of parsing and transforming the portlet markup to work in the single form environment, the ability for consumers to do this is restricted by both its needs to return a response to the user quickly and the complexity of locating (javascript) references to field names. Portlets, therefore, though not required, are encouraged to namespace not only their global (client) references but also their form fields as well.  
+Faces supports a notion of namespacing elements in its view tree which in turn
+impacts form field names and renderkit resources such as its javascript names. A
+namespace is introduced using a concept called a `NamingContainer`. When Faces
+needs to construct a name it ascends the view tree looking for the closest
+parent that implements `NamingContainer`. If it finds one this parent gets an
+opportunity to return a namespace that will be incorporated into the name.
 
-Faces supports a notion of namespacing elements in its view tree which in turn impacts form field names and renderkit resources such as its javascript names.  A namespace is introduced using a concept called a NamingContainer.  When Faces needs to construct a name it ascends the view tree looking for the closest parent that implements NamingContainer.  If it finds one this parent gets an opportunity to return a namespace that will be incorporated into the name.
+Though structurally supportive, Faces however doesn't inherently provide proper
+portlet namespacing. The bridge needs to introduce this support. This is done by
+returning a `UIViewRoot` from `ViewHandler.createView()` that implements
+`NamingContainer` in a manner whereby the generated container name is
+constructed in part by using the unique namespace `Id` of the portlet. More
+specifically, a `UIViewRoot` with the
+`javax.portlet.faces.annotation.PortletNamingContainer` annotation must
+implement `getContainerClientId()` to return a `String` containing (at least in
+part) the portlet's namespace `Id`, if and only if, called during a portlet
+request<sup>[[6.91](TCK-Tests.html#6.91)]</sup>. The namespace Id used in
+processing `getContainerClientId()` must be consistent for the lifetime of the
+view (across save and restore)<sup>[[6.92](TCK-Tests.html#6.92)]</sup>. Because
+getContainerClientId() can be called during any portlet lifecycle phase (action
+or render)<sup>[[6.93](TCK-Tests.html#6.93)]</sup>, care should be taken in
+implementing this support to ensure such consistency as Portlet 1.0 containers
+only expose the portlet's namespace `Id` during the render phase and hence
+`ExternalContext.encodeNamespace()` throws an exception if called during a
+portlet action request.
 
-Though structurally supportive, Faces however doesn't inherently provide proper portlet namespacing.  The bridge needs to introduce this support. This is done by returning a UIViewRoot from ViewHandler.createView()that implements NamingContainer in a manner whereby the generated container name is constructed in part by using the unique namespace Id of the portlet. More specifically, a UIViewRoot with the javax.portlet.faces.annotation.PortletNamingContainer annotation must implement getContainerClientId() to return a String containing (at least in part) the portlet's namespace Id, if and only if, called during a portlet request[6.91].  The namespace Id used in processing getContainerClientId() must be consistent for the lifetime of the view (across save and restore)[6.92].  Because getContainerClientId() can be called during any portlet lifecycle phase (action or render)[6.93], care should be taken in implementing this support to ensure such consistency as Portlet 1.0 containers only expose the portlet's namespace Id during the render phase and hence ExternalContext.encodeNamespace() throws an exception if called during a portlet action request.
+The convenience class
+`javax.portlet.faces.PortletNamingContainerUIViewRoot`<sup>[[6.94](TCK-Tests.html#6.94)]</sup>
+is provided to simplify adding portlet namespacing for Faces extensions (and for
+internal bridge usage). This class can either be used directly or subclassed.
+The class is annotated with the
+`javax.portlet.faces.annotation.PortletNamingContainer`
+annotation<sup>[[6.95](TCK-Tests.html#6.95)]</sup> ensuring the bridge will
+recognize this `UIViewRoot` as one that implements the portlet namespacing
+behavior. It implements `getContainerClientId()` to meet the above
+requirements<sup>[[6.96](TCK-Tests.html#6.96)]</sup>. In addition its returns
+`getContainerClientId()null` for non-portlet requests. This ensures the class
+can be used by the bridge as a replacement for the standard
+`javax.faces.component.UIViewRoot` because it ensures that non-portlet behavior
+runs unchanged, without `NamingContainer` function.
 
-The convenience class javax.portlet.faces.PortletNamingContainerUIViewRoot[6.94] is provided to simplify adding portlet namespacing for Faces extensions (and for internal bridge usage).  This class can either be used directly or subclassed. The class is annotated with the javax.portlet.faces.annotation.PortletNamingContainer annotation[6.95] ensuring the bridge will recognize this UIViewRoot as one that implements the portlet namespacing behavior.   It implements getContainerClientId() to meet the above requirements[6.96].  In addition its returns getContainerClientId()null for non-portlet requests.  This ensures the class can be used by the bridge as a replacement for the standard javax.faces.component.UIViewRoot  because it ensures that non-portlet behavior runs unchanged, without NamingContainer function.  
+As indicated, annotating the `UIViewRoot` class with
+`javax.portlet.faces.annotation.PortletNamingContainer` allows the bridge's
+`FacesContext` to detect that the response will be portlet namespaced. To signal
+this behavior to the consumer, `FacesContext.setViewRoot()` sets the
+"`X-JAVAX-PORTLET-FACES-NAMESPACED-RESPONSE`" response property with a value of
+"`true`"<sup>[[nt](TCK-Tests.html#nt)]</sup>. Consumers needing to do response
+parsing to meet its namespacing requirements (e.g. when inserting the response
+into a single overall page form) can use the existence of this property as an
+indication that the form fields in the portlet response have already been
+properly namespaced and hence need not be fixed up as part of the form parsing
+process.
 
-As indicated, annotating the UIViewRoot class with javax.portlet.faces.annotation.PortletNamingContainer allows the bridge's FacesContext to detect that the response will be portlet namespaced. To signal this behavior to the consumer, FacesContext.setViewRoot() sets the "X-JAVAX-PORTLET-FACES-NAMESPACED-RESPONSE" response property with a value of "true"[nt]. Consumers needing to do response parsing to meet its namespacing requirements (e.g. when inserting the response into a single overall page form) can use the existence of this property as an indication that the form fields in the portlet response have already been properly namespaced and hence need not be fixed up as part of the form parsing process.
-6.7 Supporting isPostback() during RENDER_PHASE
-When rendering, Faces depends on distinguishing between renders that follow action processing within the same request and renders that do not. This is determined by calling ResponseStateManager.isPostback().  Because portlet renders occur in distinct requests from actions, the state Faces depends on to make this determination isn't naturally present.  As discussed in section 5.1.2 the bridge is required to ensure the existence and/or absence of such state within its render phase in order to ensure proper execution of isPostback(). Specifically, the bridge is required to always preserve the ResponseStateManager.VIEW_STATE_PARAM parameter in each bridge request scope.  This is done at the at the end of the ACTION_PHASE and EVENT_PHASE phase.  Furthermore it must restore this request parameter at the beginning of each RENDER_PHASE phase that corresponds to this bridge request scope such that a call to ExternalContext.getRequestParameterMap().get(ResponseStateManager.VIEW_STATE_PARAM) returns the restored value[6.97]. Finally, when its able to restore this parameter the bridge must also set the request attribute javax.portlet.faces.isPostback with a Boolean object whose value is Boolean.TRUE[6.98].  This allows alternative isPostback() implementations that do not rely on the existence of the ResponseStateManager.VIEW_STATE_PARAM to recognize they are running in a postback situation.
+## <a name="6.7"></a>6.7 Supporting isPostback() during RENDER_PHASE
 
+When rendering, Faces depends on distinguishing between renders that follow
+action processing within the same request and renders that do not. This is
+determined by calling `ResponseStateManager.isPostback()`. Because portlet
+renders occur in distinct requests from actions, the state Faces depends on to
+make this determination isn't naturally present. As discussed in section
+[5.1.2](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1.2) the bridge is
+required to ensure the existence and/or absence of such state within its render
+phase in order to ensure proper execution of `isPostback()`. Specifically, the
+bridge is required to always preserve the
+`ResponseStateManager.VIEW_STATE_PARAM` parameter in each bridge request scope.
+This is done at the at the end of the `ACTION_PHASE` and `EVENT_PHASE` phase.
+Furthermore it must restore this request parameter at the beginning of each
+`RENDER_PHASE` phase that corresponds to this bridge request scope such that a
+call to
+`ExternalContext.getRequestParameterMap().get(ResponseStateManager.VIEW_STATE_PARAM)`
+returns the restored value<sup>[[6.97](TCK-Tests.html#6.97)]</sup>. Finally,
+when its able to restore this parameter the bridge must also set the request
+attribute `javax.portlet.faces.isPostback` with a `Boolean` object whose value
+is `Boolean.TRUE`<sup>[[6.98](TCK-Tests.html#6.98)]</sup>. This allows
+alternative `isPostback()` implementations that do not rely on the existence of
+the `ResponseStateManager.VIEW_STATE_PARAM` to recognize they are running in a
+postback situation.
 
-6.8 Supporting PreDestroy Annotated Methods
-Faces requires that all managed beans be given the opportunity to clean themselves up when they are being removed from one of the three container scopes (application, session, request).  The function is managed via annotations and injection.  A managed bean with one or more public no-argument void return methods annotated with javax.annotation.PreDestroy will be called when either the object is removed from scope or the scope terminates.  
+## <a name="6.8"></a>6.8 Supporting PreDestroy Annotated Methods
 
-When running in the bridge, the lifetime of the application and session scopes aren't modified but the request scope is.  The bridge implements an extended request scope called the bridge request scope. This scope preserves managed beans across physical requests ensuring that applications written in a style where request scoped managed beans are used to maintain state between the Faces action and render lifecycles will function properly in the portlet's multi-request lifecycle.  However, because bridge request scope data is transferred into the portlet request scope when processing a request, special handling is required by managed beans utilizing the annotation to avoid releasing the bean prematurely.  This is because the bridge can't prevent the PreDestroy method from being called when the portlet request scope ends even though it is managing the attribute in its request scope.  I.e. managed beans managed by the bridge in its bridge request scope will still be notified they are being destroyed at the end of each portlet request.  To work properly clients must change their managed bean implementations for those beans not excluded from the bridge request scope and the bridge must provide new (additional) mechanisms.
+Faces requires that all managed beans be given the opportunity to clean
+themselves up when they are being removed from one of the three container scopes
+(application, session, request). The function is managed via annotations and
+injection. A managed bean with one or more public no-argument void return
+methods annotated with `javax.annotation.PreDestroy` will be called when either
+the object is removed from scope or the scope terminates.
 
-6.8.1 Managed Bean Changes
-Managed beans that want to utilize PreDestroy and run properly when not explicitly excluded from the bridge request scope must:
+When running in the bridge, the lifetime of the application and session scopes
+aren't modified but the request scope is. The bridge implements an extended
+request scope called the bridge request scope. This scope preserves managed
+beans across physical requests ensuring that applications written in a style
+where request scoped managed beans are used to maintain state between the Faces
+action and render lifecycles will function properly in the portlet's
+multi-request lifecycle. However, because bridge request scope data is
+transferred into the portlet request scope when processing a request, special
+handling is required by managed beans utilizing the annotation to avoid
+releasing the bean prematurely. This is because the bridge can't prevent the
+`PreDestroy` method from being called when the portlet request scope ends even
+though it is managing the attribute in its request scope. I.e. managed beans
+managed by the bridge in its bridge request scope will still be notified they
+are being destroyed at the end of each portlet request. To work properly clients
+must change their managed bean implementations for those beans not excluded from
+the bridge request scope and the bridge must provide new (additional)
+mechanisms.
 
-    Create separate but equal methods for handling the cleanup in the bridge environment.  This distinct method(s) is identified by the BridgePreDestroy annotation (javax.portlet.faces.annotation.BridgePreDestroy).
-    Add a new public no-argument void return method annotated with BridgeRequestScopeAttributeAdded (javax.portlet.faces.annotation.BridgeRequestScopeAttributeAdded).  This method is called when the managed bean is added to the portlet request scope and it will be preserved by the bridge in the bridge request scope.  When called a managed bean is expected to set internal state such that when its PreDestroy method(s) is called (later) it can check this state and if it indicates the request is running under the management of the bridge the PreDestroy returns without doing any cleanup.  This mechanism works around the issues related to the bridge being unable to disable the execution of the PreDestroy method even when it continues to manage this bean in its request scope.
-    Modify each method annotated with PreDestroy to check if its executing under bridge management and if so return without performing any cleanup.
+### <a name="6.8.1"></a>6.8.1 Managed Bean Changes
 
-6.8.2 Bridge requirements
-To satisfy the Faces requirement that managed beans managed in the bridge's request scope have an opportunity to release themeselves when the bridge request scope ends, the bridge must provide the following once it has acquired a FacesContext for a given request:
+Managed beans that want to utilize `PreDestroy` and run properly when not
+explicitly excluded from the bridge request scope must:
 
-        When the bridge preserves a request attribute in the bridge request scope, the bridge must execute on the attribute's value all public no argument void return methods annotated by BridgeRequestScopeAttributeAdded[nt/6.44].
-        When an attribute that is currently maintained in the bridge's request scope is explicitly removed from the container's request scope or its value replaced, the bridge must execute on the (old) attribute's value any public no-argument void return method annotated by BridgePreDestroy if executing in the action phase[nt/6.44].  Note: because the bridge request scope isn't updated during its render phase replace/removal of  an attribute's value from the container's request scope must not cause the BridgePreDestroy method(s) to be called[nt/6.44].  
-        When an attribute that is currently maintained in the bridge's request scope is implicitly removed from the container's request scope (such as when the container's request scope ends), the bridge does not notify the attribute's BridgePreDestroy methods[nt/6.44].  This is because the attribute is still managed in the bridge request scope though removed from the underlying container request scope which is terminating.
-        When the bridge is terminating a bridge request scope,  the bridge must iterate over all managed attributes and execute on the attribute's value any public no-argument void return method annotated by BridgePreDestroy[nt/6.44]. 
+- Create separate but equal methods for handling the cleanup in the bridge
+environment. This distinct method(s) is identified by the `BridgePreDestroy`
+annotation (`javax.portlet.faces.annotation.BridgePreDestroy`).
+- Add a new public no-argument void return method annotated with
+`BridgeRequestScopeAttributeAdded`
+(`javax.portlet.faces.annotation.BridgeRequestScopeAttributeAdded`). This method
+is called when the managed bean is added to the portlet request scope and it
+will be preserved by the bridge in the bridge request scope. When called a
+managed bean is expected to set internal state such that when its `PreDestroy`
+method(s) is called (later) it can check this state and if it indicates the
+request is running under the management of the bridge the `PreDestroy` returns
+without doing any cleanup. This mechanism works around the issues related to the
+bridge being unable to disable the execution of the `PreDestroy` method even
+when it continues to manage this bean in its request scope.
+- Modify each method annotated with `PreDestroy` to check if its executing under
+bridge management and if so return without performing any cleanup.
 
+### <a name="6.8.2"></a>6.8.2 Bridge requirements
 
-6.9 Setting the RenderKit used by a Portlet
-Faces resolves the renderkit used in a given request by first looking for a request parameter whose name is the value of ResponseStateManager.RENDER_KIT_ID_PARAM. If this parameter doesn't exist the id is next determined from a configuration parameter in the application's faces-config.xml and finally an internal setting.  Given that the faces-config.xml is an application wide setting, the request parameter is the sole mechanism for managing the needs of portlets that use distinct renderkits.  As this may not be uncommon and most portlets use the same renderkit throughout all its views, the bridge simplifies the use of this request parameter if the proper context attribute has been set prior to it being initialized.
+To satisfy the Faces requirement that managed beans managed in the bridge's
+request scope have an opportunity to release themeselves when the bridge request
+scope ends, the bridge must provide the following once it has acquired a
+`FacesContext` for a given request:
 
-Specifically, when the bridge is initialized, if the portlet context attribute javax.portlet.faces.<portletName>.defaultRenderKitId is set, the bridge is responsible for ensuring that in every request the request parameter Map(s) returned from ExternalContext.getRequestParameterMap() and ExternalContext.getRequestParameterValuesMap()and the Iterator returned from the ExternalContext.getRequestParameterNames() contain an entry for ResponseStateManager.RENDER_KIT_ID_PARAM[6.135]. In the Map(s), the value for this entry must be the value from the underlying request, if it exists, otherwise it must be the value in the javax.portlet.faces.<portletName>.defaultRenderKitId context attribute[6.135].
+- When the bridge preserves a request attribute in the bridge request scope, the
+bridge must execute on the attribute's value all public no argument void return
+methods annotated by
+`BridgeRequestScopeAttributeAdded`<sup>[[nt](TCK-Tests.html#nt)/[6.44](TCK-Tests.html#6.44)]</sup>.
+- When an attribute that is currently maintained in the bridge's request scope
+is explicitly removed from the container's request scope or its value replaced,
+the bridge must execute on the (old) attribute's value any public no-argument
+void return method annotated by `BridgePreDestroy` if executing in the action
+phase<sup>[[nt](TCK-Tests.html#nt)/[6.44](TCK-Tests.html#6.44)]</sup>. Note: because the bridge request scope isn't updated during its
+render phase replace/removal of an attribute's value from the container's
+request scope must not cause the `BridgePreDestroy` method(s) to be
+called<sup>[[nt](TCK-Tests.html#nt)/[6.44](TCK-Tests.html#6.44)]</sup>.
+- When an attribute that is currently maintained in the bridge's request scope
+is implicitly removed from the container's request scope (such as when the
+container's request scope ends), the bridge does not notify the attribute's
+`BridgePreDestroy`
+methods<sup>[[nt](TCK-Tests.html#nt)/[6.44](TCK-Tests.html#6.44)]</sup>. This is
+because the attribute is still managed in the bridge request scope though
+removed from the underlying container request scope which is terminating.
+- When the bridge is terminating a bridge request scope, the bridge must iterate
+over all managed attributes and execute on the attribute's value any public
+no-argument void return method annotated by
+`BridgePreDestroy`<sup>[[nt](TCK-Tests.html#nt)/[6.44](TCK-Tests.html#6.44)]</sup>.
 
+## <a name="6.9"></a>6.9 Setting the RenderKit used by a Portlet
+
+Faces resolves the renderkit used in a given request by first looking for a
+request parameter whose name is the value of
+`ResponseStateManager.RENDER_KIT_ID_PARAM`. If this parameter doesn't exist the id
+is next determined from a configuration parameter in the application's
+`faces-config.xml` and finally an internal setting. Given that the
+`faces-config.xml` is an application wide setting, the request parameter is the
+sole mechanism for managing the needs of portlets that use distinct renderkits.
+As this may not be uncommon and most portlets use the same renderkit throughout
+all its views, the bridge simplifies the use of this request parameter if the
+proper context attribute has been set prior to it being initialized.
+
+Specifically, when the bridge is initialized, if the portlet context attribute
+`javax.portlet.faces.<portletName>.defaultRenderKitId` is set, the bridge is
+responsible for ensuring that in every request the request parameter `Map`(s)
+returned from `ExternalContext.getRequestParameterMap()` and
+`ExternalContext.getRequestParameterValuesMap()` and the `Iterator` returned
+from the `ExternalContext.getRequestParameterNames()` contain an entry for
+`ResponseStateManager.RENDER_KIT_ID_PARAM`<sup>[[6.135](TCK-Tests.html#6.135)]</sup>.
+In the `Map`(s), the value for this entry must be the value from the underlying
+request, if it exists, otherwise it must be the value in the
+`javax.portlet.faces.<portletName>.defaultRenderKitId` context
+attribute<sup>[[6.135](TCK-Tests.html#6.135)]</sup>.
