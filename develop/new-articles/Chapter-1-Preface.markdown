@@ -84,23 +84,25 @@ interface and configuration which a portlet uses to initialize, configure,
 manage, and execute it. I.e. defines the interface and configuration details
 hidden to you in chapter 4 by the GenericFacesPortlet implementation.
 
-- [Chapter 6, section 6.5](Chapter-6-Bridge-Requirements-for-Managing-Faces#6.5)
-through subsection 6.5.2.1 plus section 6.5.2.3: these sections provide
-information related to portlet specific EL evaluation.
+- [Chapter 6, section
+6.5](Chapter-6-Bridge-Requirements-for-Managing-Faces.html#6.5) through
+subsection 6.5.2.1 plus section 6.5.2.3: these sections provide information
+related to portlet specific EL evaluation.
 
 *Advanced Information:*
 
 - [Chapter 6, section
-6.8](Chapter-6-Bridge-Requirements-for-Managing-Faces#6.8): JSF provides a
+6.8](Chapter-6-Bridge-Requirements-for-Managing-Faces.html#6.8): JSF provides a
 facility allowing managedbean implementors to be notified before the bean is
 destroyed. This section includes important information for supporting this
 notification (correctly) in a portlet environment.
 
-- [Chapter 5, section 5.1](Chapter-5-Bridge-Lifecycle-Requirements#5.1): this
-section describes how the portlet and JSF lifecycles differ and how the bridge
-manages state to ensure expected behavior in JSF. You will need to understand
-this information and how to exclude specific state from being managed by the
-bridge if you determine that such state management is detrimental/not needed.
+- [Chapter 5, section 5.1](Chapter-5-Bridge-Lifecycle-Requirements.html#5.1):
+this section describes how the portlet and JSF lifecycles differ and how the
+bridge manages state to ensure expected behavior in JSF. You will need to
+understand this information and how to exclude specific state from being managed
+by the bridge if you determine that such state management is detrimental/not
+needed.
 
 - [Chapter 7](Chapter-7-BridgeRenderFilter.html): this chapter defines the
 behavior of a servlet filter that can be used with the bridge to provide correct
