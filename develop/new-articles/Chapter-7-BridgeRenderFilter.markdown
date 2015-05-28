@@ -218,3 +218,14 @@ All (existing) MyFaces versions (1.2.2-1.2.9) tag handlers detect write behind
 support by using `instanceof` a particular `ServletResponseWrapper` class. This
 class is incompatible with this `PortletResponseWrapper` mechanism, hence only
 the `ServletFilter` mechanism can be used to add write behind support.
+
+<span style="font-weight: bold;"></span></span></div>
+<table style="text-align: left; width: 100%;" border="0" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>&nbsp; <a href="Chapter-6-Bridge-Requirements-for-Managing-Faces.html">Previous</a></td>
+<td style="text-align: center;"><a href="TOC.html">Portlet 2.0 Bridge for JavaServer<small><sup>TM</sup></small>Faces 1.2 -- November 14th, 2010</a></td>
+<td style="text-align: right;"><a href="Chapter-8-Faces-Extensions-in-the-Bridge-Environment.html">Next</a> &nbsp;</td>
+</tr>
+</tbody>
+</table>

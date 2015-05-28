@@ -264,4 +264,15 @@ query string<sup>[[3.16](TCK-Tests.html#3.16)]</sup>.
 The `BridgeUninitializedException` is thrown if this method is called while the
 bridge is in an uninitialized state<sup>[[3.17](TCK-Tests.html#3.17)]</sup>. The
 `NullPointerException` is thrown if either the passed request or response
-objects are null<sup>[[3.18](TCK-Tests.html#3.18)]</sup>. 
+objects are null<sup>[[3.18](TCK-Tests.html#3.18)]</sup>.
+
+<span style="font-weight: bold;"></span></span></div>
+<table style="text-align: left; width: 100%;" border="0" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>&nbsp; <a href="Chapter-2-Overview.html">Previous</a></td>
+<td style="text-align: center;"><a href="TOC.html">Portlet 2.0 Bridge for JavaServer<small><sup>TM</sup></small>Faces 1.2 -- November 14th, 2010</a></td>
+<td style="text-align: right;"><a href="Chapter-4-GenericFacesPortlet.html">Next</a> &nbsp;</td>
+</tr>
+</tbody>
+</table>

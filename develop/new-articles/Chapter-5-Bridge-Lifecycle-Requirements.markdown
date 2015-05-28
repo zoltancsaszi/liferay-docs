@@ -995,3 +995,14 @@ navigation rules that target it that use a query string (`<to-view-id>`
 `/edit.jspx?javax.portlet.faces.PortletMode=edit </to-view-id>`). Developers are
 encouraged to use such wildcarding to ensure they execute properly in the
 broadest set of bridge implementations.
+
+<span style="font-weight: bold;"></span></span></div>
+<table style="text-align: left; width: 100%;" border="0" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>&nbsp; <a href="Chapter-4-GenericFacesPortlet.html">Previous</a></td>
+<td style="text-align: center;"><a href="TOC.html">Portlet 2.0 Bridge for JavaServer<small><sup>TM</sup></small>Faces 1.2 -- November 14th, 2010</a></td>
+<td style="text-align: right;"><a href="Chapter-6-Bridge-Requirements-for-Managing-Faces.html">Next</a> &nbsp;</td>
+</tr>
+</tbody>
+</table>

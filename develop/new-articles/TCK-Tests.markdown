@@ -1331,4 +1331,5 @@ Test: Reprise of tests 6.118-6.125 except the target is a nonfaces viewId.  To a
 
 [<a name="7.1"></a>7.1] One configures the particular implementation of the RenderResponseWrapper and/or ResourceResponseWrapper the bridge uses as the response object it dispatches to in the bridge's application-extension section of the face-config.xml
 Test: Covered by Tests 6.133 and 6.134
-Chapter 8 Tests
+
+## Chapter 8 Tests

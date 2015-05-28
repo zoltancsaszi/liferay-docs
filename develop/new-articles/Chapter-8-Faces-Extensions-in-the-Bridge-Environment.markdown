@@ -193,3 +193,14 @@ mistakenly excluded. In such a situation when non-uniquely namespaced attributes
 are used, the extension developer should merely document for the portlet
 developer her need to configure such an exclusion in the application's
 portlet.xml for each portlet that utilizes the extension.
+
+<span style="font-weight: bold;"></span></span></div>
+<table style="text-align: left; width: 100%;" border="0" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>&nbsp; <a href="Chapter-7-BridgeRenderFilter.html">Previous</a></td>
+<td style="text-align: center;"><a href="TOC.html">Portlet 2.0 Bridge for JavaServer<small><sup>TM</sup></small>Faces 1.2 -- November 14th, 2010</a></td>
+<td style="text-align: right;"><a href="Title-Page.html">Next</a> &nbsp;</td>
+</tr>
+</tbody>
+</table>
