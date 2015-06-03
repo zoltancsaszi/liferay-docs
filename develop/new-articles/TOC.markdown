@@ -30,7 +30,7 @@
 
     2.2 What is a Portlet?
 
-    2.3 What is JavaServer™ Faces?
+    2.3 What is JavaServe&trade; Faces?
 
     2.4 Architectural Overview
 

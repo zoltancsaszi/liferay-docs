@@ -205,12 +205,12 @@ when running in the `EVENT_PHASE` is undefined although it must not be `null`.
              mapped and then checking the `URL` to see if it would be mapped. If
              a Faces `URL`, derive the view identifier encoded in this `URL`, as
              follows: (Note: all resulting `viewIds` start with a "/")
-                 - If prefix mapping (such as “/faces/*”) is used for the
+                 - If prefix mapping (such as "/faces/*") is used for the
                  `FacesServlet`, the `viewId` is set from the extra path
                  information of the request `URI`. This corresponds to the path
                  that follows the prefix mapping. e.g. a prefix mapped URL such
                  as /faces/mypage.jsp would have a `viewId` of "/mypage.jsp".
-                 - If suffix mapping (such as “*.faces”) is used for
+                 - If suffix mapping (such as "*.faces") is used for
                  `FacesServlet`, the `viewId` is set from the servlet path
                  information of the request URI, after replacing the suffix with
                  the value of the context initialization parameter named by the

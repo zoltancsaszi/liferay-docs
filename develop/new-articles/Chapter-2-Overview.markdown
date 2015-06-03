@@ -76,9 +76,9 @@ application code
 Most importantly, JSF establishes standards which are designed to be leveraged
 by tools to provide a developer experience which is accessible to a wide variety
 of developer types, ranging from corporate developers to systems programmers. A
-“corporate developer” is characterized as an individual who is proficient in
+"corporate developer" is characterized as an individual who is proficient in
 writing procedural code and business logic, but is not necessarily skilled in
-object-oriented programming. A “systems programmer” understands object-oriented
+object-oriented programming. A "systems programmer" understands object-oriented
 fundamentals, including abstraction and designing for re-use. A corporate
 developer typically relies on tools for development, while a system programmer
 may define his or her tool as a text editor for writing code. Therefore, JSF is

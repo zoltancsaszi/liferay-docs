@@ -60,7 +60,7 @@ support web applications that publish portions of their Faces views as portlets
 or JavaServer&trade; Faces extension developers who want to ensure that their
 extension can run in a portlet (bridge) environment.
 
-The specification is not a user’s guide for developing portlets using
+The specification is not a user's guide for developing portlets using
 JavaServer&trade; Faces and is not intended to be used as such. As it focuses on the
 behavioral details of the bridge, it is primarily oriented towards bridge
 implementors. Portlet developers or JSF developers who want quick access to the
