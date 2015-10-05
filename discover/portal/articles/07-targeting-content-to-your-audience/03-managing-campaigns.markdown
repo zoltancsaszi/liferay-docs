@@ -7,19 +7,22 @@ Targeting* &rarr; *Campaigns*. To create a new campaign, you need to select user
 segments to target, a start date and an end date, and a priority, as well as a
 name and, optionally, a description. You also have to indicate whether or not
 the campaign you create should be active or inactive. When you've entered the
-required information, click *Save*. The user segments you select when creating a
-campaign represents the portal users targeted by the campaign. You can select
-one or more user segments to focus on for your campaign. The start and end dates
-together specify the duration of the campaign. There can be multiple campaigns
-active at the same time that target the same user segment. In these situations,
-the priority attribute of the campaigns determines which campaign takes
-precedence. Finally, you can activate or deactivate a campaign via the active
-attribute of a campaign. Deactivating a campaign disables the effect of the
-campaign within the portal. Deactivating a campaign is like deleting the
-campaign except that a deactivated campaign can be reactivated later. It can be
-useful to deactivate a campaign if a problem is found with the way content is
-being displayed. Once the problem has been corrected, the campaign can be
-reactivated.
+required information, click *Save*.
+
+The user segments you select when creating a campaign represents the portal
+users targeted by the campaign. You can select one or more user segments to
+focus on for your campaign. The start and end dates together specify the
+duration of the campaign. The date parameters are specified to the exact time of
+day (e.g., 12/22/15 at 05:11), which is evaluated by a user-selected time zone.
+There can be multiple campaigns active at the same time that target the same
+user segment. In these situations, the priority attribute of the campaigns
+determines which campaign takes precedence. Finally, you can activate or
+deactivate a campaign via the active attribute of a campaign. Deactivating a
+campaign disables the effect of the campaign within the portal. Deactivating a
+campaign is like deleting the campaign except that a deactivated campaign can be
+reactivated later. It can be useful to deactivate a campaign if a problem is
+found with the way content is being displayed. Once the problem has been
+corrected, the campaign can be reactivated.
 
 ![Figure 7.5: Click on *Site Administration* &rarr; *Configuration* &rarr; *Audience Targeting* &rarr; *Campaigns* to manage campaigns for a site.](../../images/07-audience-targeting-user-campaigns.png)
 
