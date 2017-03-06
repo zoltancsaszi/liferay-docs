@@ -24,20 +24,13 @@ server's returned node name.
 
 2.  Displaying the server node name in your Liferay DXP installation is set to
     `false` by default. You'll need to enable this property. To do this,
-    navigate into your Ext plugin's `/docroot/WEB-INF/ext-impl/src` folder and
-    create a `portal-ext.properties` file. In that file, insert the following
-    property:
+    navigate into your Liferay bundle's root folder and create a
+    `portal-ext.properties` file. In that file, insert the following property:
 
         web.server.display.node=true
 
-    Now your server's node name will be displayed once your Ext plugin is
-    deployed.
-
-    **Note:** You can change core portal properties without deploying an Ext
-    plugin. You can do this by creating a `portal-ext.properties` file and
-    placing it in your Liferay bundle's root folder. Therefore, you could add
-    the property above to a `portal-ext.properties` file in your Liferay
-    bundle's root folder, restart the server, and have the same result.
+    Now your server's node name will be displayed once your Liferay bundle is
+    restarted.
 
 3.  In the `/ext-impl/src` folder, create the folder structure representing the
     package name you want your new class to reside in (e.g.,
