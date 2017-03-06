@@ -16,7 +16,7 @@ server's returned node name.
 1.  Navigate into your Plugins SDK's `/ext` folder and run the following
     command:
 
-        create.[bat|sh]  portal-impl-extend-spring “PortalImpl Extend Spring”
+        create.[bat|sh]  portal-impl-extend-spring "PortalImpl Extend Spring"
 
     Your Ext plugin is generated and now resides in the Plugins SDK's `/ext`
     folder with the name you assigned followed by `-ext` (e.g.,
