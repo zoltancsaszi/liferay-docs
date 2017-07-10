@@ -1,10 +1,13 @@
 # Extending Core Classes Using Spring with Ext Plugins
 
 A supported use case for using Ext plugins in Liferay DXP is extending Liferay
-Digital Enterprise's core classes (e.g., `portal-impl`, `portal-kernel`, etc.) using
-Spring. Before beginning, make sure you've reviewed the generalized
-[Advanced Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
-tutorial.
+Digital Enterprise's core classes (e.g., `portal-impl`, `portal-kernel`, etc.)
+using Spring. You can reference the
+[Finding Core Liferay Portal Artifacts](/develop/tutorials/-/knowledge_base/7-0/configuring-dependencies#finding-core-liferay-portal-artifacts)
+section for help distinguishing core classes. Make sure you've reviewed the
+generalized
+[Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
+tutorial before creating an Ext plugin.
 
 As an example, you'll create a sample Ext plugin that extends the
 [PortalImpl](https://docs.liferay.com/ce/portal/7.0-latest/javadocs/portal-impl/com/liferay/portal/util/PortalImpl.html)

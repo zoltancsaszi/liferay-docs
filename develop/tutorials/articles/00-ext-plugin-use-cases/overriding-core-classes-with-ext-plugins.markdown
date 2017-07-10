@@ -2,9 +2,12 @@
 
 A supported use case for using Ext plugins in Liferay DXP is overriding Liferay
 Digital Enterprise's core classes (e.g., `portal-impl`, `portal-kernel`, etc.).
-Before beginning, make sure you've reviewed the generalized
-[Advanced Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
-tutorial.
+You can reference the
+[Finding Core Liferay Portal Artifacts](/develop/tutorials/-/knowledge_base/7-0/configuring-dependencies#finding-core-liferay-portal-artifacts)
+section for help distinguishing core classes. Make sure you've reviewed the
+generalized
+[Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
+tutorial before creating an Ext plugin.
 
 As an example, you'll create a sample Ext plugin that overwrites the
 [PortalImpl](https://docs.liferay.com/ce/portal/7.0-latest/javadocs/portal-impl/com/liferay/portal/util/PortalImpl.html)

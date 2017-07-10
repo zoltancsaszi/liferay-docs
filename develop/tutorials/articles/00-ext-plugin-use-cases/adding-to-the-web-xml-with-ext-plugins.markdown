@@ -3,7 +3,7 @@
 A supported use case for using Ext Plugins in Liferay DXP is adding additional
 functionality to Liferay Digital Enterprise's `web.xml` file. Before beginning,
 make sure you've reviewed the generalized
-[Advanced Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
+[Customization with Ext Plugins](/documentation/7.0/develop/tutorials/-/official_documentation/tutorials/advanced-customization-with-ext-plugins)
 tutorial.
 
 As an example, you'll create a sample Ext plugin that adds to your Liferay
