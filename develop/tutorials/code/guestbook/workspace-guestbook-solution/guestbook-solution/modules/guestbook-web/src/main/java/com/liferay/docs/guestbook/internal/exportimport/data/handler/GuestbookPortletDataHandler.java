@@ -1,3 +1,4 @@
+
 package com.liferay.docs.guestbook.internal.exportimport.data.handler;
 
 import java.util.List;
@@ -23,11 +24,10 @@ import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.xml.Element;
 
-@Component(
-	immediate = true, 
-	property = {
-		"javax.portlet.name=" + GuestbookPortletKeys.GUESTBOOK,
-		"javax.portlet.name=" + GuestbookPortletKeys.GUESTBOOK_ADMIN}, 
+@Component(immediate = true, property = {
+	"javax.portlet.name=" + GuestbookPortletKeys.GUESTBOOK,
+	"javax.portlet.name=" + GuestbookPortletKeys.GUESTBOOK_ADMIN
+	}, 
 	service = PortletDataHandler.class
 )
 public class GuestbookPortletDataHandler extends BasePortletDataHandler {
@@ -75,7 +75,7 @@ public class GuestbookPortletDataHandler extends BasePortletDataHandler {
 				_entryLocalService.deleteEntry(entry);
 			}
 			_guestbookLocalService.deleteGuestbook(guestbook.getGuestbookId());
-		}		
+		}
 
 		return portletPreferences;
 	}
@@ -101,12 +101,16 @@ public class GuestbookPortletDataHandler extends BasePortletDataHandler {
 		ActionableDynamicQuery guestbookActionableDynamicQuery =
 			_guestbookLocalService.getExportActionableDynamicQuery(
 				portletDataContext);
+		
+		guestbookActionableDynamicQuery.setGroupId(portletDataContext.getScopeGroupId());
 
 		guestbookActionableDynamicQuery.performActions();
 
 		ActionableDynamicQuery entryActionableDynamicQuery =
 			_entryLocalService.getExportActionableDynamicQuery(
 				portletDataContext);
+
+		entryActionableDynamicQuery.setGroupId(portletDataContext.getScopeGroupId());
 
 		entryActionableDynamicQuery.performActions();
 
@@ -159,13 +163,8 @@ public class GuestbookPortletDataHandler extends BasePortletDataHandler {
 			_entryLocalService.getExportActionableDynamicQuery(
 				portletDataContext);
 
+		entryExportActionableDynamicQuery.setGroupId(portletDataContext.getScopeGroupId());
 		entryExportActionableDynamicQuery.performCount();
-
-		ActionableDynamicQuery guestbookExportActionableDynamicQuery =
-			_guestbookLocalService.getExportActionableDynamicQuery(
-				portletDataContext);
-
-		guestbookExportActionableDynamicQuery.performCount();
 	}
 
 	@Reference(unbind = "-")
