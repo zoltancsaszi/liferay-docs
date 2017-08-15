@@ -27,10 +27,12 @@ import com.liferay.docs.guestbook.service.base.EntryLocalServiceBaseImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
@@ -38,14 +40,13 @@ import com.liferay.portal.kernel.util.Validator;
 import aQute.bnd.annotation.ProviderType;
 
 /**
- * The implementation of the entry local service.
- *
- * <p>
- * All custom service methods should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the {@link com.liferay.docs.guestbook.service.EntryLocalService} interface.
- *
- * <p>
- * This is a local service. Methods of this service will not have security checks based on the propagated JAAS credentials because this service can only be accessed from within the same VM.
- * </p>
+ * The implementation of the entry local service. <p> All custom service methods
+ * should be put in this class. Whenever methods are added, rerun ServiceBuilder
+ * to copy their definitions into the
+ * {@link com.liferay.docs.guestbook.service.EntryLocalService} interface. <p>
+ * This is a local service. Methods of this service will not have security
+ * checks based on the propagated JAAS credentials because this service can only
+ * be accessed from within the same VM. </p>
  *
  * @author liferay
  * @see EntryLocalServiceBaseImpl
@@ -54,14 +55,16 @@ import aQute.bnd.annotation.ProviderType;
 @ProviderType
 public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 	/*
-	 * NOTE FOR DEVELOPERS:
-	 *
-	 * Never reference this class directly. Always use {@link com.liferay.docs.guestbook.service.EntryLocalServiceUtil} to access the entry local service.
+	 * NOTE FOR DEVELOPERS: Never reference this class directly. Always use
+	 * {@link com.liferay.docs.guestbook.service.EntryLocalServiceUtil} to
+	 * access the entry local service.
 	 */
-	
+
 	@Indexable(type = IndexableType.REINDEX)
-	public Entry addEntry(long userId, long guestbookId, String name, String email, String message,
-			ServiceContext serviceContext) throws PortalException {
+	public Entry addEntry(
+		long userId, long guestbookId, String name, String email,
+		String message, ServiceContext serviceContext)
+		throws PortalException {
 
 		long groupId = serviceContext.getScopeGroupId();
 
@@ -90,29 +93,38 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 
 		entryPersistence.update(entry);
 
-		resourceLocalService.addResources(user.getCompanyId(), groupId, userId, Entry.class.getName(), entryId, false,
-				true, true);
+		resourceLocalService.addResources(
+			user.getCompanyId(), groupId, userId, Entry.class.getName(),
+			entryId, false, true, true);
 
-		AssetEntry assetEntry = assetEntryLocalService.updateEntry(userId, groupId, entry.getCreateDate(),
-				entry.getModifiedDate(), Entry.class.getName(), entryId, entry.getUuid(), 0,
-				serviceContext.getAssetCategoryIds(), serviceContext.getAssetTagNames(), true, true, null, null, null,
-				null, ContentTypes.TEXT_HTML, entry.getMessage(), null, null, null, null, 0, 0, null);
+		AssetEntry assetEntry = assetEntryLocalService.updateEntry(
+			userId, groupId, entry.getCreateDate(), entry.getModifiedDate(),
+			Entry.class.getName(), entryId, entry.getUuid(), 0,
+			serviceContext.getAssetCategoryIds(),
+			serviceContext.getAssetTagNames(), true, true, null, null, null,
+			null, ContentTypes.TEXT_HTML, entry.getMessage(), null, null, null,
+			null, 0, 0, null);
 
-		assetLinkLocalService.updateLinks(userId, assetEntry.getEntryId(), serviceContext.getAssetLinkEntryIds(),
-				AssetLinkConstants.TYPE_RELATED);
+		assetLinkLocalService.updateLinks(
+			userId, assetEntry.getEntryId(),
+			serviceContext.getAssetLinkEntryIds(),
+			AssetLinkConstants.TYPE_RELATED);
 
 		return entry;
 	}
 
 	@Indexable(type = IndexableType.DELETE)
-	public Entry deleteEntry(long entryId, ServiceContext serviceContext) throws PortalException {
+	public Entry deleteEntry(long entryId, ServiceContext serviceContext)
+		throws PortalException {
 
 		Entry entry = getEntry(entryId);
 
-		resourceLocalService.deleteResource(serviceContext.getCompanyId(), Entry.class.getName(),
-				ResourceConstants.SCOPE_INDIVIDUAL, entryId);
+		resourceLocalService.deleteResource(
+			serviceContext.getCompanyId(), Entry.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, entryId);
 
-		AssetEntry assetEntry = assetEntryLocalService.fetchEntry(Entry.class.getName(), entryId);
+		AssetEntry assetEntry =
+			assetEntryLocalService.fetchEntry(Entry.class.getName(), entryId);
 
 		assetLinkLocalService.deleteLinks(assetEntry.getEntryId());
 
@@ -123,46 +135,70 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 		return entry;
 	}
 
+	@Indexable(type = IndexableType.DELETE)
+	@Override
+	public Entry deleteEntry(long entryId)
+		throws PortalException {
+
+		Entry entry = entryPersistence.findByPrimaryKey(entryId);
+
+		return entryLocalService.deleteEntry(entry);
+	}
+
+	@Indexable(type = IndexableType.DELETE)
+	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
+	public Entry deleteEntry(Entry entry) {
+
+		return entryPersistence.remove(entry);
+	}
+
 	public List<Entry> getEntries(long groupId, long guestbookId) {
+
 		return entryPersistence.findByG_G(groupId, guestbookId);
 	}
 
 	public List<Entry> getEntries(
-		long groupId, long guestbookId, int start, int end, OrderByComparator<Entry> obc) {
+		long groupId, long guestbookId, int start, int end,
+		OrderByComparator<Entry> obc) {
 
-		return entryPersistence.findByG_G(groupId, guestbookId, start, end, obc);
+		return entryPersistence.findByG_G(
+			groupId, guestbookId, start, end, obc);
 	}
 
 	public int getEntriesCount(long groupId, long guestbookId) {
+
 		return entryPersistence.countByG_G(groupId, guestbookId);
 	}
-	
-	public List<Entry> getEntries(long groupId, long guestbookId, int start, int end)
-			     throws SystemException {
 
-			    return entryPersistence.findByG_G(groupId, guestbookId, start, end);
-			}
-	
-	
-		protected void validate(String name, String email, String entry)
-				throws PortalException {
+	public List<Entry> getEntries(
+		long groupId, long guestbookId, int start, int end)
+		throws SystemException {
 
-				if (Validator.isNull(name)) {
-					throw new EntryNameException();
-				}
-
-				if (!Validator.isEmailAddress(email)) {
-					throw new EntryEmailException();
-				}
-
-				if (Validator.isNull(entry)) {
-					throw new EntryMessageException();
-				}
+		return entryPersistence.findByG_G(groupId, guestbookId, start, end);
 	}
-		
+
+	protected void validate(String name, String email, String entry)
+		throws PortalException {
+
+		if (Validator.isNull(name)) {
+			throw new EntryNameException();
+		}
+
+		if (!Validator.isEmailAddress(email)) {
+			throw new EntryEmailException();
+		}
+
+		if (Validator.isNull(entry)) {
+			throw new EntryMessageException();
+		}
+	}
+
 	@Indexable(type = IndexableType.REINDEX)
-	public Entry updateEntry(long userId, long guestbookId, long entryId, String name, String email, String message,
-			ServiceContext serviceContext) throws PortalException {
+	public Entry updateEntry(
+		long userId, long guestbookId, long entryId, String name, String email,
+		String message, ServiceContext serviceContext)
+		throws PortalException {
 
 		long groupId = serviceContext.getScopeGroupId();
 
@@ -184,19 +220,26 @@ public class EntryLocalServiceImpl extends EntryLocalServiceBaseImpl {
 
 		entryPersistence.update(entry);
 
-		resourceLocalService.updateResources(user.getCompanyId(), groupId, Entry.class.getName(), entryId,
-				serviceContext.getGroupPermissions(), serviceContext.getGuestPermissions());
+		resourceLocalService.updateResources(
+			user.getCompanyId(), groupId, Entry.class.getName(), entryId,
+			serviceContext.getGroupPermissions(),
+			serviceContext.getGuestPermissions());
 
-		AssetEntry assetEntry = assetEntryLocalService.updateEntry(userId, groupId, entry.getCreateDate(),
-				entry.getModifiedDate(), Entry.class.getName(), entryId, entry.getUuid(), 0,
-				serviceContext.getAssetCategoryIds(), serviceContext.getAssetTagNames(), true, true,
-				entry.getCreateDate(), null, null, null, ContentTypes.TEXT_HTML, entry.getMessage(), null, null, null,
-				null, 0, 0, serviceContext.getAssetPriority());
+		AssetEntry assetEntry = assetEntryLocalService.updateEntry(
+			userId, groupId, entry.getCreateDate(), entry.getModifiedDate(),
+			Entry.class.getName(), entryId, entry.getUuid(), 0,
+			serviceContext.getAssetCategoryIds(),
+			serviceContext.getAssetTagNames(), true, true,
+			entry.getCreateDate(), null, null, null, ContentTypes.TEXT_HTML,
+			entry.getMessage(), null, null, null, null, 0, 0,
+			serviceContext.getAssetPriority());
 
-		assetLinkLocalService.updateLinks(userId, assetEntry.getEntryId(), serviceContext.getAssetLinkEntryIds(),
-				AssetLinkConstants.TYPE_RELATED);
+		assetLinkLocalService.updateLinks(
+			userId, assetEntry.getEntryId(),
+			serviceContext.getAssetLinkEntryIds(),
+			AssetLinkConstants.TYPE_RELATED);
 
 		return entry;
 	}
-	
+
 }
