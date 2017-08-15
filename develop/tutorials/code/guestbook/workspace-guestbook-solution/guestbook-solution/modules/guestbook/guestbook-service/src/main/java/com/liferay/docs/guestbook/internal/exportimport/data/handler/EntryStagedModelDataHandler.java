@@ -104,7 +104,7 @@ public class EntryStagedModelDataHandler
 
 		StagedModelDataHandlerUtil.exportReferenceStagedModel(
 			portletDataContext, entry, guestbook,
-			PortletDataContext.REFERENCE_TYPE_STRONG);
+			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		Element entryElement = portletDataContext.getExportDataElement(entry);
 
