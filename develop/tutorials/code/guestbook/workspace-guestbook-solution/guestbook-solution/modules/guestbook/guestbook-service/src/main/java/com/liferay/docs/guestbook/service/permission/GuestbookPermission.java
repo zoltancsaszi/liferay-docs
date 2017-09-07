@@ -2,10 +2,11 @@
 package com.liferay.docs.guestbook.service.permission;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.liferay.docs.guestbook.constants.GuestbookPortletKeys;
 import com.liferay.docs.guestbook.model.Guestbook;
-import com.liferay.docs.guestbook.service.GuestbookLocalServiceUtil;
+import com.liferay.docs.guestbook.service.GuestbookLocalService;
 import com.liferay.exportimport.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -36,8 +37,7 @@ public class GuestbookPermission {
 		PermissionChecker permissionChecker, long guestbookId, String actionId)
 		throws PortalException, SystemException {
 
-		Guestbook guestbook =
-			GuestbookLocalServiceUtil.getGuestbook(guestbookId);
+		Guestbook guestbook = _guestbookLocalService.getGuestbook(guestbookId);
 
 		return contains(permissionChecker, guestbook, actionId);
 	}
@@ -59,4 +59,13 @@ public class GuestbookPermission {
 			guestbook.getGroupId(), Guestbook.class.getName(),
 			guestbook.getGuestbookId(), actionId);
 	}
+
+	@Reference(unbind = "-")
+	protected void setGuestbookLocalService(
+		GuestbookLocalService guestbookLocalService) {
+
+		_guestbookLocalService = guestbookLocalService;
+	}
+
+	private static GuestbookLocalService _guestbookLocalService;
 }
