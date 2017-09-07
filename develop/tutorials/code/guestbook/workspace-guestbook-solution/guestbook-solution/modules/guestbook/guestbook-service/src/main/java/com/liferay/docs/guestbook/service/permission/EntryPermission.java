@@ -33,7 +33,16 @@ public class EntryPermission implements BaseModelPermissionChecker {
 			throw new PrincipalException();
 		}
 	}
+	
+	@Override
+	public void checkBaseModel(
+			PermissionChecker permissionChecker, long groupId, long primaryKey,
+			String actionId)
+		throws PortalException {
 
+		check(permissionChecker, primaryKey, actionId);
+	}
+	
 	public static boolean contains(
 		PermissionChecker permissionChecker, long entryId, String actionId)
 		throws PortalException, SystemException {
@@ -57,15 +66,6 @@ public class EntryPermission implements BaseModelPermissionChecker {
 		return permissionChecker.hasPermission(
 			entry.getGroupId(), Entry.class.getName(), entry.getEntryId(),
 			actionId);
-	}
-	
-	@Override
-	public void checkBaseModel(
-			PermissionChecker permissionChecker, long groupId, long primaryKey,
-			String actionId)
-		throws PortalException {
-
-		check(permissionChecker, primaryKey, actionId);
 	}
 
 	@Reference(unbind = "-")
