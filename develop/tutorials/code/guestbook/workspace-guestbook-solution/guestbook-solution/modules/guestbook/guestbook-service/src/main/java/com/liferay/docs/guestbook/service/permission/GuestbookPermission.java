@@ -11,6 +11,7 @@ import com.liferay.exportimport.kernel.staging.permission.StagingPermissionUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.BaseModelPermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 
 @Component(
@@ -19,7 +20,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 		"model.class.name=" + GuestbookPermission.RESOURCE_NAME
 	}
 )
-public class GuestbookPermission {
+public class GuestbookPermission implements BaseModelPermissionChecker {
 
 	public static final String RESOURCE_NAME =
 		"com.liferay.docs.guestbook.model.Guestbook";
@@ -32,7 +33,16 @@ public class GuestbookPermission {
 			throw new PrincipalException();
 		}
 	}
+	
+	@Override
+	public void checkBaseModel(
+			PermissionChecker permissionChecker, long groupId, long primaryKey,
+			String actionId)
+		throws PortalException {
 
+		check(permissionChecker, primaryKey, actionId);
+	}
+	
 	public static boolean contains(
 		PermissionChecker permissionChecker, long guestbookId, String actionId)
 		throws PortalException, SystemException {
